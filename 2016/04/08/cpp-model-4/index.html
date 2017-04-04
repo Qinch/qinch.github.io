@@ -1,0 +1,262 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+
+  <meta charset="utf-8">
+  
+  <title>基础类型的内存表示 | Just For Fun</title>
+  <meta name="author" content="qinchao">
+  
+  <meta name="description" content="qinchao&#39;s blog">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="基础类型的内存表示"/>
+  <meta property="og:site_name" content="Just For Fun"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico">
+  <link rel="alternate" href="/atom.xml" title="Just For Fun" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?a296c886e0b03b87da36df65dff53cba";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+</head>
+
+
+
+ <body>
+  <header id="header" class="inner"><div class= "header-content">
+		<div class="header-div">
+		    <h1><a href="/">Just For Fun</a></h1>
+		    <h2><a>&nbsp;If no fun Why do it</a></h2>
+		</div>
+	<div class="clearfix"></div>
+</div>
+
+<div class= "header-nav">
+	<div id="main-nav" class="alignleft">
+	    
+	      <a href="/">首页</a>
+	    
+	      <a href="/archives">归档</a>
+	    
+	      <a href="/about">关于</a>
+	    
+	</div>
+	<div id="sub-nav" class="alignright">
+
+
+	
+		<form class="search" action="/search/index.html" method="get" accept-charset="utf-8" >
+		<input type="text" id="search" style="width: 100px; height: 9px;" " class="st-default-search-input" maxlength="20" placeholder="Search" />
+		</form>
+	
+　
+	</div>
+	<div class="clearfix"></div>
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+  (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+  e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install','F9-FFdkxc43TCEzy_894','2.0.0');
+</script>
+</div>
+
+
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  <div class="post-content">
+    <header>
+      
+	
+    <h1 class="title">基础类型的内存表示</h1>
+
+ 
+	
+	<time  datetime="2016-04-07T16:00:00.000Z"><p>发表于 2016-04-08 | 字数 <span class="post-count">532</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		  
+		<h5 id="开发环境"><a href="#开发环境" class="headerlink" title="开发环境"></a>开发环境</h5><ul>
+<li>Ubuntu 14.04(32bits)</li>
+<li>GCC      </li>
+<li>编辑器 Cmd Markdown</li>
+<li>画图工具 Processon    </li>
+</ul>
+<h5 id="1-基础类型内存表示"><a href="#1-基础类型内存表示" class="headerlink" title="1,基础类型内存表示"></a>1,基础类型内存表示</h5><p><a href="http://chinchao.xyz/2016/04/07/cpp-model-2/">上一节</a> 介绍了swich/if-else的实现机制。本文准备介绍一下基础类型的内存表示。</p>
+<h6 id="1-1大端法和小端法"><a href="#1-1大端法和小端法" class="headerlink" title="1.1大端法和小端法"></a>1.1大端法和小端法</h6><p>小端法，即数字的低位在低地址。大端法，即数字高位在低地址。大小端法的最小单位为byte,而不是bit.<br>举例：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">int i=-16;</div><div class="line">对应的小端法表示为（从低地址到高地址（从左到右为地址增长方向）对应的每个byte）：</div><div class="line">0xf0 ff ff ff </div><div class="line">大端法表示为（从低地址到高地址（从左到右为地址增长方向）对应的每个byte）：</div><div class="line">0x FF FF FF F0</div></pre></td></tr></table></figure></p>
+<p>在实际开发中，可以需要做大小端法互换，其代码如下：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">void swap1(int *rhs)</div><div class="line">&#123;</div><div class="line">    unsigned char *p=rhs;</div><div class="line">    unsigned char tmp;</div><div class="line">    tmp=p[0];</div><div class="line">    p[0]=[3];</div><div class="line">    p[3]=tmp;</div><div class="line"></div><div class="line">    tmp=p[1];</div><div class="line">    p[1]=[2];</div><div class="line">    p[2]=tmp;</div><div class="line">    <span class="built_in">return</span> ;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>在小端机上，如下程序的输出结果为-16.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">int <span class="function"><span class="title">main</span></span>()</div><div class="line">&#123;</div><div class="line">        int i;</div><div class="line">        unsigned char *p=(unsigned char*)&amp;i;</div><div class="line">        p[0]=0xF0;</div><div class="line">        p[1]=0XFF;</div><div class="line">        p[2]=0XFF;</div><div class="line">        p[3]=0Xff;</div><div class="line">        <span class="built_in">printf</span>(<span class="string">"%d\n"</span>,i);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<a id="more"></a>
+<h6 id="1-2-int-unsigned-int内存表示"><a href="#1-2-int-unsigned-int内存表示" class="headerlink" title="1.2 int/unsigned int内存表示"></a>1.2 int/unsigned int内存表示</h6><p>在有符号整数，和无符号整数中，需要指出的是0扩展和符号拓展。<br>在开发中，不可避免的需要强制类型转换。此时需要明确到底是符号扩展还是0拓展。假设 n bytes的无符号，无论是扩展为有符号数（m bytes），还是扩展为无符号数(m bytes)，并且m&gt;=n,则n通过0拓展（即最高位补0）为m bytes.假设 n bytes的有符号数，无论是扩展为有符号数（m bytes），还是扩展为无符号数(m bytes)，并且m&gt;=n,则n通过符号拓展（n bytes最高位如果为0，则补0，如果为1则补1）为m bytes.</p>
+<h6 id="1-3-float内存表示"><a href="#1-3-float内存表示" class="headerlink" title="1.3 float内存表示"></a>1.3 float内存表示</h6><p>float 32bits,其中1bit为符号为，8bits为阶码，23bits为尾码。<br>如下代码的输出结果为3.25<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">int <span class="function"><span class="title">main</span></span>()</div><div class="line">&#123;</div><div class="line">        <span class="built_in">float</span>  i;</div><div class="line">        unsigned char *p=(unsigned char*)&amp;i;</div><div class="line">        p[0]=0x00;</div><div class="line">        p[1]=0x00;</div><div class="line">        p[2]=0x50;</div><div class="line">        p[3]=0x40;</div><div class="line">        <span class="built_in">printf</span>(<span class="string">"%f\n"</span>,i);</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+
+	
+    </div>
+    <footer>
+      
+        
+  
+  <div class="categories">
+    <a href="/categories/Asm-Cpp/">Asm/Cpp</a>
+  </div>
+
+        
+  
+  <div class="tags">
+    <a href="/tags/Asm/">Asm</a>, <a href="/tags/C/">C</a>, <a href="/tags/Cpp/">Cpp</a>
+  </div>
+
+	
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+<section id="comment">
+<!-- Duoshuo Comment BEGIN -->
+	<div class="ds-thread"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"qinch"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = 'http://static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		|| document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- Duoshuo Comment END -->  
+
+
+
+</section>
+
+
+
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  
+<div class="widget tag">
+  <h3 class="title">最新文章</h3>
+  <ul class="entry">
+    
+      <li>
+        <a href="/2017/04/04/hello-world/">Hello World</a>
+      </li>
+    
+      <li>
+        <a href="/2016/10/19/ctoy-1/">奇怪的死循环</a>
+      </li>
+    
+      <li>
+        <a href="/2016/04/09/cpp-model-5/">C++对象模型-关于对象</a>
+      </li>
+    
+      <li>
+        <a href="/2016/04/08/cpp-model-3/">C++对象模型-3</a>
+      </li>
+    
+      <li>
+        <a href="/2016/04/08/cpp-model-4/">基础类型的内存表示</a>
+      </li>
+    
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">分类</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/Asm-C/">Asm/C</a><small>1</small></li>
+  
+    <li><a href="/categories/Asm-Cpp/">Asm/Cpp</a><small>7</small></li>
+  
+    <li><a href="/categories/C-C/">C/C++</a><small>1</small></li>
+  
+    <li><a href="/categories/Linux/">Linux</a><small>1</small></li>
+  
+    <li><a href="/categories/STL源码剖析/">STL源码剖析</a><small>2</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tagcloud">
+  <h3 class="title">标签云</h3>
+  <div class="entry">
+    <a href="/tags/Asm/" style="font-size: 20px;">Asm</a> <a href="/tags/C/" style="font-size: 20px;">C</a> <a href="/tags/Cpp/" style="font-size: 16.67px;">Cpp</a> <a href="/tags/apue/" style="font-size: 10px;">apue</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/heap/" style="font-size: 10px;">heap</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/sort/" style="font-size: 10px;">sort</a> <a href="/tags/stl/" style="font-size: 13.33px;">stl</a> <a href="/tags/内存流/" style="font-size: 10px;">内存流</a>
+  </div>
+</div>
+
+
+  
+<div class="widget blogroll">
+  <h3 class="title">链接</h3>
+  <ul class="entry">
+    
+	<li><a href="http://zhangwenli.com" title="http://zhangwenli.com" target="_blank"]);">Ovilia</a></li>
+    
+	<li><a href="http://www.jianshu.com/users/301abb85f52a/latest_articles" title="" target="_blank"]);">idealRetail</a></li>
+    
+  </ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="copyright">
+  
+  &copy; 2015-2017 qinchao
+  
+  | Powered by hexo and Theme by <a href=https://github.com/Qinch/hexo-theme-light_mod target="_blank">light </a>
+  <a href="/atom.xml" target="_blank">| RSS</a>
+</div>
+<div class="clearfix"></div>
+
+</footer>
+  <script src="//libs.baidu.com/jquery/2.0.3/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+</body>
+</html>

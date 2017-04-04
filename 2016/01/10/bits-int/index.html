@@ -1,0 +1,252 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+
+  <meta charset="utf-8">
+  
+  <title>24 bits解析为有符号整数 | Just For Fun</title>
+  <meta name="author" content="qinchao">
+  
+  <meta name="description" content="qinchao&#39;s blog">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="24 bits解析为有符号整数"/>
+  <meta property="og:site_name" content="Just For Fun"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico">
+  <link rel="alternate" href="/atom.xml" title="Just For Fun" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?a296c886e0b03b87da36df65dff53cba";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+</head>
+
+
+
+ <body>
+  <header id="header" class="inner"><div class= "header-content">
+		<div class="header-div">
+		    <h1><a href="/">Just For Fun</a></h1>
+		    <h2><a>&nbsp;If no fun Why do it</a></h2>
+		</div>
+	<div class="clearfix"></div>
+</div>
+
+<div class= "header-nav">
+	<div id="main-nav" class="alignleft">
+	    
+	      <a href="/">首页</a>
+	    
+	      <a href="/archives">归档</a>
+	    
+	      <a href="/about">关于</a>
+	    
+	</div>
+	<div id="sub-nav" class="alignright">
+
+
+	
+		<form class="search" action="/search/index.html" method="get" accept-charset="utf-8" >
+		<input type="text" id="search" style="width: 100px; height: 9px;" " class="st-default-search-input" maxlength="20" placeholder="Search" />
+		</form>
+	
+　
+	</div>
+	<div class="clearfix"></div>
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+  (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+  e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install','F9-FFdkxc43TCEzy_894','2.0.0');
+</script>
+</div>
+
+
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  <div class="post-content">
+    <header>
+      
+	
+    <h1 class="title">24 bits解析为有符号整数</h1>
+
+ 
+	
+	<time  datetime="2016-01-09T16:00:00.000Z"><p>发表于 2016-01-10 | 字数 <span class="post-count">327</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		  
+		<p>最近遇到了24bits来解析为有符号整数的问题，提供如下两个解决思路：</p>
+<h4 id="方法1"><a href="#方法1" class="headerlink" title="方法1:"></a>方法1:</h4><p>24bits即从高位到低位为:buf[0],buf[1],buf[2] 三个bytes;通过将最高字节buf[0]符号扩展为两个字节（假设从高位到低位为ps[1],ps[0]），然后将ps[1],ps[0],buf[1],buf[2]拼接为int变量的四个字节;见下图;<br><img src="/img/bits2int.png" alt="pic1"><br><a id="more"></a></p>
+<h4 id="方法2"><a href="#方法2" class="headerlink" title="方法2"></a>方法2</h4><p>类似于：十进制123=1乘以10^2+2乘以10^1+3乘以10^0；将buf[0],buf[1],buf[2]分别乘以相应的指数，即可得到相应的整型值;    </p>
+<h4 id="代码如下："><a href="#代码如下：" class="headerlink" title="代码如下："></a>代码如下：</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#include&lt;stdio.h&gt;</span></div><div class="line"></div><div class="line">//方法1</div><div class="line">int getdig1(char* buf,int n)</div><div class="line"> &#123;</div><div class="line">        int ret=0;</div><div class="line">        char *pret=(unsigned char*)&amp;ret;</div><div class="line">		short s=(short)buf[0];//buf[0]符号扩展为2个字节;</div><div class="line">        char *ps=(unsigned char*)&amp;s;</div><div class="line">        pret[0]=buf[2];</div><div class="line">        pret[1]=buf[1];</div><div class="line">        </div><div class="line">        pret[2]=ps[0];</div><div class="line">        pret[3]=ps[1];</div><div class="line">        <span class="built_in">return</span> ret;</div><div class="line"> &#125;</div><div class="line"></div><div class="line">//方法2</div><div class="line">int getdig2(char *buf,int n)</div><div class="line">&#123;</div><div class="line">	int ret=buf[0]&lt;&lt;16;</div><div class="line">	ret|=((unsigned char)buf[1])&lt;&lt;8;</div><div class="line">	ret|=(unsigned char)buf[2];</div><div class="line">	<span class="built_in">return</span> ret;</div><div class="line"></div><div class="line">&#125;</div><div class="line"> void resolve(unsigned char* buf,int n,int  (*ret)[50],int fn)</div><div class="line"> &#123;</div><div class="line">	 int i=0;</div><div class="line">	 int k=0;</div><div class="line">        <span class="keyword">for</span>( i=0;i&lt;1;i++)</div><div class="line">        &#123;</div><div class="line">            <span class="keyword">for</span>( k=7;k&gt;=0;k--)</div><div class="line">            &#123;</div><div class="line">                ret[k][i]=getdig1(buf+i*24+(7-k)*3,3);</div><div class="line">                <span class="built_in">printf</span>(<span class="string">"%d\n"</span>,ret[k][i]);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"> &#125;</div><div class="line">int <span class="function"><span class="title">main</span></span>()</div><div class="line">&#123;</div><div class="line">	int <span class="built_in">test</span>[8][50];</div><div class="line">	char recv[24]=&#123;0x0d,0xd7,0x00,0x0c,0xa1,0xff,0xf5,0x27,0xff,0xf7,0x60, \</div><div class="line">	0xff,0xfb,0xfe,0x00,0x00,0xd3,0xff,0xf8,0x4a,0xff,0xfb,0x89,0x00 &#125;;</div><div class="line"></div><div class="line">	resolve(recv,24,<span class="built_in">test</span>,8);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+	
+    </div>
+    <footer>
+      
+        
+  
+  <div class="categories">
+    <a href="/categories/C-C/">C/C++</a>
+  </div>
+
+        
+  
+  <div class="tags">
+    <a href="/tags/bits/">bits</a>, <a href="/tags/int/">int</a>
+  </div>
+
+	
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+<section id="comment">
+<!-- Duoshuo Comment BEGIN -->
+	<div class="ds-thread"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"qinch"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = 'http://static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		|| document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- Duoshuo Comment END -->  
+
+
+
+</section>
+
+
+
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  
+<div class="widget tag">
+  <h3 class="title">最新文章</h3>
+  <ul class="entry">
+    
+      <li>
+        <a href="/2017/04/04/hello-world/">Hello World</a>
+      </li>
+    
+      <li>
+        <a href="/2016/10/19/ctoy-1/">奇怪的死循环</a>
+      </li>
+    
+      <li>
+        <a href="/2016/04/09/cpp-model-5/">C++对象模型-关于对象</a>
+      </li>
+    
+      <li>
+        <a href="/2016/04/08/cpp-model-3/">C++对象模型-3</a>
+      </li>
+    
+      <li>
+        <a href="/2016/04/08/cpp-model-4/">基础类型的内存表示</a>
+      </li>
+    
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">分类</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/Asm-C/">Asm/C</a><small>1</small></li>
+  
+    <li><a href="/categories/Asm-Cpp/">Asm/Cpp</a><small>7</small></li>
+  
+    <li><a href="/categories/C-C/">C/C++</a><small>1</small></li>
+  
+    <li><a href="/categories/Linux/">Linux</a><small>1</small></li>
+  
+    <li><a href="/categories/STL源码剖析/">STL源码剖析</a><small>2</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tagcloud">
+  <h3 class="title">标签云</h3>
+  <div class="entry">
+    <a href="/tags/Asm/" style="font-size: 20px;">Asm</a> <a href="/tags/C/" style="font-size: 20px;">C</a> <a href="/tags/Cpp/" style="font-size: 16.67px;">Cpp</a> <a href="/tags/apue/" style="font-size: 10px;">apue</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/heap/" style="font-size: 10px;">heap</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/sort/" style="font-size: 10px;">sort</a> <a href="/tags/stl/" style="font-size: 13.33px;">stl</a> <a href="/tags/内存流/" style="font-size: 10px;">内存流</a>
+  </div>
+</div>
+
+
+  
+<div class="widget blogroll">
+  <h3 class="title">链接</h3>
+  <ul class="entry">
+    
+	<li><a href="http://zhangwenli.com" title="http://zhangwenli.com" target="_blank"]);">Ovilia</a></li>
+    
+	<li><a href="http://www.jianshu.com/users/301abb85f52a/latest_articles" title="" target="_blank"]);">idealRetail</a></li>
+    
+  </ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="copyright">
+  
+  &copy; 2015-2017 qinchao
+  
+  | Powered by hexo and Theme by <a href=https://github.com/Qinch/hexo-theme-light_mod target="_blank">light </a>
+  <a href="/atom.xml" target="_blank">| RSS</a>
+</div>
+<div class="clearfix"></div>
+
+</footer>
+  <script src="//libs.baidu.com/jquery/2.0.3/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+</body>
+</html>

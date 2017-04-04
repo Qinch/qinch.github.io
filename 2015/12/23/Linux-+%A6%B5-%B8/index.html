@@ -1,0 +1,260 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+
+  <meta charset="utf-8">
+  
+  <title>Linux内存流 | Just For Fun</title>
+  <meta name="author" content="qinchao">
+  
+  <meta name="description" content="qinchao&#39;s blog">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="Linux内存流"/>
+  <meta property="og:site_name" content="Just For Fun"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico">
+  <link rel="alternate" href="/atom.xml" title="Just For Fun" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?a296c886e0b03b87da36df65dff53cba";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+</head>
+
+
+
+ <body>
+  <header id="header" class="inner"><div class= "header-content">
+		<div class="header-div">
+		    <h1><a href="/">Just For Fun</a></h1>
+		    <h2><a>&nbsp;If no fun Why do it</a></h2>
+		</div>
+	<div class="clearfix"></div>
+</div>
+
+<div class= "header-nav">
+	<div id="main-nav" class="alignleft">
+	    
+	      <a href="/">首页</a>
+	    
+	      <a href="/archives">归档</a>
+	    
+	      <a href="/about">关于</a>
+	    
+	</div>
+	<div id="sub-nav" class="alignright">
+
+
+	
+		<form class="search" action="/search/index.html" method="get" accept-charset="utf-8" >
+		<input type="text" id="search" style="width: 100px; height: 9px;" " class="st-default-search-input" maxlength="20" placeholder="Search" />
+		</form>
+	
+　
+	</div>
+	<div class="clearfix"></div>
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+  (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+  e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install','F9-FFdkxc43TCEzy_894','2.0.0');
+</script>
+</div>
+
+
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  <div class="post-content">
+    <header>
+      
+	
+    <h1 class="title">Linux内存流</h1>
+
+ 
+	
+	<time  datetime="2015-12-23T07:25:29.000Z"><p>发表于 2015-12-23 | 字数 <span class="post-count">659</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		  
+		<h4 id="1-内存流"><a href="#1-内存流" class="headerlink" title="1, 内存流"></a>1, 内存流</h4><p>As we’ve seen, the standard I/O library buffers data in memory, so operations such as character-at-a-time I/O and line-at-a-time I/O are more efficient. We’ve also seen that we can provide our own buffer for the library to use by calling setbuf or setvbuf. In Version 4, the Single UNIX Specification added support for memory streams. These are standard I/O streams for which there are no underlying files, although they are still accessed with FILE pointers. All I/O is done by transferring bytes to and from buffers in main memory.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#include &lt;stdio.h&gt;     </span></div><div class="line">FILE * fopen(const char * path,const char * mode);</div><div class="line">FILE *fmemopen(void *restrict mem, size_t size, const char *restrict <span class="built_in">type</span>);</div><div class="line">Returns: stream pointer <span class="keyword">if</span> OK, NULL on error</div></pre></td></tr></table></figure></p>
+<p>其中mem相当于fopen函数中的文件(即参数path)；如果mem参数为空，则fmemopen函数分配size字节数的内存（我们称作“anonmem”，当流关闭时anonmem会被释放)。<br>其中type参数取值的含义：   </p>
+<ol>
+<li>whenever a memory stream is opened for append, the current file position is set to the first null byte in the buffer. If the buffer contains no null bytes, then the current position is set to one byte past the end of the buffer. When a stream is not opened for append, the current position is set to the beginning of the buffer. Because the append mode determines the end of the data by the first null byte, memory streams aren’t well suited for storing binary data (which might contain null bytes before the end of the data).      </li>
+<li>a null byte is written at the current position in the stream whenever we increase the amount of data in the stream’s buffer and call fclose, fflush, fseek,fseeko, or fsetpos.(只有mem中的数据量增加（条件1）并且调用fclose,fflush,fseek,fseeko,fsetpos函数时（条件2），当前位置才会被写入一个null字节.如果条件1和条件2只有一个成立，则不会插入null)。<a id="more"></a>    
+</li>
+</ol>
+<h4 id="2-测试代码"><a href="#2-测试代码" class="headerlink" title="2, 测试代码"></a>2, 测试代码</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div></pre></td><td class="code"><pre><div class="line">/********************************************************</div><div class="line"> &gt; File Name: p138.c</div><div class="line"> &gt; Author: qinchao</div><div class="line"> &gt; Mail: 1187620726@qq.com</div><div class="line"> &gt; Created Date:2015-12-23 Time:01:11:47.</div><div class="line"> *********************************************************/</div><div class="line"><span class="comment">#include&lt;stdio.h&gt;</span></div><div class="line"><span class="comment">#include&lt;string.h&gt;</span></div><div class="line"></div><div class="line"><span class="comment">#define BSZ 100</span></div><div class="line">char buf[1000];</div><div class="line">int <span class="function"><span class="title">main</span></span>()</div><div class="line">&#123;</div><div class="line">    FILE *fp;</div><div class="line">	char mem[BSZ];</div><div class="line">	memset(mem,<span class="string">'a'</span>,BSZ-2);</div><div class="line">	buf[BSZ-2]=<span class="string">'\0'</span>;</div><div class="line">	buf[BSZ-1]=<span class="string">'x'</span>;</div><div class="line">	<span class="built_in">printf</span>(<span class="string">"memset mem=%s\n"</span>,mem);</div><div class="line">	</div><div class="line">	fp=fmemopen(mem,BSZ,<span class="string">"w+"</span>);//mem[0]=<span class="string">'\0'</span>;</div><div class="line">	<span class="built_in">printf</span>(<span class="string">"initial mem=%d %s\n"</span>,mem[0],mem);</div><div class="line">	setbuf(fp,buf);//设置缓冲区;</div><div class="line">	</div><div class="line">	fprintf(fp,<span class="string">"hello world"</span>);</div><div class="line">	<span class="built_in">printf</span>(<span class="string">"buff=%s\n"</span>,buf);</div><div class="line">	<span class="built_in">printf</span>(<span class="string">"before fflush mem=:%s\n"</span>,mem);</div><div class="line">	fflush(fp);</div><div class="line">	<span class="built_in">printf</span>(<span class="string">"after fflush mem=%s\n"</span>,mem);</div><div class="line"></div><div class="line">	fprintf(fp,<span class="string">" qinchao"</span>);</div><div class="line">	fseek(fp,0,SEEK_SET);</div><div class="line">	//mem数据量增加和fseek函数调用，满足条件1和条件2，当前位置写入null;</div><div class="line">	<span class="built_in">printf</span>(<span class="string">"after seek mem=%s\n"</span>,mem);</div><div class="line">	</div><div class="line">	fprintf(fp,<span class="string">"whut"</span>);</div><div class="line">	fseek(fp,0,SEEK_SET);</div><div class="line">	//fseek引起buf冲洗,只满足条件2，所以当前位置没有写入null;</div><div class="line">	<span class="built_in">printf</span>(<span class="string">"after seek mem=%s\n"</span>,mem);</div><div class="line">	fclose(fp);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="3-测试输出"><a href="#3-测试输出" class="headerlink" title="3, 测试输出"></a>3, 测试输出</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">qin@qin-Lenovo-G450:~/apue/ch5$ gcc p138.c </div><div class="line">qin@qin-Lenovo-G450:~/apue/ch5$ ./a.out </div><div class="line">memset mem=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa \</div><div class="line">	aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@</div><div class="line">initial mem=0 </div><div class="line">buff=hello world</div><div class="line">before fflush mem=:</div><div class="line">after fflush mem=hello world</div><div class="line">after seek mem=hello world qinchao</div><div class="line">after seek mem=whuto world qinchao</div><div class="line">qin@qin-Lenovo-G450:~/apue/ch5$</div></pre></td></tr></table></figure>
+<h4 id="4-fmemopen源码分析"><a href="#4-fmemopen源码分析" class="headerlink" title="4, fmemopen源码分析"></a>4, fmemopen源码分析</h4><p>—待续</p>
+<h4 id="5-参考文献"><a href="#5-参考文献" class="headerlink" title="5, 参考文献"></a>5, 参考文献</h4><p> 1,Advanced Programming in the UNIX Environment, Third Edition</p>
+
+	
+    </div>
+    <footer>
+      
+        
+  
+  <div class="categories">
+    <a href="/categories/Linux/">Linux</a>
+  </div>
+
+        
+  
+  <div class="tags">
+    <a href="/tags/apue/">apue</a>, <a href="/tags/linux/">linux</a>, <a href="/tags/内存流/">内存流</a>
+  </div>
+
+	
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+<section id="comment">
+<!-- Duoshuo Comment BEGIN -->
+	<div class="ds-thread"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"qinch"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = 'http://static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		|| document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- Duoshuo Comment END -->  
+
+
+
+</section>
+
+
+
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  
+<div class="widget tag">
+  <h3 class="title">最新文章</h3>
+  <ul class="entry">
+    
+      <li>
+        <a href="/2017/04/04/hello-world/">Hello World</a>
+      </li>
+    
+      <li>
+        <a href="/2016/10/19/ctoy-1/">奇怪的死循环</a>
+      </li>
+    
+      <li>
+        <a href="/2016/04/09/cpp-model-5/">C++对象模型-关于对象</a>
+      </li>
+    
+      <li>
+        <a href="/2016/04/08/cpp-model-3/">C++对象模型-3</a>
+      </li>
+    
+      <li>
+        <a href="/2016/04/08/cpp-model-4/">基础类型的内存表示</a>
+      </li>
+    
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">分类</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/Asm-C/">Asm/C</a><small>1</small></li>
+  
+    <li><a href="/categories/Asm-Cpp/">Asm/Cpp</a><small>7</small></li>
+  
+    <li><a href="/categories/C-C/">C/C++</a><small>1</small></li>
+  
+    <li><a href="/categories/Linux/">Linux</a><small>1</small></li>
+  
+    <li><a href="/categories/STL源码剖析/">STL源码剖析</a><small>2</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tagcloud">
+  <h3 class="title">标签云</h3>
+  <div class="entry">
+    <a href="/tags/Asm/" style="font-size: 20px;">Asm</a> <a href="/tags/C/" style="font-size: 20px;">C</a> <a href="/tags/Cpp/" style="font-size: 16.67px;">Cpp</a> <a href="/tags/apue/" style="font-size: 10px;">apue</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/heap/" style="font-size: 10px;">heap</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/sort/" style="font-size: 10px;">sort</a> <a href="/tags/stl/" style="font-size: 13.33px;">stl</a> <a href="/tags/内存流/" style="font-size: 10px;">内存流</a>
+  </div>
+</div>
+
+
+  
+<div class="widget blogroll">
+  <h3 class="title">链接</h3>
+  <ul class="entry">
+    
+	<li><a href="http://zhangwenli.com" title="http://zhangwenli.com" target="_blank"]);">Ovilia</a></li>
+    
+	<li><a href="http://www.jianshu.com/users/301abb85f52a/latest_articles" title="" target="_blank"]);">idealRetail</a></li>
+    
+  </ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="copyright">
+  
+  &copy; 2015-2017 qinchao
+  
+  | Powered by hexo and Theme by <a href=https://github.com/Qinch/hexo-theme-light_mod target="_blank">light </a>
+  <a href="/atom.xml" target="_blank">| RSS</a>
+</div>
+<div class="clearfix"></div>
+
+</footer>
+  <script src="//libs.baidu.com/jquery/2.0.3/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+</body>
+</html>

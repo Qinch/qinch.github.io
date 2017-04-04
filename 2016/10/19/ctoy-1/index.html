@@ -1,0 +1,251 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+
+  <meta charset="utf-8">
+  
+  <title>奇怪的死循环 | Just For Fun</title>
+  <meta name="author" content="qinchao">
+  
+  <meta name="description" content="qinchao&#39;s blog">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="奇怪的死循环"/>
+  <meta property="og:site_name" content="Just For Fun"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico">
+  <link rel="alternate" href="/atom.xml" title="Just For Fun" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?a296c886e0b03b87da36df65dff53cba";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+</head>
+
+
+
+ <body>
+  <header id="header" class="inner"><div class= "header-content">
+		<div class="header-div">
+		    <h1><a href="/">Just For Fun</a></h1>
+		    <h2><a>&nbsp;If no fun Why do it</a></h2>
+		</div>
+	<div class="clearfix"></div>
+</div>
+
+<div class= "header-nav">
+	<div id="main-nav" class="alignleft">
+	    
+	      <a href="/">首页</a>
+	    
+	      <a href="/archives">归档</a>
+	    
+	      <a href="/about">关于</a>
+	    
+	</div>
+	<div id="sub-nav" class="alignright">
+
+
+	
+		<form class="search" action="/search/index.html" method="get" accept-charset="utf-8" >
+		<input type="text" id="search" style="width: 100px; height: 9px;" " class="st-default-search-input" maxlength="20" placeholder="Search" />
+		</form>
+	
+　
+	</div>
+	<div class="clearfix"></div>
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+  (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+  e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install','F9-FFdkxc43TCEzy_894','2.0.0');
+</script>
+</div>
+
+
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  <div class="post-content">
+    <header>
+      
+	
+    <h1 class="title">奇怪的死循环</h1>
+
+ 
+	
+	<time  datetime="2016-10-18T16:00:00.000Z"><p>发表于 2016-10-19 | 字数 <span class="post-count">186</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		  
+		<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#include&lt;stdio.h&gt;</span></div><div class="line">int <span class="function"><span class="title">main</span></span>()</div><div class="line">&#123;</div><div class="line">    int i;</div><div class="line">    int a[10];</div><div class="line">    <span class="keyword">for</span>(i=0;i&lt;=10;++i)</div><div class="line">    &#123;</div><div class="line">        a[i]=0;</div><div class="line">        <span class="built_in">printf</span>(<span class="string">"%d\n"</span>,a[i]);</div><div class="line">    &#125;</div><div class="line">    <span class="built_in">return</span> 0;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>该程序对应的汇编代码见如下代码:<br><a id="more"></a><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line">.file <span class="string">"cs18.c"</span></div><div class="line">        .section .rodata</div><div class="line">.LC0:</div><div class="line">        .string <span class="string">"%d\n"</span></div><div class="line">        .text</div><div class="line">.globl main</div><div class="line">        .type main, @<span class="keyword">function</span>71</div><div class="line">main:</div><div class="line">        pushl %ebp ;old ebp压栈</div><div class="line">        movl %esp, %ebp ;ebp=esp</div><div class="line">        andl $-16, %esp </div><div class="line">        subl <span class="variable">$64</span>, %esp  //esp=esp-64</div><div class="line">        movl <span class="variable">$0</span>, 60(%esp)  //i=0</div><div class="line">        jmp .L2</div><div class="line">.L3:</div><div class="line">        movl 60(%esp), %eax  //eax=i</div><div class="line">        movl <span class="variable">$0</span>, 20(%esp,%eax,4) //即a[i]=0</div><div class="line">        movl 60(%esp), %eax</div><div class="line">        movl 20(%esp,%eax,4), %edx  //edx=a[i]</div><div class="line">        movl $.LC0, %eax</div><div class="line">        movl %edx, 4(%esp) //参数压栈</div><div class="line">        movl %eax, (%esp) //参数压栈</div><div class="line">        call <span class="built_in">printf</span>  //调用<span class="built_in">printf</span>函数</div><div class="line">  addl <span class="variable">$1</span>, 60(%esp) //i+=1</div><div class="line">.L2:</div><div class="line">        cmpl <span class="variable">$10</span>, 60(%esp) //比较10和i</div><div class="line">        jle .L3  //<span class="keyword">if</span> i&lt;=10 jmp .L3</div><div class="line">        leave</div><div class="line">        ret</div><div class="line">        .size main, .-main</div><div class="line">        .ident <span class="string">"GCC: (GNU) 4.4.7 20120313 (Red Hat 4.4.7-3)"</span></div><div class="line">        .section .note.GNU-stack,<span class="string">""</span>,@progbits</div></pre></td></tr></table></figure></p>
+
+	
+    </div>
+    <footer>
+      
+        
+  
+  <div class="categories">
+    <a href="/categories/Asm-C/">Asm/C</a>
+  </div>
+
+        
+  
+  <div class="tags">
+    <a href="/tags/Asm/">Asm</a>, <a href="/tags/C/">C</a>
+  </div>
+
+	
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+<section id="comment">
+<!-- Duoshuo Comment BEGIN -->
+	<div class="ds-thread"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"qinch"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = 'http://static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		|| document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- Duoshuo Comment END -->  
+
+
+
+</section>
+
+
+
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  
+<div class="widget tag">
+  <h3 class="title">最新文章</h3>
+  <ul class="entry">
+    
+      <li>
+        <a href="/2017/04/04/hello-world/">Hello World</a>
+      </li>
+    
+      <li>
+        <a href="/2016/10/19/ctoy-1/">奇怪的死循环</a>
+      </li>
+    
+      <li>
+        <a href="/2016/04/09/cpp-model-5/">C++对象模型-关于对象</a>
+      </li>
+    
+      <li>
+        <a href="/2016/04/08/cpp-model-3/">C++对象模型-3</a>
+      </li>
+    
+      <li>
+        <a href="/2016/04/08/cpp-model-4/">基础类型的内存表示</a>
+      </li>
+    
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">分类</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/Asm-C/">Asm/C</a><small>1</small></li>
+  
+    <li><a href="/categories/Asm-Cpp/">Asm/Cpp</a><small>7</small></li>
+  
+    <li><a href="/categories/C-C/">C/C++</a><small>1</small></li>
+  
+    <li><a href="/categories/Linux/">Linux</a><small>1</small></li>
+  
+    <li><a href="/categories/STL源码剖析/">STL源码剖析</a><small>2</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tagcloud">
+  <h3 class="title">标签云</h3>
+  <div class="entry">
+    <a href="/tags/Asm/" style="font-size: 20px;">Asm</a> <a href="/tags/C/" style="font-size: 20px;">C</a> <a href="/tags/Cpp/" style="font-size: 16.67px;">Cpp</a> <a href="/tags/apue/" style="font-size: 10px;">apue</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/heap/" style="font-size: 10px;">heap</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/sort/" style="font-size: 10px;">sort</a> <a href="/tags/stl/" style="font-size: 13.33px;">stl</a> <a href="/tags/内存流/" style="font-size: 10px;">内存流</a>
+  </div>
+</div>
+
+
+  
+<div class="widget blogroll">
+  <h3 class="title">链接</h3>
+  <ul class="entry">
+    
+	<li><a href="http://zhangwenli.com" title="http://zhangwenli.com" target="_blank"]);">Ovilia</a></li>
+    
+	<li><a href="http://www.jianshu.com/users/301abb85f52a/latest_articles" title="" target="_blank"]);">idealRetail</a></li>
+    
+  </ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="copyright">
+  
+  &copy; 2015-2017 qinchao
+  
+  | Powered by hexo and Theme by <a href=https://github.com/Qinch/hexo-theme-light_mod target="_blank">light </a>
+  <a href="/atom.xml" target="_blank">| RSS</a>
+</div>
+<div class="clearfix"></div>
+
+</footer>
+  <script src="//libs.baidu.com/jquery/2.0.3/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+</body>
+</html>

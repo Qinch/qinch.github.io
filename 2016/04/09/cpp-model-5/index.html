@@ -1,0 +1,247 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+
+  <meta charset="utf-8">
+  
+  <title>C++对象模型-关于对象 | Just For Fun</title>
+  <meta name="author" content="qinchao">
+  
+  <meta name="description" content="qinchao&#39;s blog">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="C++对象模型-关于对象"/>
+  <meta property="og:site_name" content="Just For Fun"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico">
+  <link rel="alternate" href="/atom.xml" title="Just For Fun" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?a296c886e0b03b87da36df65dff53cba";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+</head>
+
+
+
+ <body>
+  <header id="header" class="inner"><div class= "header-content">
+		<div class="header-div">
+		    <h1><a href="/">Just For Fun</a></h1>
+		    <h2><a>&nbsp;If no fun Why do it</a></h2>
+		</div>
+	<div class="clearfix"></div>
+</div>
+
+<div class= "header-nav">
+	<div id="main-nav" class="alignleft">
+	    
+	      <a href="/">首页</a>
+	    
+	      <a href="/archives">归档</a>
+	    
+	      <a href="/about">关于</a>
+	    
+	</div>
+	<div id="sub-nav" class="alignright">
+
+
+	
+		<form class="search" action="/search/index.html" method="get" accept-charset="utf-8" >
+		<input type="text" id="search" style="width: 100px; height: 9px;" " class="st-default-search-input" maxlength="20" placeholder="Search" />
+		</form>
+	
+　
+	</div>
+	<div class="clearfix"></div>
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+  (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+  e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install','F9-FFdkxc43TCEzy_894','2.0.0');
+</script>
+</div>
+
+
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  <div class="post-content">
+    <header>
+      
+	
+    <h1 class="title">C++对象模型-关于对象</h1>
+
+ 
+	
+	<time  datetime="2016-04-08T16:00:00.000Z"><p>发表于 2016-04-09 | 字数 <span class="post-count">1,396</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+<div id="toc" class="toc-article">
+	<div class="toc-title">目录</div>
+	<ol class="toc"><li class="toc-item toc-level-5"><a class="toc-link" href="#开发环境"><span class="toc-text">开发环境</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#1-关于对象"><span class="toc-text">1,关于对象</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#1-1C语言中的struct"><span class="toc-text">1.1C语言中的struct</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#1-2-class"><span class="toc-text">1.2 class</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#1-2-1-class对象内存布局"><span class="toc-text">1.2.1 class对象内存布局</span></a></li></ol></li></ol>
+</div>
+  
+		<h5 id="开发环境"><a href="#开发环境" class="headerlink" title="开发环境"></a>开发环境</h5><ul>
+<li>Ubuntu 14.04(32bits)</li>
+<li>GCC      </li>
+<li>编辑器 Cmd Markdown</li>
+<li>画图工具 Processon    </li>
+</ul>
+<h5 id="1-关于对象"><a href="#1-关于对象" class="headerlink" title="1,关于对象"></a>1,关于对象</h5><p>从这篇博客开始真正介绍C++对象模型，前边BB了那么多没用的，终于开始了C++对模型的分析。关于C++对象模型的介绍，我将根据《深度探索C++对象模型》这本书，其书中的每一章，对应一篇博客，博客内容为自己对这本书的理解和补充吧。</p>
+<h6 id="1-1C语言中的struct"><a href="#1-1C语言中的struct" class="headerlink" title="1.1C语言中的struct"></a>1.1C语言中的struct</h6><p>我们知道，C语言是面向过程的，即数据和处理数据的函数时分开的，也就是说，struct中不能包含函数（当然也不能包含static变量）。但是我们可以在struct中声明指向函数的指针来模拟数据和处理数据的函数指针。其中，需要指出的是，c语言中struct变量的数据成员的访问方式都是基于该结构体变量的首地址的偏移量来访问的（同样适用于C++中的class/struct）。<br>即，见如下代码:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#include&lt;stdio.h&gt;</span></div><div class="line"></div><div class="line">struct point3d;</div><div class="line">typedef void (*initfun)(struct point3d*);</div><div class="line"></div><div class="line">struct point3d&#123;</div><div class="line">        <span class="built_in">float</span> x;</div><div class="line">        <span class="built_in">float</span> y;</div><div class="line">        <span class="built_in">float</span> z;</div><div class="line">        initfun init;//指向初始化数据函数的指针</div><div class="line">&#125;;</div><div class="line">void initp(struct point3d* p3d) //struct point3d变量初始化函数</div><div class="line">&#123;</div><div class="line">        p3d-&gt;x=1;</div><div class="line">        p3d-&gt;y=2;</div><div class="line">        p3d-&gt;z=3;</div><div class="line">        <span class="built_in">printf</span>(<span class="string">"%f %f %f\n"</span>,p3d-&gt;x,p3d-&gt;y,p3d-&gt;z);</div><div class="line">        <span class="built_in">return</span>;</div><div class="line">&#125;</div><div class="line"></div><div class="line">int <span class="function"><span class="title">main</span></span>()</div><div class="line">&#123;</div><div class="line">        struct point3d pd;</div><div class="line">        pd.init=initp;//将initp函数地址赋给结构体中指向函数的指针pd.init。</div><div class="line">        pd.init(&amp;pd);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<a id="more"></a>
+<h6 id="1-2-class"><a href="#1-2-class" class="headerlink" title="1.2 class"></a>1.2 class</h6><p>需要指出的是，C++类的非static的成员函数都有一个隐式的参数，即this(class object *const this)指针（对象的首地址）。在gcc，通过压栈来传递this指针。在vc6.0,通过ecx寄存器来传递this指针。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="comment">#include&lt;iostream&gt;</span></div><div class="line">using namespace std;</div><div class="line"></div><div class="line">class point3d&#123;</div><div class="line">        private:</div><div class="line">                <span class="built_in">float</span> x;</div><div class="line">                <span class="built_in">float</span> y;</div><div class="line">                <span class="built_in">float</span> z;</div><div class="line">                friend ostream&amp; operator&lt;&lt;(ostream&amp;,point3d&amp;);</div><div class="line">        public:</div><div class="line">                point3d():x(1),y(2),z(3)&#123;&#125;</div><div class="line">&#125;;</div><div class="line"></div><div class="line">//该函数不能作为class的成员函数，因为它的第一个参数不是point3d的对象！</div><div class="line">//设置为友元函数，可以访问class point3d的私有数据成员。</div><div class="line">inline ostream&amp; operator &lt;&lt;(ostream&amp; os, point3d&amp; pt)</div><div class="line">&#123;</div><div class="line">        os&lt;&lt;pt.x&lt;&lt;<span class="string">' '</span>&lt;&lt;pt.y&lt;&lt;<span class="string">' '</span>&lt;&lt;pt.z&lt;&lt;endl;</div><div class="line">        <span class="built_in">return</span> os;</div><div class="line">&#125;</div><div class="line"></div><div class="line">int <span class="function"><span class="title">main</span></span>()</div><div class="line">&#123;</div><div class="line">        point3d pd;</div><div class="line">        cout&lt;&lt;pd;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>以上程序对应的汇编代码为（C++ name mangling）：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div></pre></td><td class="code"><pre><div class="line">	.file	<span class="string">"c5-1.cpp"</span></div><div class="line">	.local	_ZStL8__ioinit</div><div class="line">	.comm	_ZStL8__ioinit,1,1</div><div class="line">	.section	.text._ZN7point3dC2Ev,<span class="string">"axG"</span>,@progbits,_ZN7point3dC5Ev,comdat</div><div class="line">	.align 2</div><div class="line">	.weak	_ZN7point3dC2Ev</div><div class="line">	.type	_ZN7point3dC2Ev, @<span class="keyword">function</span></div><div class="line">_ZN7point3dC2Ev:  //即函数point3d::point3d()</div><div class="line">.LFB972:</div><div class="line">	.cfi_startproc</div><div class="line">	pushl	%ebp  //ebp压栈</div><div class="line">	.cfi_def_cfa_offset 8</div><div class="line">	.cfi_offset 5, -8</div><div class="line">	movl	%esp, %ebp  //ebp=esp</div><div class="line"> 	.cfi_def_cfa_register 5</div><div class="line">	movl	8(%ebp), %edx //将this(即point3d对象的首地址)之后怎赋值给edx,即edx=this</div><div class="line">	movl	.LC0, %eax //即eax=1</div><div class="line">	movl	%eax, (%edx)//edx即为class point3d中x的首地址，即this-&gt;x=1</div><div class="line">	movl	8(%ebp), %edx //edx=this</div><div class="line">	movl	.LC1, %eax //eax=2</div><div class="line">	movl	%eax, 4(%edx) //edx+4即为y的首地址，即this-&gt;y=2</div><div class="line">	movl	8(%ebp), %edx //edx=this</div><div class="line">	movl	.LC2, %eax //eax=3</div><div class="line">	movl	%eax, 8(%edx) //this-&gt;z=3,其中edx+8即this-&gt;z </div><div class="line">	popl	%ebp //ebp=old ebp,esp+=4</div><div class="line">	.cfi_restore 5</div><div class="line">	.cfi_def_cfa 4, 4</div><div class="line">	ret //eip=ret addr, esp+=4</div><div class="line">	.cfi_endproc</div><div class="line">.LFE972:</div><div class="line">	.size	_ZN7point3dC2Ev, .-_ZN7point3dC2Ev</div><div class="line">	.weak	_ZN7point3dC1Ev</div><div class="line">	.set	_ZN7point3dC1Ev,_ZN7point3dC2Ev</div><div class="line">	.section	.text._ZlsRSoR7point3d,<span class="string">"axG"</span>,@progbits,_ZlsRSoR7point3d,comdat</div><div class="line">	.weak	_ZlsRSoR7point3d</div><div class="line">	.type	_ZlsRSoR7point3d, @<span class="keyword">function</span></div><div class="line"></div><div class="line">main:</div><div class="line">.LFB975:</div><div class="line">	.cfi_startproc</div><div class="line">	pushl	%ebp  //ebp压栈</div><div class="line">	.cfi_def_cfa_offset 8</div><div class="line">	.cfi_offset 5, -8</div><div class="line">	movl	%esp, %ebp  //ebp=esp</div><div class="line">	.cfi_def_cfa_register 5</div><div class="line">	andl	$-16, %esp //esp为16的整数倍</div><div class="line">	subl	<span class="variable">$32</span>, %esp //esp-=32</div><div class="line">	leal	20(%esp), %eax //eax=esp+20,\</div><div class="line">	即pd对象的首地址（也就是我们说的this指针）</div><div class="line">	movl	%eax, (%esp) //将eax压栈，即将pd的\</div><div class="line">	首地址压栈(需要重点指出的，this指针作为类\</div><div class="line">	非static成员函数的隐式参数，gcc采用压栈方\</div><div class="line">	式传递this指针，而VC6.0通过ecx寄存器来传递this指针)</div><div class="line">	call	_ZN7point3dC1Ev //调用构造函数pointd3d()</div><div class="line">	leal	20(%esp), %eax //esp+20即pd对象的首地址</div><div class="line">	movl	%eax, 4(%esp) //eax压栈</div><div class="line">	movl	<span class="variable">$_ZSt4cout</span>, (%esp) //cout压栈</div><div class="line">	call	_ZlsRSoR7point3d  //调用operator&lt;&lt;函数</div><div class="line">	movl	<span class="variable">$0</span>, %eax</div><div class="line">	leave //esp=ebp,pop ebp;</div><div class="line">	.cfi_restore 5</div><div class="line">	.cfi_def_cfa 4, 4</div><div class="line">	ret</div><div class="line">	.cfi_endproc</div><div class="line">.LFE975:</div><div class="line">	.size	main, .-main</div><div class="line">	.type	_Z41__static_initialization_and_destruction_0ii, @<span class="keyword">function</span></div><div class="line">_Z41__static_initialization_and_destruction_0ii:</div><div class="line">.LFB983:</div><div class="line">	.cfi_startproc</div><div class="line">	pushl	%ebp</div><div class="line">	.cfi_def_cfa_offset 8</div><div class="line">	.cfi_offset 5, -8</div><div class="line">	movl	%esp, %ebp</div><div class="line">	.cfi_def_cfa_register 5</div><div class="line">	subl	<span class="variable">$24</span>, %esp</div><div class="line">	cmpl	<span class="variable">$1</span>, 8(%ebp)</div><div class="line">	jne	.L6</div><div class="line">	cmpl	<span class="variable">$65535</span>, 12(%ebp)</div><div class="line">	jne	.L6</div><div class="line">	movl	<span class="variable">$_ZStL8__ioinit</span>, (%esp)</div><div class="line">	call	_ZNSt8ios_base4InitC1Ev</div><div class="line">	movl	<span class="variable">$__dso_handle</span>, 8(%esp)</div><div class="line">	movl	<span class="variable">$_ZStL8__ioinit</span>, 4(%esp)</div><div class="line">	movl	<span class="variable">$_ZNSt8ios_base4InitD1Ev</span>, (%esp)</div><div class="line">	call	__cxa_atexit</div><div class="line">.L6:</div><div class="line">	leave</div><div class="line">	.cfi_restore 5</div><div class="line">	.cfi_def_cfa 4, 4</div><div class="line">	ret</div><div class="line">	.cfi_endproc</div><div class="line">.LFE983:</div><div class="line">	.size	_Z41__static_initialization_and_destruction_0ii, .-_Z41__static_initialization_and_destruction_0ii</div><div class="line">	.type	_GLOBAL__sub_I_main, @<span class="keyword">function</span></div><div class="line">_GLOBAL__sub_I_main:</div><div class="line">.LFB984:</div><div class="line">	.cfi_startproc</div><div class="line">	pushl	%ebp</div><div class="line">	.cfi_def_cfa_offset 8</div><div class="line">	.cfi_offset 5, -8</div><div class="line">	movl	%esp, %ebp</div><div class="line">	.cfi_def_cfa_register 5</div><div class="line">	subl	<span class="variable">$24</span>, %esp</div><div class="line">	movl	<span class="variable">$65535</span>, 4(%esp)</div><div class="line">	movl	<span class="variable">$1</span>, (%esp)</div><div class="line">	call	_Z41__static_initialization_and_destruction_0ii</div><div class="line">	leave</div><div class="line">	.cfi_restore 5</div><div class="line">	.cfi_def_cfa 4, 4</div><div class="line">	ret</div><div class="line">	.cfi_endproc</div><div class="line">.LFE984:</div><div class="line">	.size	_GLOBAL__sub_I_main, .-_GLOBAL__sub_I_main</div><div class="line">	.section	.init_array,<span class="string">"aw"</span></div><div class="line">	.align 4</div><div class="line">	.long	_GLOBAL__sub_I_main</div><div class="line">	.section	.rodata</div><div class="line">	.align 4</div><div class="line">.LC0:</div><div class="line">	.long	1065353216</div><div class="line">	.align 4</div><div class="line">.LC1:</div><div class="line">	.long	1073741824</div><div class="line">	.align 4</div><div class="line">.LC2:</div><div class="line">	.long	1077936128</div><div class="line">	.hidden	__dso_handle</div><div class="line">	.ident	<span class="string">"GCC: (Ubuntu 4.8.4-2ubuntu1~14.04.1) 4.8.4"</span></div><div class="line">	.section	.note.GNU-stack,<span class="string">""</span>,@progbits</div></pre></td></tr></table></figure></p>
+<p>其中调用构造函数point3d::point3d()时的栈帧结构为：<br><img src="/img/c5-x.png" alt="statck0"></p>
+<h6 id="1-2-1-class对象内存布局"><a href="#1-2-1-class对象内存布局" class="headerlink" title="1.2.1 class对象内存布局"></a>1.2.1 class对象内存布局</h6><p>C++在内存布局以及存取时间上主要的额外负担是虚函数（即链接时的多态）和虚继承（即多次出现在继承体系中的父类，在子类对象中有一个单一共享的实例，其最典型的是菱形继承）<br>另外，需要指出的是，C++中class和struct关键字都可以包含函数，其不同点在于，class默认为private，struct默认为public.在继承时，class默认为私有继承，strutc默认为公有继承。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#include&lt;iostream&gt;</span></div><div class="line">using namespace std;</div><div class="line"></div><div class="line">class point&#123;</div><div class="line">        <span class="built_in">float</span> x;</div><div class="line">public:</div><div class="line">        point():x(1)&#123;&#125;</div><div class="line">	virtual void <span class="function"><span class="title">draw</span></span>()</div><div class="line">	&#123;</div><div class="line">		cout&lt;&lt;<span class="string">"draw point"</span>&lt;&lt;endl;</div><div class="line">	&#125;</div><div class="line">        virtual ~<span class="function"><span class="title">point</span></span>()</div><div class="line">        &#123;//需要将析构函数声明为虚函数(用于动态绑定)</div><div class="line">                cout&lt;&lt;<span class="string">"point"</span>&lt;&lt;endl;</div><div class="line">        &#125;</div><div class="line">&#125;;</div><div class="line"></div><div class="line">class point2d:public point&#123;</div><div class="line">        <span class="built_in">float</span> y;</div><div class="line">public:</div><div class="line">        point2d():point(),y(2)&#123;&#125;</div><div class="line">        ~<span class="function"><span class="title">point2d</span></span>()</div><div class="line">        &#123;</div><div class="line">                cout&lt;&lt;<span class="string">"point2"</span>&lt;&lt;endl;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">&#125;;</div><div class="line"></div><div class="line">int <span class="function"><span class="title">main</span></span>()</div><div class="line">&#123;</div><div class="line">        point *p=new point2d;</div><div class="line">        delete p;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>class point的对象对应的内存布局<br><img src="/img/c5-0.png" alt="layout1"><br>class point2d的对象对应的内存布局<br><img src="/img/c5-1.png" alt="layout2"></p>
+<p>通过对比point和point2d的对象内存布局，可知，如果父类中定义了虚函数，并且在子类中进行了重写，则在子类的对象模型中，用子类重写的函数的地址将父类的虚函数地址替换掉，否则不进行替换。</p>
+
+	
+    </div>
+    <footer>
+      
+        
+  
+  <div class="categories">
+    <a href="/categories/Asm-Cpp/">Asm/Cpp</a>
+  </div>
+
+        
+  
+  <div class="tags">
+    <a href="/tags/Asm/">Asm</a>, <a href="/tags/C/">C</a>, <a href="/tags/Cpp/">Cpp</a>
+  </div>
+
+	
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  
+<div class="widget tag">
+  <h3 class="title">最新文章</h3>
+  <ul class="entry">
+    
+      <li>
+        <a href="/2017/04/04/hello-world/">Hello World</a>
+      </li>
+    
+      <li>
+        <a href="/2016/10/19/ctoy-1/">奇怪的死循环</a>
+      </li>
+    
+      <li>
+        <a href="/2016/04/09/cpp-model-5/">C++对象模型-关于对象</a>
+      </li>
+    
+      <li>
+        <a href="/2016/04/08/cpp-model-3/">C++对象模型-3</a>
+      </li>
+    
+      <li>
+        <a href="/2016/04/08/cpp-model-4/">基础类型的内存表示</a>
+      </li>
+    
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">分类</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/Asm-C/">Asm/C</a><small>1</small></li>
+  
+    <li><a href="/categories/Asm-Cpp/">Asm/Cpp</a><small>7</small></li>
+  
+    <li><a href="/categories/C-C/">C/C++</a><small>1</small></li>
+  
+    <li><a href="/categories/Linux/">Linux</a><small>1</small></li>
+  
+    <li><a href="/categories/STL源码剖析/">STL源码剖析</a><small>2</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tagcloud">
+  <h3 class="title">标签云</h3>
+  <div class="entry">
+    <a href="/tags/Asm/" style="font-size: 20px;">Asm</a> <a href="/tags/C/" style="font-size: 20px;">C</a> <a href="/tags/Cpp/" style="font-size: 16.67px;">Cpp</a> <a href="/tags/apue/" style="font-size: 10px;">apue</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/heap/" style="font-size: 10px;">heap</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/sort/" style="font-size: 10px;">sort</a> <a href="/tags/stl/" style="font-size: 13.33px;">stl</a> <a href="/tags/内存流/" style="font-size: 10px;">内存流</a>
+  </div>
+</div>
+
+
+  
+<div class="widget blogroll">
+  <h3 class="title">链接</h3>
+  <ul class="entry">
+    
+	<li><a href="http://zhangwenli.com" title="http://zhangwenli.com" target="_blank"]);">Ovilia</a></li>
+    
+	<li><a href="http://www.jianshu.com/users/301abb85f52a/latest_articles" title="" target="_blank"]);">idealRetail</a></li>
+    
+  </ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="copyright">
+  
+  &copy; 2015-2017 qinchao
+  
+  | Powered by hexo and Theme by <a href=https://github.com/Qinch/hexo-theme-light_mod target="_blank">light </a>
+  <a href="/atom.xml" target="_blank">| RSS</a>
+</div>
+<div class="clearfix"></div>
+
+</footer>
+  <script src="//libs.baidu.com/jquery/2.0.3/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,12 @@
+# hexo robots.txt
+User-agent: *
+Allow: /
+Allow: /archives/
+
+
+Disallow: /img/
+Disallow: /css/
+Disallow: /js/
+Disallow: /fancybox/
+
+Sitemap: http://qinch.github.io/sitemap.xml
