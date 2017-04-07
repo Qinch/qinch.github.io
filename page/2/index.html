@@ -87,52 +87,6 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2016/01/10/bits-int/">24 bits解析为有符号整数</a></h1>
-
- 
-	
-	<time  datetime="2016-01-09T16:00:00.000Z"><p>发表于 2016-01-10 | 字数 <span class="post-count">327</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<p>最近遇到了24bits来解析为有符号整数的问题，提供如下两个解决思路：</p>
-<h4 id="方法1"><a href="#方法1" class="headerlink" title="方法1:"></a>方法1:</h4><p>24bits即从高位到低位为:buf[0],buf[1],buf[2] 三个bytes;通过将最高字节buf[0]符号扩展为两个字节（假设从高位到低位为ps[1],ps[0]），然后将ps[1],ps[0],buf[1],buf[2]拼接为int变量的四个字节;见下图;<br><img src="/img/bits2int.png" alt="pic1"><br>
-		
-	
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2016/01/10/bits-int/#more" class="more-link">阅读全文</a>
-          </div>
-        
-        
-        <div class="alignright">
-          <a href="/2016/01/10/bits-int/#comment" class="comment-link">评论</a>
-        </div>
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
     <h1 class="title"><a href="/2015/12/23/Linux-+%A6%B5-%B8/">Linux内存流</a></h1>
 
  
@@ -284,15 +238,15 @@ var _hmt = _hmt || [];
       </li>
     
       <li>
-        <a href="/2017/04/04/hello-world/">Hello World</a>
-      </li>
-    
-      <li>
         <a href="/2016/10/19/ctoy-1/">奇怪的死循环</a>
       </li>
     
       <li>
         <a href="/2016/04/09/cpp-model-5/">C++对象模型-关于对象</a>
+      </li>
+    
+      <li>
+        <a href="/2016/04/08/cpp-model-4/">基础类型的内存表示</a>
       </li>
     
       <li>
