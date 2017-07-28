@@ -136,7 +136,7 @@ var _hmt = _hmt || [];
 
  
 	
-	<time  datetime="2017-04-06T16:00:00.000Z"><p>发表于 2017-04-07 | 字数 <span class="post-count">661</span>
+	<time  datetime="2017-04-06T16:00:00.000Z"><p>发表于 2017-04-07 | 字数 <span class="post-count">664</span>
 
 </p></time>
       
@@ -145,7 +145,7 @@ var _hmt = _hmt || [];
       
 		
 			<h5 id="1-槽位使用情况序列号"><a href="#1-槽位使用情况序列号" class="headerlink" title="1,槽位使用情况序列号"></a>1,槽位使用情况序列号</h5><p>ipc_perm结构中含有一个名为seq的变量，是一个槽位使用情况序列号。该变量是一个由内核为系统中每个潜在的IPC对象维持的计数器。每当删除一个IPC对象时，内核就递增相应槽位的使用情况序列号，若溢出则循环回0.</p>
-<p>简单理解就是: 存在ipc_perm[max]，当创建ipc对象时，在ipc_perm数组中查找第一个ipc_perm元素为空，记为ipc_perm[i].当删除ipc_perm[i]对应的ipc时，ipc_perm[i].seq++,下次再次创建ipc对象时，假设ipc_perm[i]元素为空，则返回ipc id为i*max.<br>注：槽位使用情况序列号是一个跨进程保持的内核变量。</p>
+<p>简单理解就是: 存在ipc_perm[max]，当创建ipc对象时，在ipc_perm数组中查找第一个ipc_perm元素为空，记为ipc_perm[i].当删除ipc_perm[i]对应的ipc时，ipc_perm[i].seq++,下次再次创建ipc对象时，假设ipc_perm[i]元素为空，则返回ipc id为i+ipc_perm[i].seq*max.<br>注：槽位使用情况序列号是一个跨进程保持的内核变量。</p>
 <h4 id="2，示例代码"><a href="#2，示例代码" class="headerlink" title="2，示例代码"></a>2，示例代码</h4><h5 id="2-1-创建ipc，然后立即删除该ipc"><a href="#2-1-创建ipc，然后立即删除该ipc" class="headerlink" title="2.1 创建ipc，然后立即删除该ipc"></a>2.1 创建ipc，然后立即删除该ipc</h5><p>对应的源码：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">/*************************************************************************</div><div class="line"> &gt; File Name: p26_1.c</div><div class="line"> &gt; Author: qinchao</div><div class="line"> &gt; Mail: 1187620726@qq.com</div><div class="line"> &gt; Created Date:2017-04-07 Time:11:02:25.</div><div class="line"> ************************************************************************/</div><div class="line"><span class="comment">#include&lt;stdio.h&gt;</span></div><div class="line"><span class="comment">#include&lt;sys/msg.h&gt;</span></div><div class="line"><span class="comment">#include&lt;sys/types.h&gt;</span></div><div class="line"></div><div class="line">int <span class="function"><span class="title">main</span></span>()</div><div class="line">&#123;</div><div class="line">        int i,msgid;</div><div class="line">        <span class="keyword">for</span>(i=0;i&lt;10;i++)</div><div class="line">        &#123;</div><div class="line">                msgid=msgget(IPC_PRIVATE,0666|IPC_CREAT);</div><div class="line">                <span class="built_in">printf</span>(<span class="string">"msgid=%d\n"</span>,msgid);</div><div class="line">                msgctl(msgid,IPC_RMID,NULL);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="built_in">return</span> 0;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>对应的结果：</p>
