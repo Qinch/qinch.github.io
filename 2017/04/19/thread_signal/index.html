@@ -4,7 +4,7 @@
 
   <meta charset="utf-8">
   
-  <title>APUE中文第三版勘误 | Just For Fun</title>
+  <title>线程-信号 | Just For Fun</title>
   <meta name="author" content="qinchao">
   
   <meta name="description" content="qinchao&#39;s blog">
@@ -12,7 +12,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-  <meta property="og:title" content="APUE中文第三版勘误"/>
+  <meta property="og:title" content="线程-信号"/>
   <meta property="og:site_name" content="Just For Fun"/>
 
   
@@ -86,11 +86,11 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title">APUE中文第三版勘误</h1>
+    <h1 class="title">线程-信号</h1>
 
  
 	
-	<time  datetime="2017-10-01T16:00:00.000Z"><p>发表于 2017-10-02 | 字数 <span class="post-count">150</span>
+	<time  datetime="2017-04-18T16:00:00.000Z"><p>发表于 2017-04-19 | 字数 <span class="post-count">218</span>
 
 </p></time>
       
@@ -98,9 +98,11 @@ var _hmt = _hmt || [];
     <div class="entry">
       
 		  
-		<p>本博客根据自己对APUE中文第三版的阅读理解，列出其中自己认为翻译错误或者翻译有歧义的部分。</p>
-<h4 id="1-page81"><a href="#1-page81" class="headerlink" title="1,page81"></a>1,page81</h4><p>中文：其中，如果测试文件是否已经存在，mode就为F_OK；否则mode是图4-7中所列常量的按位或。<br>英文(page102)：The mode is either the value F_OK to test if a file exists, or the bitwise OR of any of the flags shown in Figure 4.7.</p>
-<h4 id="2-page89"><a href="#2-page89" class="headerlink" title="2,page89"></a>2,page89</h4><p>中文：对于符号链接，文件长度是在文件名中的实际字节数。<br>英文(page111):For a symbolic link, the file size is the numberof bytes in the filename.<br><a id="more"></a></p>
+		<h4 id="1-线程与信号"><a href="#1-线程与信号" class="headerlink" title="1,线程与信号"></a>1,线程与信号</h4><ol>
+<li>每个线程都有自己的信号屏蔽字，但是信号的处理是先进程中所有线程共享的。这就意味着单个线程可以阻止某些信号，但当某个线程修改了与某个给定信号相关的处理行为以后，所有的线程都必须共享这个处理行为的改变。</li>
+<li>进程中的信号是递送给单个线程的。（Signals are delivered to a single thread in the process. If the signal is related to a hardware fault, the signal is usually sent to the thread whose action caused the event. Other signals, on the other hand, are delivered to an arbitrary thread.)对于该句的理解是：因为进程中所有线程共享信号的处理，所以发送给任意进程（只要该进程没有屏蔽该信号），对该信号的处理都是相同的。</li>
+</ol>
+<a id="more"></a>
 
 	
     </div>
@@ -109,13 +111,13 @@ var _hmt = _hmt || [];
         
   
   <div class="categories">
-    <a href="/categories/C-Linux/">C/Linux</a>
+    <a href="/categories/线程/">线程</a>
   </div>
 
         
   
   <div class="tags">
-    <a href="/tags/apue/">apue</a>, <a href="/tags/勘误/">勘误</a>
+    <a href="/tags/thread/">thread</a>, <a href="/tags/signal/">signal</a>
   </div>
 
 	
