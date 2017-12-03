@@ -4,7 +4,7 @@
 
   <meta charset="utf-8">
   
-  <title>Makefile | Just For Fun</title>
+  <title>redis4.0_sds | Just For Fun</title>
   <meta name="author" content="qinchao">
   
   <meta name="description" content="qinchao&#39;s blog">
@@ -12,7 +12,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-  <meta property="og:title" content="Makefile"/>
+  <meta property="og:title" content="redis4.0_sds"/>
   <meta property="og:site_name" content="Just For Fun"/>
 
   
@@ -86,11 +86,11 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title">Makefile</h1>
+    <h1 class="title">redis4.0_sds</h1>
 
  
 	
-	<time  datetime="2017-04-18T16:00:00.000Z"><p>发表于 2017-04-19 | 字数 <span class="post-count">99</span>
+	<time  datetime="2016-09-30T16:00:00.000Z"><p>发表于 2016-10-01 | 字数 <span class="post-count">53</span>
 
 </p></time>
       
@@ -98,8 +98,13 @@ var _hmt = _hmt || [];
     <div class="entry">
       
 		  
-		<h4 id="1-makefile的规则"><a href="#1-makefile的规则" class="headerlink" title="1,makefile的规则"></a>1,makefile的规则</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">target ...: prerequisites ...</div><div class="line">	cmd</div><div class="line">	...</div><div class="line">	...</div><div class="line"></div><div class="line">其中，target可以是一个obj file,也可以是一个执行文件，还可以是一个label.</div><div class="line">prerequisites：为生成该target所依赖的文件或target</div><div class="line">cmd(必须以一个Tab键作为开头)：为target要执行的命令</div><div class="line">注：prerequisites中如果有一个以上的文件比target文件要新的话，cmd所定义的命令就会被执行。</div></pre></td></tr></table></figure>
-<a id="more"></a>
+		<h4 id="1-sds介绍"><a href="#1-sds介绍" class="headerlink" title="1.sds介绍"></a>1.sds介绍</h4><ol>
+<li>sds:Simple Dynamic String即简单动态字符串，为redis的默认字符串表示。</li>
+</ol>
+<h4 id="2-sds-h源码分析"><a href="#2-sds-h源码分析" class="headerlink" title="2.sds.h源码分析"></a>2.sds.h源码分析</h4><a id="more"></a>
+<h4 id="3-sds-c源码分析"><a href="#3-sds-c源码分析" class="headerlink" title="3.sds.c源码分析"></a>3.sds.c源码分析</h4><h4 id="4-参考文献"><a href="#4-参考文献" class="headerlink" title="4.参考文献"></a>4.参考文献</h4><ol>
+<li>《Redis设计与实现》</li>
+</ol>
 
 	
     </div>
@@ -108,13 +113,13 @@ var _hmt = _hmt || [];
         
   
   <div class="categories">
-    <a href="/categories/makefile/">makefile</a>
+    <a href="/categories/redis/">redis</a>
   </div>
 
         
   
   <div class="tags">
-    <a href="/tags/makefile/">makefile</a>, <a href="/tags/make/">make</a>
+    <a href="/tags/redis4-0/">redis4.0</a>, <a href="/tags/sds/">sds</a>, <a href="/tags/sourcecode/">sourcecode</a>
   </div>
 
 	
