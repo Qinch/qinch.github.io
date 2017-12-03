@@ -128,7 +128,9 @@ var _hmt = _hmt || [];
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">ds sdscatlen(sds s, const void *t, size_t len) &#123;</div><div class="line">    size_t curlen = sdslen(s);</div><div class="line"></div><div class="line">   //确保s所指向的buf[]有足够空间</div><div class="line">    s = sdsMakeRoomFor(s,len);</div><div class="line">    <span class="keyword">if</span> (s == NULL) <span class="built_in">return</span> NULL;</div><div class="line">    memcpy(s+curlen, t, len);</div><div class="line">    sdssetlen(s, curlen+len);</div><div class="line">    s[curlen+len] = <span class="string">'\0'</span>;</div><div class="line">    <span class="built_in">return</span> s;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 </li>
 <li><p>其他函数注释在参考文献2指向的github仓库查看相关文件。</p>
-<h4 id="4-参考文献"><a href="#4-参考文献" class="headerlink" title="4.参考文献"></a>4.参考文献</h4></li>
+</li>
+</ol>
+<h4 id="4-参考文献"><a href="#4-参考文献" class="headerlink" title="4.参考文献"></a>4.参考文献</h4><ol>
 <li>《Redis设计与实现》</li>
 <li>《<a href="https://github.com/Qinch/redis_reading/tree/4.0/src" target="_blank" rel="external">redis_reading</a>》</li>
 </ol>
