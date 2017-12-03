@@ -324,6 +324,51 @@ var _hmt = _hmt || [];
     <header>
       
 	
+    <h1 class="title"><a href="/2016/10/02/redis4-adlist/">redis4.0_adlist</a></h1>
+
+ 
+	
+	<time  datetime="2016-10-01T16:00:00.000Z"><p>发表于 2016-10-02 | 字数 <span class="post-count">32</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<h4 id="1-adlist介绍"><a href="#1-adlist介绍" class="headerlink" title="1.adlist介绍"></a>1.adlist介绍</h4><h4 id="2-adlist-h源码分析"><a href="#2-adlist-h源码分析" class="headerlink" title="2.adlist.h源码分析"></a>2.adlist.h源码分析</h4><h4 id="3-addlist-c-源码分析"><a href="#3-addlist-c-源码分析" class="headerlink" title="3.addlist.c.源码分析"></a>3.addlist.c.源码分析</h4><h4 id="4-参考文献"><a href="#4-参考文献" class="headerlink" title="4.参考文献"></a>4.参考文献</h4><ol>
+<li>《Redis设计与实现》</li>
+<li>《<a href="https://github.com/Qinch/redis_reading/tree/4.0/src" target="_blank" rel="external">redis_reading</a>》</li>
+</ol>
+
+		
+	
+    </div>
+    <footer>
+      
+        
+        
+        <div class="alignright">
+          <a href="/2016/10/02/redis4-adlist/#comment" class="comment-link">评论</a>
+        </div>
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
     <h1 class="title"><a href="/2016/10/01/redis4-sds/">redis4.0_sds</a></h1>
 
  
@@ -532,61 +577,6 @@ var _hmt = _hmt || [];
 
 
 
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
-    <h1 class="title"><a href="/2016/04/07/cpp-model-2/">动态/静态数组内存布局</a></h1>
-
- 
-	
-	<time  datetime="2016-04-06T16:00:00.000Z"><p>发表于 2016-04-07 | 字数 <span class="post-count">1,232</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<h5 id="开发环境"><a href="#开发环境" class="headerlink" title="开发环境"></a>开发环境</h5><ul>
-<li>Ubuntu 14.04(32bits)</li>
-<li>GCC      </li>
-<li>编辑器 Cmd Markdown</li>
-<li>画图工具 Processon    </li>
-</ul>
-<h5 id="1-数组内存布局"><a href="#1-数组内存布局" class="headerlink" title="1,数组内存布局"></a>1,数组内存布局</h5><p><a href="http://chinchao.xyz/2016/04/06/cpp-model-1/">上一节</a> 简单介绍了结构体作为函数参数和返回值的情况。本文准备介绍一下数组的内存布局，即静态数组/动态数组和一维数组/二维数组，顺便介绍一下0长度数组的妙用。</p>
-<h6 id="1-1静态一维数组和动态二维数组"><a href="#1-1静态一维数组和动态二维数组" class="headerlink" title="1.1静态一维数组和动态二维数组"></a>1.1静态一维数组和动态二维数组</h6><p>静态一维数组，即类似于int a[10];动态数据，即类似于int <em>p=(int</em>)malloc(10<em>sizeof(int));（或者int </em>p=new int[10]）;</p>
-<h6 id="1-1-1静态一维数组"><a href="#1-1-1静态一维数组" class="headerlink" title="1.1.1静态一维数组"></a>1.1.1静态一维数组</h6><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#include&lt;stdio.h&gt;</span></div><div class="line"></div><div class="line">int <span class="function"><span class="title">main</span></span>()</div><div class="line">&#123;</div><div class="line">        int a[3];</div><div class="line">        a[0]=1;</div><div class="line">        a[1]=2;</div><div class="line">        a[2]=3;</div><div class="line">        <span class="built_in">printf</span>(<span class="string">"%d %d %d\n"</span>,a[0],a[1],a[2]);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>对应的汇编代码为<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line">	.file	<span class="string">"c2-0.c"</span></div><div class="line">	.section	.rodata</div><div class="line">.LC0:</div><div class="line">	.string	<span class="string">"%d %d %d\n"</span></div><div class="line">	.text</div><div class="line">	.globl	main</div><div class="line">	.type	main, @<span class="keyword">function</span></div><div class="line">main:</div><div class="line">.LFB0:</div><div class="line">	.cfi_startproc</div><div class="line">	pushl	%ebp</div><div class="line">	.cfi_def_cfa_offset 8</div><div class="line">	.cfi_offset 5, -8</div><div class="line">	movl	%esp, %ebp</div><div class="line">	.cfi_def_cfa_register 5</div><div class="line">	andl	$-16, %esp</div><div class="line">	subl	<span class="variable">$32</span>, %esp</div><div class="line">	movl	<span class="variable">$1</span>, 20(%esp) //esp+20即为p[0]的地址</div><div class="line">	movl	<span class="variable">$2</span>, 24(%esp) //esp+24即为p[1]的地址</div><div class="line">	movl	<span class="variable">$3</span>, 28(%esp) //esp+28即为p[2]的地址</div><div class="line">	movl	28(%esp), %ecx</div><div class="line">	movl	24(%esp), %edx</div><div class="line">	movl	20(%esp), %eax</div><div class="line">	movl	%ecx, 12(%esp) //将ecx压栈，即[esp+12]=ecx</div><div class="line">	movl	%edx, 8(%esp) //将edx压栈，即[esp+8]=edx</div><div class="line">	movl	%eax, 4(%esp) //将eax压栈，即[esp+4]=eax</div><div class="line">	movl	$.LC0, (%esp) //类似于“%d %d”字符串的地址</div><div class="line">	call	<span class="built_in">printf</span></div><div class="line">	leave</div><div class="line">	.cfi_restore 5</div><div class="line">	.cfi_def_cfa 4, 4</div><div class="line">	ret</div><div class="line">	.cfi_endproc</div><div class="line">.LFE0:</div><div class="line">	.size	main, .-main</div><div class="line">	.ident	<span class="string">"GCC: (Ubuntu 4.8.4-2ubuntu1~14.04.1) 4.8.4"</span></div><div class="line">	.section	.note.GNU-stack,<span class="string">""</span>,@progbits</div></pre></td></tr></table></figure></p>
-<p>main函数执行时，栈帧为：<br><img src="/img/c2-0.png" alt="img0"><br>
-		
-	
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2016/04/07/cpp-model-2/#more" class="more-link">阅读全文</a>
-          </div>
-        
-        
-        <div class="alignright">
-          <a href="/2016/04/07/cpp-model-2/#comment" class="comment-link">评论</a>
-        </div>
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
 
   <nav id="page-nav" class="clearfix">
     <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">下一页 &raquo;</a>
@@ -641,7 +631,7 @@ var _hmt = _hmt || [];
   
     <li><a href="/categories/makefile/">makefile</a><small>1</small></li>
   
-    <li><a href="/categories/redis/">redis</a><small>1</small></li>
+    <li><a href="/categories/redis/">redis</a><small>2</small></li>
   
     <li><a href="/categories/unpv2/">unpv2</a><small>1</small></li>
   
@@ -655,7 +645,7 @@ var _hmt = _hmt || [];
 <div class="widget tagcloud">
   <h3 class="title">标签云</h3>
   <div class="entry">
-    <a href="/tags/Asm/" style="font-size: 20px;">Asm</a> <a href="/tags/C/" style="font-size: 20px;">C</a> <a href="/tags/Cpp/" style="font-size: 16.67px;">Cpp</a> <a href="/tags/apue/" style="font-size: 13.33px;">apue</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/heap/" style="font-size: 10px;">heap</a> <a href="/tags/icp/" style="font-size: 10px;">icp</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/make/" style="font-size: 10px;">make</a> <a href="/tags/makefile/" style="font-size: 10px;">makefile</a> <a href="/tags/redis4-0/" style="font-size: 10px;">redis4.0</a> <a href="/tags/sds/" style="font-size: 10px;">sds</a> <a href="/tags/signal/" style="font-size: 10px;">signal</a> <a href="/tags/sort/" style="font-size: 10px;">sort</a> <a href="/tags/sourcecode/" style="font-size: 10px;">sourcecode</a> <a href="/tags/stl/" style="font-size: 13.33px;">stl</a> <a href="/tags/thread/" style="font-size: 10px;">thread</a> <a href="/tags/unpv2/" style="font-size: 10px;">unpv2</a> <a href="/tags/内存流/" style="font-size: 10px;">内存流</a> <a href="/tags/勘误/" style="font-size: 10px;">勘误</a>
+    <a href="/tags/Asm/" style="font-size: 20px;">Asm</a> <a href="/tags/C/" style="font-size: 20px;">C</a> <a href="/tags/Cpp/" style="font-size: 16.67px;">Cpp</a> <a href="/tags/adlist/" style="font-size: 10px;">adlist</a> <a href="/tags/apue/" style="font-size: 13.33px;">apue</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/heap/" style="font-size: 10px;">heap</a> <a href="/tags/icp/" style="font-size: 10px;">icp</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/make/" style="font-size: 10px;">make</a> <a href="/tags/makefile/" style="font-size: 10px;">makefile</a> <a href="/tags/redis4-0/" style="font-size: 13.33px;">redis4.0</a> <a href="/tags/sds/" style="font-size: 10px;">sds</a> <a href="/tags/signal/" style="font-size: 10px;">signal</a> <a href="/tags/sort/" style="font-size: 10px;">sort</a> <a href="/tags/sourcecode/" style="font-size: 13.33px;">sourcecode</a> <a href="/tags/stl/" style="font-size: 13.33px;">stl</a> <a href="/tags/thread/" style="font-size: 10px;">thread</a> <a href="/tags/unpv2/" style="font-size: 10px;">unpv2</a> <a href="/tags/内存流/" style="font-size: 10px;">内存流</a> <a href="/tags/勘误/" style="font-size: 10px;">勘误</a>
   </div>
 </div>
 
