@@ -4,7 +4,7 @@
 
   <meta charset="utf-8">
   
-  <title>redis4.0_adlist | Just For Fun</title>
+  <title>redis4.0_ziplist | Just For Fun</title>
   <meta name="author" content="qinchao">
   
   <meta name="description" content="qinchao&#39;s blog">
@@ -12,7 +12,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-  <meta property="og:title" content="redis4.0_adlist"/>
+  <meta property="og:title" content="redis4.0_ziplist"/>
   <meta property="og:site_name" content="Just For Fun"/>
 
   
@@ -86,11 +86,11 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title">redis4.0_adlist</h1>
+    <h1 class="title">redis4.0_ziplist</h1>
 
  
 	
-	<time  datetime="2016-10-01T16:00:00.000Z"><p>发表于 2016-10-02 | 字数 <span class="post-count">529</span>
+	<time  datetime="2016-10-02T16:00:00.000Z"><p>发表于 2016-10-03 | 字数 <span class="post-count">417</span>
 
 </p></time>
       
@@ -99,47 +99,25 @@ var _hmt = _hmt || [];
       
 		  
 		<h3 id="1-ziplist"><a href="#1-ziplist" class="headerlink" title="1.ziplist"></a>1.ziplist</h3><h4 id="1-1-ziplist概述"><a href="#1-1-ziplist概述" class="headerlink" title="1.1.ziplist概述"></a>1.1.ziplist概述</h4><p> The ziplist is a specially encoded dually linked list that is designed to be very memory efficient. It stores both strings and integer values, where integers are encoded as actual integers(integer内存表示) instead of a series of characters（ASCII码）. It allows push and pop operations on either side of the list in O(1) time. However, because every operation requires a reallocation of the memory used by the ziplist, the actual complexity is related to the amount of memory used by the ziplist.</p>
-<h4 id="1-2-ziplist内存布局"><a href="#1-2-ziplist内存布局" class="headerlink" title="1.2.ziplist内存布局"></a>1.2.ziplist内存布局</h4><ul>
-<li><p>The general layout of the ziplist is as follows:</p>
+<h4 id="1-2-ziplist内存布局"><a href="#1-2-ziplist内存布局" class="headerlink" title="1.2.ziplist内存布局"></a>1.2.ziplist内存布局</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"> |-----------|----------|---------|---------|---------|----|----------|---------|</div><div class="line"> | &lt;zlbytes&gt; | &lt;zltail&gt; | &lt;zllen&gt; | &lt;entry0&gt;| &lt;entry1&gt;| ...| &lt;entryn&gt; | &lt;zlend&gt; |</div><div class="line"> |-----------|----------|---------|---------|---------|----|----------|---------|</div><div class="line"> |低地址            &lt;----------------------------                       高地址  |</div><div class="line"></div><div class="line">NOTE: all fields are stored <span class="keyword">in</span> little endian(即：低位在地地址，高位在高地址), <span class="keyword">if</span> not specified otherwise.</div></pre></td></tr></table></figure>
 <ul>
+<li>The general layout of the ziplist is as follows:<ul>
 <li><uint32_t zlbytes="">用于记录整个ziplist占用的内存字节数；</uint32_t></li>
 <li><uint32_t zltail="">用于记录最后一个节点(the last entry)的首地址距离ziplist首地址的偏移量;</uint32_t></li>
-<li><uint16_t zllen="">用于记录ziplist中节点(entry)数量;<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">&lt;zlbytes&gt; &lt;zltail&gt; &lt;zllen&gt; &lt;entry&gt; &lt;entry&gt; ... &lt;entry&gt; &lt;zlend&gt;</div><div class="line"></div><div class="line">NOTE: all fields are stored <span class="keyword">in</span> little endian, <span class="keyword">if</span> not specified otherwise.</div></pre></td></tr></table></figure>
-</uint16_t></li>
+<li><uint16_t zllen="">用于记录ziplist中节点(entry)数量;</uint16_t></li>
+<li><uint8_t zlend="">用于表示ziplist的结尾,为定制 0xFF;</uint8_t></li>
 </ul>
-<p><uint32_t zlbytes=""> is an unsigned integer to hold the number of bytes that<br>*the ziplist occupies, including the four bytes of the zlbytes field itself.</uint32_t></p>
+</li>
+</ul>
+<h5 id="1-2-entry内存布局"><a href="#1-2-entry内存布局" class="headerlink" title="1.2.entry内存布局"></a>1.2.entry内存布局</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">           </div><div class="line"> |--------|----------|---------|</div><div class="line"> | prelen | encoding | content |</div><div class="line"> |--------|----------|---------|</div><div class="line"> |低地址  &lt;----------   高地址 |</div><div class="line"></div><div class="line">NOTE：a complete entry is stored like above.</div></pre></td></tr></table></figure>
+<h5 id="1-2-1-entry每个字段的含义"><a href="#1-2-1-entry每个字段的含义" class="headerlink" title="1.2.1 entry每个字段的含义:"></a>1.2.1 entry每个字段的含义:</h5><ul>
+<li><p>prevlen字段用于记录前一个ziplist节点(entry)的长度，该字段以字节为单位。</p>
 <ul>
-<li>This value needs to be stored to be able to resize the entire structure</li>
-<li>without the need to traverse it first.<br>*</li>
-<li><uint32_t zltail=""> is the offset to the last entry in the list. This allows</uint32_t></li>
-<li>a pop operation on the far side of the list without the need for full</li>
-<li>traversal.<br>*</li>
-<li><uint16_t zllen=""> is the number of entries. When there are more than</uint16_t></li>
-<li>2^16-2 entires, this value is set to 2^16-1 and we need to traverse the</li>
-<li>entire list to know how many items it holds.<br>*</li>
-<li><uint8_t zlend=""> is a special entry representing the end of the ziplist.</uint8_t></li>
-<li>Is encoded as a single byte equal to 255. No other normal entry starts</li>
-<li>with a byte set to the value of 255.<br>*</li>
-<li>ZIPLIST ENTRIES</li>
-<li>===============<br>*</li>
-<li>Every entry in the ziplist is prefixed by metadata that contains two pieces</li>
-<li>of information. First, the length of the previous entry is stored to be</li>
-<li>able to traverse the list from back to front. Second, the entry encoding is</li>
-<li>provided. It represents the entry type, integer or string, and in the case</li>
-<li>of strings it also represents the length of the string payload.</li>
-<li>So a complete entry is stored like this:<br>*</li>
-<li><prevlen> <encoding> <entry-data><br>*</entry-data></encoding></prevlen></li>
-<li>Sometimes the encoding represents the entry itself, like for small integers</li>
-<li>as we’ll see later. In such a case the <entry-data> part is missing, and we</entry-data></li>
-<li>could have just:<br>*</li>
-<li><prevlen> <encoding><br>*</encoding></prevlen></li>
-<li>The length of the previous entry, <prevlen>, is encoded in the following way:</prevlen></li>
-<li>If this length is smaller than 255 bytes, it will only consume a single</li>
-<li>byte representing the length as an unsinged 8 bit integer. When the length</li>
-<li>is greater than or equal to 255, it will consume 5 bytes. The first byte is</li>
-<li>set to 255 (FF) to indicate a larger value is following. The remaining 4</li>
-<li>bytes take the length of the previous entry as value.<br>*</li>
+<li>如果前一个节点的长度小于255个字节，则prelen属性的长度为1bytes，该字节用于保存前一个节点的长度；</li>
+<li>如果前一个节点的长度大于或等于255个字节，则prelen字段的长度为5bytes,其中第一个bytes为定制0xFF,之后的四个bytes用于保存前一个节点的长度；</li>
 </ul>
+</li>
+<li><p>encoding字段用于表示content字段所保存的数据的类型(string or int)以及content的长度。</p>
 </li>
 </ul>
 <h3 id="2-ziplist-c-源码分析"><a href="#2-ziplist-c-源码分析" class="headerlink" title="2.ziplist.c.源码分析"></a>2.ziplist.c.源码分析</h3><h4 id="4-参考文献"><a href="#4-参考文献" class="headerlink" title="4.参考文献"></a>4.参考文献</h4><ol>
@@ -160,7 +138,7 @@ var _hmt = _hmt || [];
         
   
   <div class="tags">
-    <a href="/tags/redis4-0/">redis4.0</a>, <a href="/tags/adlist/">adlist</a>, <a href="/tags/sourcecode/">sourcecode</a>
+    <a href="/tags/redis4-0/">redis4.0</a>, <a href="/tags/sourcecode/">sourcecode</a>, <a href="/tags/ziplist/">ziplist</a>
   </div>
 
 	
@@ -260,7 +238,7 @@ var duoshuoQuery = {short_name:"qinch"};
 <div class="widget tagcloud">
   <h3 class="title">标签云</h3>
   <div class="entry">
-    <a href="/tags/Asm/" style="font-size: 20px;">Asm</a> <a href="/tags/C/" style="font-size: 20px;">C</a> <a href="/tags/Cpp/" style="font-size: 17.5px;">Cpp</a> <a href="/tags/adlist/" style="font-size: 12.5px;">adlist</a> <a href="/tags/apue/" style="font-size: 12.5px;">apue</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/heap/" style="font-size: 10px;">heap</a> <a href="/tags/icp/" style="font-size: 10px;">icp</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/make/" style="font-size: 10px;">make</a> <a href="/tags/makefile/" style="font-size: 10px;">makefile</a> <a href="/tags/redis4-0/" style="font-size: 15px;">redis4.0</a> <a href="/tags/sds/" style="font-size: 10px;">sds</a> <a href="/tags/signal/" style="font-size: 10px;">signal</a> <a href="/tags/sort/" style="font-size: 10px;">sort</a> <a href="/tags/sourcecode/" style="font-size: 15px;">sourcecode</a> <a href="/tags/stl/" style="font-size: 12.5px;">stl</a> <a href="/tags/thread/" style="font-size: 10px;">thread</a> <a href="/tags/unpv2/" style="font-size: 10px;">unpv2</a> <a href="/tags/内存流/" style="font-size: 10px;">内存流</a> <a href="/tags/勘误/" style="font-size: 10px;">勘误</a>
+    <a href="/tags/Asm/" style="font-size: 20px;">Asm</a> <a href="/tags/C/" style="font-size: 20px;">C</a> <a href="/tags/Cpp/" style="font-size: 17.5px;">Cpp</a> <a href="/tags/adlist/" style="font-size: 10px;">adlist</a> <a href="/tags/apue/" style="font-size: 12.5px;">apue</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/heap/" style="font-size: 10px;">heap</a> <a href="/tags/icp/" style="font-size: 10px;">icp</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/make/" style="font-size: 10px;">make</a> <a href="/tags/makefile/" style="font-size: 10px;">makefile</a> <a href="/tags/redis4-0/" style="font-size: 15px;">redis4.0</a> <a href="/tags/sds/" style="font-size: 10px;">sds</a> <a href="/tags/signal/" style="font-size: 10px;">signal</a> <a href="/tags/sort/" style="font-size: 10px;">sort</a> <a href="/tags/sourcecode/" style="font-size: 15px;">sourcecode</a> <a href="/tags/stl/" style="font-size: 12.5px;">stl</a> <a href="/tags/thread/" style="font-size: 10px;">thread</a> <a href="/tags/unpv2/" style="font-size: 10px;">unpv2</a> <a href="/tags/ziplist/" style="font-size: 10px;">ziplist</a> <a href="/tags/内存流/" style="font-size: 10px;">内存流</a> <a href="/tags/勘误/" style="font-size: 10px;">勘误</a>
   </div>
 </div>
 
