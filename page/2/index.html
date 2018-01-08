@@ -87,11 +87,11 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2016/04/08/cpp-model-3/">C++对象模型-3</a></h1>
+    <h1 class="title"><a href="/2016/04/08/cpp-model-4/">基础类型的内存表示</a></h1>
 
  
 	
-	<time  datetime="2016-04-07T16:00:00.000Z"><p>发表于 2016-04-08 | 字数 <span class="post-count">65</span>
+	<time  datetime="2016-04-07T16:00:00.000Z"><p>发表于 2016-04-08 | 字数 <span class="post-count">532</span>
 
 </p></time>
       
@@ -105,20 +105,23 @@ var _hmt = _hmt || [];
 <li>编辑器 Cmd Markdown</li>
 <li>画图工具 Processon    </li>
 </ul>
-<h5 id="1-switch-if-else"><a href="#1-switch-if-else" class="headerlink" title="1,switch/if-else"></a>1,switch/if-else</h5><p><a href="http://chinchao.xyz/2016/04/07/cpp-model-2/">上一节</a> 数组的内存布局。本文准备介绍一下switch/if-else的实现机制。</p>
-<h6 id="1-1swich实现机制"><a href="#1-1swich实现机制" class="headerlink" title="1.1swich实现机制"></a>1.1swich实现机制</h6><h6 id="1-2-if-else实现机制"><a href="#1-2-if-else实现机制" class="headerlink" title="1.2 if-else实现机制"></a>1.2 if-else实现机制</h6><ul>
-<li>待续</li>
-</ul>
-
+<h5 id="1-基础类型内存表示"><a href="#1-基础类型内存表示" class="headerlink" title="1,基础类型内存表示"></a>1,基础类型内存表示</h5><p><a href="http://chinchao.xyz/2016/04/07/cpp-model-2/">上一节</a> 介绍了swich/if-else的实现机制。本文准备介绍一下基础类型的内存表示。</p>
+<h6 id="1-1大端法和小端法"><a href="#1-1大端法和小端法" class="headerlink" title="1.1大端法和小端法"></a>1.1大端法和小端法</h6><p>小端法，即数字的低位在低地址。大端法，即数字高位在低地址。大小端法的最小单位为byte,而不是bit.<br>举例：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">int i=-16;</div><div class="line">对应的小端法表示为（从低地址到高地址（从左到右为地址增长方向）对应的每个byte）：</div><div class="line">0xf0 ff ff ff </div><div class="line">大端法表示为（从低地址到高地址（从左到右为地址增长方向）对应的每个byte）：</div><div class="line">0x FF FF FF F0</div></pre></td></tr></table></figure></p>
+<p>在实际开发中，可以需要做大小端法互换，其代码如下：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">void swap1(int *rhs)</div><div class="line">&#123;</div><div class="line">    unsigned char *p=rhs;</div><div class="line">    unsigned char tmp;</div><div class="line">    tmp=p[0];</div><div class="line">    p[0]=[3];</div><div class="line">    p[3]=tmp;</div><div class="line"></div><div class="line">    tmp=p[1];</div><div class="line">    p[1]=[2];</div><div class="line">    p[2]=tmp;</div><div class="line">    <span class="built_in">return</span> ;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>在小端机上，如下程序的输出结果为-16.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">int <span class="function"><span class="title">main</span></span>()</div><div class="line">&#123;</div><div class="line">        int i;</div><div class="line">        unsigned char *p=(unsigned char*)&amp;i;</div><div class="line">        p[0]=0xF0;</div><div class="line">        p[1]=0XFF;</div><div class="line">        p[2]=0XFF;</div><div class="line">        p[3]=0Xff;</div><div class="line">        <span class="built_in">printf</span>(<span class="string">"%d\n"</span>,i);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
 		
 	
     </div>
     <footer>
       
         
+          <div class="alignleft">
+            <a href="/2016/04/08/cpp-model-4/#more" class="more-link">阅读全文</a>
+          </div>
+        
         
         <div class="alignright">
-          <a href="/2016/04/08/cpp-model-3/#comment" class="comment-link">评论</a>
+          <a href="/2016/04/08/cpp-model-4/#comment" class="comment-link">评论</a>
         </div>
         
       
@@ -542,11 +545,11 @@ var _hmt = _hmt || [];
   <ul class="entry">
     
       <li>
-        <a href="/2017/10/02/apue-erros/">APUE中文第三版勘误</a>
+        <a href="/2018/01/09/redis4-ziplist/">redis4.0_ziplist源码剖析</a>
       </li>
     
       <li>
-        <a href="/2017/04/19/thread_signal/">线程-信号</a>
+        <a href="/2017/10/02/apue-erros/">APUE中文第三版勘误</a>
       </li>
     
       <li>
@@ -554,11 +557,11 @@ var _hmt = _hmt || [];
       </li>
     
       <li>
-        <a href="/2017/04/07/unpv2-p25/">IPC-标识符重用</a>
+        <a href="/2017/04/19/thread_signal/">线程-信号</a>
       </li>
     
       <li>
-        <a href="/2016/10/19/ctoy-1/">奇怪的死循环</a>
+        <a href="/2017/04/07/unpv2-p25/">IPC-标识符重用</a>
       </li>
     
   </ul>

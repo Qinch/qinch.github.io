@@ -87,6 +87,90 @@ var _hmt = _hmt || [];
     <header>
       
 	
+    <h1 class="title"><a href="/2018/01/09/redis4-ziplist/">redis4.0_ziplist源码剖析</a></h1>
+
+ 
+	
+	<time  datetime="2018-01-08T16:44:41.000Z"><p>发表于 2018-01-09 | 字数 <span class="post-count">9,729</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<h3 id="1-ziplist"><a href="#1-ziplist" class="headerlink" title="1.ziplist"></a>1.ziplist</h3><h4 id="1-1-ziplist概述"><a href="#1-1-ziplist概述" class="headerlink" title="1.1.ziplist概述"></a>1.1.ziplist概述</h4><p> The ziplist is a specially encoded dually linked list that is designed to be very memory efficient. It stores both strings and integer values, where integers are encoded as actual integers(integer内存表示) instead of a series of characters（ASCII码）. It allows push and pop operations on either side of the list in O(1) time. However, because every operation requires a reallocation of the memory used by the ziplist, the actual complexity is related to the amount of memory used by the ziplist.</p>
+<h4 id="1-2-ziplist整体内存布局"><a href="#1-2-ziplist整体内存布局" class="headerlink" title="1.2.ziplist整体内存布局"></a>1.2.ziplist整体内存布局</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"> |-----------|----------|---------|---------|---------|----|----------|---------|</div><div class="line"> | &lt;zlbytes&gt; | &lt;zltail&gt; | &lt;zllen&gt; | &lt;entry0&gt;| &lt;entry1&gt;| ...| &lt;entryn&gt; | &lt;zlend&gt; |</div><div class="line"> |-----------|----------|---------|---------|---------|----|----------|---------|</div><div class="line"> |低地址            &lt;----------------------------                       高地址  |</div><div class="line"></div><div class="line">NOTE: all fields are stored <span class="keyword">in</span> little endian(即：低位在地地址，高位在高地址), <span class="keyword">if</span> not specified otherwise.</div></pre></td></tr></table></figure>
+<ul>
+<li>The general layout of the ziplist is as follows:<ul>
+<li><uint32_t zlbytes>用于记录整个ziplist占用的内存字节数；</li>
+<li><uint32_t zltail>用于记录最后一个节点(the last entry)的首地址距离ziplist首地址的偏移量;</li>
+<li><uint16_t zllen>用于记录ziplist中节点(entry)数量;</li>
+<li><uint8_t  zlend>用于表示ziplist的结尾,为定制 0xFF;</li>
+</ul>
+</li>
+</ul>
+<h5 id="1-2-ziplist中entry内存布局"><a href="#1-2-ziplist中entry内存布局" class="headerlink" title="1.2.ziplist中entry内存布局"></a>1.2.ziplist中entry内存布局</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">           </div><div class="line"> |--------|----------|---------|</div><div class="line"> | prelen | encoding | content |</div><div class="line"> |--------|----------|---------|</div><div class="line"> |低地址  &lt;----------   高地址 |</div><div class="line"></div><div class="line">NOTE：a complete entry is stored like above(content长度可能为0,即一个entry可能只有prelen和encoding字段，没有content字段).</div></pre></td></tr></table></figure>
+<h5 id="1-2-1-entry每个字段的含义"><a href="#1-2-1-entry每个字段的含义" class="headerlink" title="1.2.1 entry每个字段的含义:"></a>1.2.1 entry每个字段的含义:</h5><ul>
+<li>prevlen字段用于记录前一个ziplist节点(entry)的长度，该字段以字节为单位。<ul>
+<li>如果前一个节点的长度小于255个字节，则prelen属性的长度为1bytes，该字节用于保存前一个节点的长度；</li>
+<li>如果前一个节点的长度大于或等于255个字节，则prelen字段的长度为5bytes,其中第一个bytes为定制0xFF,之后的四个bytes用于保存前一个节点的长度；</li>
+</ul>
+</li>
+</ul>
+<h5 id="1-2-2-encoding字段的含义："><a href="#1-2-2-encoding字段的含义：" class="headerlink" title="1.2.2 encoding字段的含义："></a>1.2.2 encoding字段的含义：</h5><ul>
+<li>encoding字段用于表示content字段所保存的数据的类型(string or int)以及content的长度。</li>
+<li>encoding表示string类型及长度：<ul>
+<li>当encoding表示string类型时，encoding长度可能为1bytes,2bytes,5bytes,其中最低地址的头两个bits为非11（即(?? &amp; 11) &lt; 11）</li>
+<li>当encoding编码为 00bb bbbb（二进制） 时，encoding字段的长度为1bytes,content的长度小于等于0x3F的字节数组;</li>
+<li>当encoding编码为 01bb bbbb bbbb bbbb（二进制） 时，encoding字段的长度为2bytes（其中encoding中bb bbbb bbbb bbbb表示string的长度，即content的长度，采用big endian表示）,content的长度为小于等于0x3FFF的字节数组;</li>
+<li>当encoding编码为10<strong> __</strong> aaaa aaaa bbbb bbbb cccc cccc dddd dddd （二进制）时,encoding字段的长度为5bytes(其中encoding中aaaaaaaa bbbbbbbb cccccccc dddddddd表示string的长度,采用big endian表示),content的长度为小于等于0xFFFFFFFF的字节数组;</li>
+</ul>
+</li>
+<li>encoding表示int*_t类型及长度：<ul>
+<li>当encoding表示integer类型时,encoding字段的长度为1bytes，最低地址的头两个bits为11(即encoding为(11?? ????));</li>
+<li>当encoding的编码为 1100 0000(二进制)时,content的长度与2bytes,即表示int16_t类型</li>
+<li>当encoding的编码为 1101 0000(二进制)时,content的长度与4bytes,即表示int32_t类型</li>
+<li>当encoding的编码为 1110 0000(二进制)时,content的长度与8bytes,即表示int64_t类型</li>
+<li>当encoding的编码为 1110 0000(二进制)时,content的长度与3bytes,即表示int24_t类型</li>
+<li>当encoding的编码为 1111 1110(二进制)时,content的长度与1bytes,即表示int8_t类型</li>
+<li>当encoding的编码为 1100 xxxx(二进制)时,content的长度与0bytes,即表示immediate 4 bit integer,其中xxxx 4bits表示<a href="encoding的编码范围为1111 0001~1111 1101">0,12</a>;</li>
+<li>|11111111| - End of ziplist special entry.</li>
+</ul>
+</li>
+</ul>
+		
+	
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2018/01/09/redis4-ziplist/#more" class="more-link">阅读全文</a>
+          </div>
+        
+        
+        <div class="alignright">
+          <a href="/2018/01/09/redis4-ziplist/#comment" class="comment-link">评论</a>
+        </div>
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
     <h1 class="title"><a href="/2017/10/02/apue-erros/">APUE中文第三版勘误</a></h1>
 
  
@@ -115,6 +199,51 @@ var _hmt = _hmt || [];
         
         <div class="alignright">
           <a href="/2017/10/02/apue-erros/#comment" class="comment-link">评论</a>
+        </div>
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
+    <h1 class="title"><a href="/2017/04/19/mk/">Makefile</a></h1>
+
+ 
+	
+	<time  datetime="2017-04-18T16:00:00.000Z"><p>发表于 2017-04-19 | 字数 <span class="post-count">99</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<h4 id="1-makefile的规则"><a href="#1-makefile的规则" class="headerlink" title="1,makefile的规则"></a>1,makefile的规则</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">target ...: prerequisites ...</div><div class="line">	cmd</div><div class="line">	...</div><div class="line">	...</div><div class="line"></div><div class="line">其中，target可以是一个obj file,也可以是一个执行文件，还可以是一个label.</div><div class="line">prerequisites：为生成该target所依赖的文件或target</div><div class="line">cmd(必须以一个Tab键作为开头)：为target要执行的命令</div><div class="line">注：prerequisites中如果有一个以上的文件比target文件要新的话，cmd所定义的命令就会被执行。</div></pre></td></tr></table></figure>
+		
+	
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2017/04/19/mk/#more" class="more-link">阅读全文</a>
+          </div>
+        
+        
+        <div class="alignright">
+          <a href="/2017/04/19/mk/#comment" class="comment-link">评论</a>
         </div>
         
       
@@ -163,51 +292,6 @@ var _hmt = _hmt || [];
         
         <div class="alignright">
           <a href="/2017/04/19/thread_signal/#comment" class="comment-link">评论</a>
-        </div>
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
-    <h1 class="title"><a href="/2017/04/19/mk/">Makefile</a></h1>
-
- 
-	
-	<time  datetime="2017-04-18T16:00:00.000Z"><p>发表于 2017-04-19 | 字数 <span class="post-count">99</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<h4 id="1-makefile的规则"><a href="#1-makefile的规则" class="headerlink" title="1,makefile的规则"></a>1,makefile的规则</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">target ...: prerequisites ...</div><div class="line">	cmd</div><div class="line">	...</div><div class="line">	...</div><div class="line"></div><div class="line">其中，target可以是一个obj file,也可以是一个执行文件，还可以是一个label.</div><div class="line">prerequisites：为生成该target所依赖的文件或target</div><div class="line">cmd(必须以一个Tab键作为开头)：为target要执行的命令</div><div class="line">注：prerequisites中如果有一个以上的文件比target文件要新的话，cmd所定义的命令就会被执行。</div></pre></td></tr></table></figure>
-		
-	
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2017/04/19/mk/#more" class="more-link">阅读全文</a>
-          </div>
-        
-        
-        <div class="alignright">
-          <a href="/2017/04/19/mk/#comment" class="comment-link">评论</a>
         </div>
         
       
@@ -305,90 +389,6 @@ var _hmt = _hmt || [];
         
         <div class="alignright">
           <a href="/2016/10/19/ctoy-1/#comment" class="comment-link">评论</a>
-        </div>
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
-    <h1 class="title"><a href="/2016/10/03/redis4-ziplist/">redis4.0_ziplist源码剖析</a></h1>
-
- 
-	
-	<time  datetime="2016-10-02T16:00:00.000Z"><p>发表于 2016-10-03 | 字数 <span class="post-count">9,667</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<h3 id="1-ziplist"><a href="#1-ziplist" class="headerlink" title="1.ziplist"></a>1.ziplist</h3><h4 id="1-1-ziplist概述"><a href="#1-1-ziplist概述" class="headerlink" title="1.1.ziplist概述"></a>1.1.ziplist概述</h4><p> The ziplist is a specially encoded dually linked list that is designed to be very memory efficient. It stores both strings and integer values, where integers are encoded as actual integers(integer内存表示) instead of a series of characters（ASCII码）. It allows push and pop operations on either side of the list in O(1) time. However, because every operation requires a reallocation of the memory used by the ziplist, the actual complexity is related to the amount of memory used by the ziplist.</p>
-<h4 id="1-2-ziplist整体内存布局"><a href="#1-2-ziplist整体内存布局" class="headerlink" title="1.2.ziplist整体内存布局"></a>1.2.ziplist整体内存布局</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"> |-----------|----------|---------|---------|---------|----|----------|---------|</div><div class="line"> | &lt;zlbytes&gt; | &lt;zltail&gt; | &lt;zllen&gt; | &lt;entry0&gt;| &lt;entry1&gt;| ...| &lt;entryn&gt; | &lt;zlend&gt; |</div><div class="line"> |-----------|----------|---------|---------|---------|----|----------|---------|</div><div class="line"> |低地址            &lt;----------------------------                       高地址  |</div><div class="line"></div><div class="line">NOTE: all fields are stored <span class="keyword">in</span> little endian(即：低位在地地址，高位在高地址), <span class="keyword">if</span> not specified otherwise.</div></pre></td></tr></table></figure>
-<ul>
-<li>The general layout of the ziplist is as follows:<ul>
-<li><uint32_t zlbytes>用于记录整个ziplist占用的内存字节数；</li>
-<li><uint32_t zltail>用于记录最后一个节点(the last entry)的首地址距离ziplist首地址的偏移量;</li>
-<li><uint16_t zllen>用于记录ziplist中节点(entry)数量;</li>
-<li><uint8_t  zlend>用于表示ziplist的结尾,为定制 0xFF;</li>
-</ul>
-</li>
-</ul>
-<h5 id="1-2-ziplist中entry内存布局"><a href="#1-2-ziplist中entry内存布局" class="headerlink" title="1.2.ziplist中entry内存布局"></a>1.2.ziplist中entry内存布局</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">           </div><div class="line"> |--------|----------|---------|</div><div class="line"> | prelen | encoding | content |</div><div class="line"> |--------|----------|---------|</div><div class="line"> |低地址  &lt;----------   高地址 |</div><div class="line"></div><div class="line">NOTE：a complete entry is stored like above(content长度可能为0,即一个entry可能只有prelen和encoding字段，没有content字段).</div></pre></td></tr></table></figure>
-<h5 id="1-2-1-entry每个字段的含义"><a href="#1-2-1-entry每个字段的含义" class="headerlink" title="1.2.1 entry每个字段的含义:"></a>1.2.1 entry每个字段的含义:</h5><ul>
-<li>prevlen字段用于记录前一个ziplist节点(entry)的长度，该字段以字节为单位。<ul>
-<li>如果前一个节点的长度小于255个字节，则prelen属性的长度为1bytes，该字节用于保存前一个节点的长度；</li>
-<li>如果前一个节点的长度大于或等于255个字节，则prelen字段的长度为5bytes,其中第一个bytes为定制0xFF,之后的四个bytes用于保存前一个节点的长度；</li>
-</ul>
-</li>
-</ul>
-<h5 id="1-2-2-encoding字段的含义："><a href="#1-2-2-encoding字段的含义：" class="headerlink" title="1.2.2 encoding字段的含义："></a>1.2.2 encoding字段的含义：</h5><ul>
-<li>encoding字段用于表示content字段所保存的数据的类型(string or int)以及content的长度。</li>
-<li>encoding表示string类型及长度：<ul>
-<li>当encoding表示string类型时，encoding长度可能为1bytes,2bytes,5bytes,其中最低地址的头两个bits为非11（即(?? &amp; 11) &lt; 11）</li>
-<li>当encoding编码为 00bb bbbb（二进制） 时，encoding字段的长度为1bytes,content的长度小于等于0x3F的字节数组;</li>
-<li>当encoding编码为 01bb bbbb bbbb bbbb（二进制） 时，encoding字段的长度为2bytes（其中encoding中bb bbbb bbbb bbbb表示string的长度，即content的长度，采用big endian表示）,content的长度为小于等于0x3FFF的字节数组;</li>
-<li>当encoding编码为10<strong> __</strong> aaaa aaaa bbbb bbbb cccc cccc dddd dddd （二进制）时,encoding字段的长度为5bytes(其中encoding中aaaaaaaa bbbbbbbb cccccccc dddddddd表示string的长度,采用big endian表示),content的长度为小于等于0xFFFFFFFF的字节数组;</li>
-</ul>
-</li>
-<li>encoding表示int*_t类型及长度：<ul>
-<li>当encoding表示integer类型时,encoding字段的长度为1bytes，最低地址的头两个bits为11(即encoding为(11?? ????));</li>
-<li>当encoding的编码为 1100 0000(二进制)时,content的长度与2bytes,即表示int16_t类型</li>
-<li>当encoding的编码为 1101 0000(二进制)时,content的长度与4bytes,即表示int32_t类型</li>
-<li>当encoding的编码为 1110 0000(二进制)时,content的长度与8bytes,即表示int64_t类型</li>
-<li>当encoding的编码为 1110 0000(二进制)时,content的长度与3bytes,即表示int24_t类型</li>
-<li>当encoding的编码为 1111 1110(二进制)时,content的长度与1bytes,即表示int8_t类型</li>
-<li>当encoding的编码为 1100 xxxx(二进制)时,content的长度与0bytes,即表示immediate 4 bit integer,其中xxxx 4bits表示<a href="encoding的编码范围为1111 0001~1111 1101">0,12</a>;</li>
-<li>|11111111| - End of ziplist special entry.</li>
-</ul>
-</li>
-</ul>
-		
-	
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2016/10/03/redis4-ziplist/#more" class="more-link">阅读全文</a>
-          </div>
-        
-        
-        <div class="alignright">
-          <a href="/2016/10/03/redis4-ziplist/#comment" class="comment-link">评论</a>
         </div>
         
       
@@ -561,11 +561,11 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2016/04/08/cpp-model-4/">基础类型的内存表示</a></h1>
+    <h1 class="title"><a href="/2016/04/08/cpp-model-3/">C++对象模型-3</a></h1>
 
  
 	
-	<time  datetime="2016-04-07T16:00:00.000Z"><p>发表于 2016-04-08 | 字数 <span class="post-count">532</span>
+	<time  datetime="2016-04-07T16:00:00.000Z"><p>发表于 2016-04-08 | 字数 <span class="post-count">65</span>
 
 </p></time>
       
@@ -579,23 +579,20 @@ var _hmt = _hmt || [];
 <li>编辑器 Cmd Markdown</li>
 <li>画图工具 Processon    </li>
 </ul>
-<h5 id="1-基础类型内存表示"><a href="#1-基础类型内存表示" class="headerlink" title="1,基础类型内存表示"></a>1,基础类型内存表示</h5><p><a href="http://chinchao.xyz/2016/04/07/cpp-model-2/">上一节</a> 介绍了swich/if-else的实现机制。本文准备介绍一下基础类型的内存表示。</p>
-<h6 id="1-1大端法和小端法"><a href="#1-1大端法和小端法" class="headerlink" title="1.1大端法和小端法"></a>1.1大端法和小端法</h6><p>小端法，即数字的低位在低地址。大端法，即数字高位在低地址。大小端法的最小单位为byte,而不是bit.<br>举例：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">int i=-16;</div><div class="line">对应的小端法表示为（从低地址到高地址（从左到右为地址增长方向）对应的每个byte）：</div><div class="line">0xf0 ff ff ff </div><div class="line">大端法表示为（从低地址到高地址（从左到右为地址增长方向）对应的每个byte）：</div><div class="line">0x FF FF FF F0</div></pre></td></tr></table></figure></p>
-<p>在实际开发中，可以需要做大小端法互换，其代码如下：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">void swap1(int *rhs)</div><div class="line">&#123;</div><div class="line">    unsigned char *p=rhs;</div><div class="line">    unsigned char tmp;</div><div class="line">    tmp=p[0];</div><div class="line">    p[0]=[3];</div><div class="line">    p[3]=tmp;</div><div class="line"></div><div class="line">    tmp=p[1];</div><div class="line">    p[1]=[2];</div><div class="line">    p[2]=tmp;</div><div class="line">    <span class="built_in">return</span> ;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>在小端机上，如下程序的输出结果为-16.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">int <span class="function"><span class="title">main</span></span>()</div><div class="line">&#123;</div><div class="line">        int i;</div><div class="line">        unsigned char *p=(unsigned char*)&amp;i;</div><div class="line">        p[0]=0xF0;</div><div class="line">        p[1]=0XFF;</div><div class="line">        p[2]=0XFF;</div><div class="line">        p[3]=0Xff;</div><div class="line">        <span class="built_in">printf</span>(<span class="string">"%d\n"</span>,i);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h5 id="1-switch-if-else"><a href="#1-switch-if-else" class="headerlink" title="1,switch/if-else"></a>1,switch/if-else</h5><p><a href="http://chinchao.xyz/2016/04/07/cpp-model-2/">上一节</a> 数组的内存布局。本文准备介绍一下switch/if-else的实现机制。</p>
+<h6 id="1-1swich实现机制"><a href="#1-1swich实现机制" class="headerlink" title="1.1swich实现机制"></a>1.1swich实现机制</h6><h6 id="1-2-if-else实现机制"><a href="#1-2-if-else实现机制" class="headerlink" title="1.2 if-else实现机制"></a>1.2 if-else实现机制</h6><ul>
+<li>待续</li>
+</ul>
+
 		
 	
     </div>
     <footer>
       
         
-          <div class="alignleft">
-            <a href="/2016/04/08/cpp-model-4/#more" class="more-link">阅读全文</a>
-          </div>
-        
         
         <div class="alignright">
-          <a href="/2016/04/08/cpp-model-4/#comment" class="comment-link">评论</a>
+          <a href="/2016/04/08/cpp-model-3/#comment" class="comment-link">评论</a>
         </div>
         
       
@@ -622,11 +619,11 @@ var _hmt = _hmt || [];
   <ul class="entry">
     
       <li>
-        <a href="/2017/10/02/apue-erros/">APUE中文第三版勘误</a>
+        <a href="/2018/01/09/redis4-ziplist/">redis4.0_ziplist源码剖析</a>
       </li>
     
       <li>
-        <a href="/2017/04/19/thread_signal/">线程-信号</a>
+        <a href="/2017/10/02/apue-erros/">APUE中文第三版勘误</a>
       </li>
     
       <li>
@@ -634,11 +631,11 @@ var _hmt = _hmt || [];
       </li>
     
       <li>
-        <a href="/2017/04/07/unpv2-p25/">IPC-标识符重用</a>
+        <a href="/2017/04/19/thread_signal/">线程-信号</a>
       </li>
     
       <li>
-        <a href="/2016/10/19/ctoy-1/">奇怪的死循环</a>
+        <a href="/2017/04/07/unpv2-p25/">IPC-标识符重用</a>
       </li>
     
   </ul>
