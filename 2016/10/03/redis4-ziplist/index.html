@@ -90,7 +90,7 @@ var _hmt = _hmt || [];
 
  
 	
-	<time  datetime="2016-10-02T16:00:00.000Z"><p>发表于 2016-10-03 | 字数 <span class="post-count">417</span>
+	<time  datetime="2016-10-02T16:00:00.000Z"><p>发表于 2016-10-03 | 字数 <span class="post-count">1,072</span>
 
 </p></time>
       
@@ -109,16 +109,76 @@ var _hmt = _hmt || [];
 </ul>
 </li>
 </ul>
-<h5 id="1-2-entry内存布局"><a href="#1-2-entry内存布局" class="headerlink" title="1.2.entry内存布局"></a>1.2.entry内存布局</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">           </div><div class="line"> |--------|----------|---------|</div><div class="line"> | prelen | encoding | content |</div><div class="line"> |--------|----------|---------|</div><div class="line"> |低地址  &lt;----------   高地址 |</div><div class="line"></div><div class="line">NOTE：a complete entry is stored like above.</div></pre></td></tr></table></figure>
+<h5 id="1-2-entry内存布局"><a href="#1-2-entry内存布局" class="headerlink" title="1.2.entry内存布局"></a>1.2.entry内存布局</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">           </div><div class="line"> |--------|----------|---------|</div><div class="line"> | prelen | encoding | content |</div><div class="line"> |--------|----------|---------|</div><div class="line"> |低地址  &lt;----------   高地址 |</div><div class="line"></div><div class="line">NOTE：a complete entry is stored like above(content长度可能为0,即一个entry可能只有prelen和encoding字段，没有content字段).</div></pre></td></tr></table></figure>
 <h5 id="1-2-1-entry每个字段的含义"><a href="#1-2-1-entry每个字段的含义" class="headerlink" title="1.2.1 entry每个字段的含义:"></a>1.2.1 entry每个字段的含义:</h5><ul>
-<li><p>prevlen字段用于记录前一个ziplist节点(entry)的长度，该字段以字节为单位。</p>
-<ul>
+<li>prevlen字段用于记录前一个ziplist节点(entry)的长度，该字段以字节为单位。<ul>
 <li>如果前一个节点的长度小于255个字节，则prelen属性的长度为1bytes，该字节用于保存前一个节点的长度；</li>
 <li>如果前一个节点的长度大于或等于255个字节，则prelen字段的长度为5bytes,其中第一个bytes为定制0xFF,之后的四个bytes用于保存前一个节点的长度；</li>
 </ul>
 </li>
-<li><p>encoding字段用于表示content字段所保存的数据的类型(string or int)以及content的长度。</p>
+</ul>
+<h5 id="1-2-2-encoding字段的含义："><a href="#1-2-2-encoding字段的含义：" class="headerlink" title="1.2.2 encoding字段的含义："></a>1.2.2 encoding字段的含义：</h5><ul>
+<li>encoding字段用于表示content字段所保存的数据的类型(string or int)以及content的长度。</li>
+<li>encoding表示string类型及长度：<ul>
+<li>当encoding表示string类型时，encoding长度可能为1bytes,2bytes,5bytes,其中最低地址的头两个bits为非11（即(?? &amp; 11) &lt; 11）</li>
+<li>当encoding编码为 00bb bbbb 时，encoding字段的长度为1bytes,content的长度小于等于0x3F的字节数组;</li>
+<li>当encoding编码为 01bb bbbb bbbb bbbb 时，encoding字段的长度为2bytes（其中encoding中bb bbbb bbbb bbbb表示string的长度，即content的长度，采用big endian表示）,content的长度为小于等于0x3FFF的字节数组;</li>
+<li>当encoding编码为10<strong> __</strong> aaaa aaaa bbbb bbbb cccc cccc dddd dddd时,encoding字段的长度为5bytes(其中encoding中aaaaaaaa bbbbbbbb cccccccc dddddddd表示string的长度,采用big endian表示),content的长度为小于等于0xFFFFFFFF的字节数组;</li>
+</ul>
 </li>
+<li>encoding表示int*_t类型及长度：<ul>
+<li>当encoding表示integer类型时,encoding字段的长度为1bytes，最低地址的头两个bits为11(即encoding为(0x11?? ????));</li>
+</ul>
+</li>
+</ul>
+<p> *</p>
+<ul>
+<li>The encoding field of the entry depends on the content of the</li>
+<li>entry. When the entry is a string, the first 2 bits of the encoding first</li>
+<li>byte will hold the type of encoding used to store the length of the string,</li>
+<li>followed by the actual length of the string. When the entry is an integer</li>
+<li>the first 2 bits are both set to 1. The following 2 bits are used to specify</li>
+<li>what kind of integer will be stored after this header. An overview of the</li>
+<li>different types and encodings is as follows. The first byte is always enough</li>
+<li>to determine the kind of entry.<br>*</li>
+<li>|00pppppp| - 1 byte</li>
+<li>String value with length less than or equal to 63 bytes (6 bits).</li>
+<li>“pppppp” represents the unsigned 6 bit length.</li>
+<li>|01pppppp|qqqqqqqq| - 2 bytes</li>
+<li>String value with length less than or equal to 16383 bytes (14 bits).</li>
+<li>IMPORTANT: The 14 bit number is stored in big endian.</li>
+<li>|10000000|qqqqqqqq|rrrrrrrr|ssssssss|tttttttt| - 5 bytes</li>
+<li>String value with length greater than or equal to 16384 bytes.</li>
+<li>Only the 4 bytes following the first byte represents the length</li>
+<li>up to 32^2-1. The 6 lower bits of the first byte are not used and</li>
+<li>are set to zero.</li>
+<li>IMPORTANT: The 32 bit number is stored in big endian.</li>
+<li>|11000000| - 3 bytes</li>
+<li>Integer encoded as int16_t (2 bytes).</li>
+<li>|11010000| - 5 bytes</li>
+<li>Integer encoded as int32_t (4 bytes).</li>
+<li>|11100000| - 9 bytes</li>
+<li>Integer encoded as int64_t (8 bytes).</li>
+<li>|11110000| - 4 bytes</li>
+<li>Integer encoded as 24 bit signed (3 bytes).</li>
+<li>|11111110| - 2 bytes</li>
+<li>Integer encoded as 8 bit signed (1 byte).</li>
+<li>|1111xxxx| - (with xxxx between 0000 and 1101) immediate 4 bit integer.</li>
+<li>Unsigned integer from 0 to 12. The encoded value is actually from</li>
+<li>1 to 13 because 0000 and 1111 can not be used, so 1 should be</li>
+<li>subtracted from the encoded 4 bit value to obtain the right value.</li>
+<li>|11111111| - End of ziplist special entry.<br>*</li>
+<li>Like for the ziplist header, all the integers are represented in little</li>
+<li>endian byte order, even when this code is compiled in big endian systems.<br>*</li>
+<li>EXAMPLES OF ACTUAL ZIPLISTS</li>
+<li>===========================<br>*</li>
+<li>The following is a ziplist containing the two elements representing</li>
+<li>the strings “2” and “5”. It is composed of 15 bytes, that we visually</li>
+<li>split into sections:<br>*</li>
+<li>[0f 00 00 00] [0c 00 00 00] [02 00] [00 f3] [02 f6] [ff]</li>
+<li>|             |          |       |       |     |</li>
+<li>zlbytes        zltail    entries   “2”     “5”   end<br>*</li>
+<li>The first 4 bytes represent the number 15, that is the number of b</li>
 </ul>
 <h3 id="2-ziplist-c-源码分析"><a href="#2-ziplist-c-源码分析" class="headerlink" title="2.ziplist.c.源码分析"></a>2.ziplist.c.源码分析</h3><h4 id="4-参考文献"><a href="#4-参考文献" class="headerlink" title="4.参考文献"></a>4.参考文献</h4><ol>
 <li>《Redis设计与实现》</li>
