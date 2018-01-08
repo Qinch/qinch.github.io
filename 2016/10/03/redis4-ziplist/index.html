@@ -4,7 +4,7 @@
 
   <meta charset="utf-8">
   
-  <title>Just For Fun</title>
+  <title>redis4.0_ziplist源码剖析 | Just For Fun</title>
   <meta name="author" content="qinchao">
   
   <meta name="description" content="qinchao&#39;s blog">
@@ -12,7 +12,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-  
+  <meta property="og:title" content="redis4.0_ziplist源码剖析"/>
   <meta property="og:site_name" content="Just For Fun"/>
 
   
@@ -81,250 +81,12 @@ var _hmt = _hmt || [];
 
 </header>
   <div id="content" class="inner">
-    <div id="main-col" class="alignleft"><div id="wrapper">
-  <article class="post">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
   <div class="post-content">
     <header>
       
 	
-    <h1 class="title"><a href="/2017/10/02/apue-erros/">APUE中文第三版勘误</a></h1>
-
- 
-	
-	<time  datetime="2017-10-01T16:00:00.000Z"><p>发表于 2017-10-02 | 字数 <span class="post-count">150</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<p>本博客根据自己对APUE中文第三版的阅读理解，列出其中自己认为翻译错误或者翻译有歧义的部分。</p>
-<h4 id="1-page81"><a href="#1-page81" class="headerlink" title="1,page81"></a>1,page81</h4><p>中文：其中，如果测试文件是否已经存在，mode就为F_OK；否则mode是图4-7中所列常量的按位或。<br>英文(page102)：The mode is either the value F_OK to test if a file exists, or the bitwise OR of any of the flags shown in Figure 4.7.</p>
-<h4 id="2-page89"><a href="#2-page89" class="headerlink" title="2,page89"></a>2,page89</h4><p>中文：对于符号链接，文件长度是在文件名中的实际字节数。<br>英文(page111):For a symbolic link, the file size is the numberof bytes in the filename.<br>
-		
-	
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2017/10/02/apue-erros/#more" class="more-link">阅读全文</a>
-          </div>
-        
-        
-        <div class="alignright">
-          <a href="/2017/10/02/apue-erros/#comment" class="comment-link">评论</a>
-        </div>
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
-    <h1 class="title"><a href="/2017/04/19/thread_signal/">线程-信号</a></h1>
-
- 
-	
-	<time  datetime="2017-04-18T16:00:00.000Z"><p>发表于 2017-04-19 | 字数 <span class="post-count">218</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<h4 id="1-线程与信号"><a href="#1-线程与信号" class="headerlink" title="1,线程与信号"></a>1,线程与信号</h4><ol>
-<li>每个线程都有自己的信号屏蔽字，但是信号的处理是先进程中所有线程共享的。这就意味着单个线程可以阻止某些信号，但当某个线程修改了与某个给定信号相关的处理行为以后，所有的线程都必须共享这个处理行为的改变。</li>
-<li>进程中的信号是递送给单个线程的。（Signals are delivered to a single thread in the process. If the signal is related to a hardware fault, the signal is usually sent to the thread whose action caused the event. Other signals, on the other hand, are delivered to an arbitrary thread.)对于该句的理解是：因为进程中所有线程共享信号的处理，所以发送给任意进程（只要该进程没有屏蔽该信号），对该信号的处理都是相同的。</li>
-</ol>
-		
-	
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2017/04/19/thread_signal/#more" class="more-link">阅读全文</a>
-          </div>
-        
-        
-        <div class="alignright">
-          <a href="/2017/04/19/thread_signal/#comment" class="comment-link">评论</a>
-        </div>
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
-    <h1 class="title"><a href="/2017/04/19/mk/">Makefile</a></h1>
-
- 
-	
-	<time  datetime="2017-04-18T16:00:00.000Z"><p>发表于 2017-04-19 | 字数 <span class="post-count">99</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<h4 id="1-makefile的规则"><a href="#1-makefile的规则" class="headerlink" title="1,makefile的规则"></a>1,makefile的规则</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">target ...: prerequisites ...</div><div class="line">	cmd</div><div class="line">	...</div><div class="line">	...</div><div class="line"></div><div class="line">其中，target可以是一个obj file,也可以是一个执行文件，还可以是一个label.</div><div class="line">prerequisites：为生成该target所依赖的文件或target</div><div class="line">cmd(必须以一个Tab键作为开头)：为target要执行的命令</div><div class="line">注：prerequisites中如果有一个以上的文件比target文件要新的话，cmd所定义的命令就会被执行。</div></pre></td></tr></table></figure>
-		
-	
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2017/04/19/mk/#more" class="more-link">阅读全文</a>
-          </div>
-        
-        
-        <div class="alignright">
-          <a href="/2017/04/19/mk/#comment" class="comment-link">评论</a>
-        </div>
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
-    <h1 class="title"><a href="/2017/04/07/unpv2-p25/">IPC-标识符重用</a></h1>
-
- 
-	
-	<time  datetime="2017-04-06T16:00:00.000Z"><p>发表于 2017-04-07 | 字数 <span class="post-count">664</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<h5 id="1-槽位使用情况序列号"><a href="#1-槽位使用情况序列号" class="headerlink" title="1,槽位使用情况序列号"></a>1,槽位使用情况序列号</h5><p>ipc_perm结构中含有一个名为seq的变量，是一个槽位使用情况序列号。该变量是一个由内核为系统中每个潜在的IPC对象维持的计数器。每当删除一个IPC对象时，内核就递增相应槽位的使用情况序列号，若溢出则循环回0.</p>
-<p>简单理解就是: 存在ipc_perm[max]，当创建ipc对象时，在ipc_perm数组中查找第一个ipc_perm元素为空，记为ipc_perm[i].当删除ipc_perm[i]对应的ipc时，ipc_perm[i].seq++,下次再次创建ipc对象时，假设ipc_perm[i]元素为空，则返回ipc id为i+ipc_perm[i].seq*max.<br>注：槽位使用情况序列号是一个跨进程保持的内核变量。</p>
-<h4 id="2，示例代码"><a href="#2，示例代码" class="headerlink" title="2，示例代码"></a>2，示例代码</h4><h5 id="2-1-创建ipc，然后立即删除该ipc"><a href="#2-1-创建ipc，然后立即删除该ipc" class="headerlink" title="2.1 创建ipc，然后立即删除该ipc"></a>2.1 创建ipc，然后立即删除该ipc</h5><p>对应的源码：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">/*************************************************************************</div><div class="line"> &gt; File Name: p26_1.c</div><div class="line"> &gt; Author: qinchao</div><div class="line"> &gt; Mail: 1187620726@qq.com</div><div class="line"> &gt; Created Date:2017-04-07 Time:11:02:25.</div><div class="line"> ************************************************************************/</div><div class="line"><span class="comment">#include&lt;stdio.h&gt;</span></div><div class="line"><span class="comment">#include&lt;sys/msg.h&gt;</span></div><div class="line"><span class="comment">#include&lt;sys/types.h&gt;</span></div><div class="line"></div><div class="line">int <span class="function"><span class="title">main</span></span>()</div><div class="line">&#123;</div><div class="line">        int i,msgid;</div><div class="line">        <span class="keyword">for</span>(i=0;i&lt;10;i++)</div><div class="line">        &#123;</div><div class="line">                msgid=msgget(IPC_PRIVATE,0666|IPC_CREAT);</div><div class="line">                <span class="built_in">printf</span>(<span class="string">"msgid=%d\n"</span>,msgid);</div><div class="line">                msgctl(msgid,IPC_RMID,NULL);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="built_in">return</span> 0;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>对应的结果：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">bogon:unp qinchao$ gcc p26_1.c  -o p26_1</div><div class="line">bogon:unp qinchao$ ./p26_1 </div><div class="line">msgid=196608</div><div class="line">msgid=262144</div><div class="line">msgid=327680</div><div class="line">msgid=393216</div><div class="line">msgid=458752</div><div class="line">msgid=524288</div><div class="line">msgid=589824</div><div class="line">msgid=655360</div><div class="line">msgid=720896</div><div class="line">msgid=786432</div><div class="line">bogon:unp qinchao$</div></pre></td></tr></table></figure>
-<p>即：创建ipc1之后，ipc_perm[0]维护该ipc对象的相关信息，然后删除ipc1，ipc_perm[0].seq++;当创建ipc2时，仍然是ipc_perm[0]维护ipc2相关信息。<br>
-		
-	
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2017/04/07/unpv2-p25/#more" class="more-link">阅读全文</a>
-          </div>
-        
-        
-        <div class="alignright">
-          <a href="/2017/04/07/unpv2-p25/#comment" class="comment-link">评论</a>
-        </div>
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
-    <h1 class="title"><a href="/2016/10/19/ctoy-1/">奇怪的死循环</a></h1>
-
- 
-	
-	<time  datetime="2016-10-18T16:00:00.000Z"><p>发表于 2016-10-19 | 字数 <span class="post-count">186</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#include&lt;stdio.h&gt;</span></div><div class="line">int <span class="function"><span class="title">main</span></span>()</div><div class="line">&#123;</div><div class="line">    int i;</div><div class="line">    int a[10];</div><div class="line">    <span class="keyword">for</span>(i=0;i&lt;=10;++i)</div><div class="line">    &#123;</div><div class="line">        a[i]=0;</div><div class="line">        <span class="built_in">printf</span>(<span class="string">"%d\n"</span>,a[i]);</div><div class="line">    &#125;</div><div class="line">    <span class="built_in">return</span> 0;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>该程序对应的汇编代码见如下代码:<br>
-		
-	
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2016/10/19/ctoy-1/#more" class="more-link">阅读全文</a>
-          </div>
-        
-        
-        <div class="alignright">
-          <a href="/2016/10/19/ctoy-1/#comment" class="comment-link">评论</a>
-        </div>
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
-    <h1 class="title"><a href="/2016/10/03/redis4-ziplist/">redis4.0_ziplist源码剖析</a></h1>
+    <h1 class="title">redis4.0_ziplist源码剖析</h1>
 
  
 	
@@ -335,8 +97,8 @@ var _hmt = _hmt || [];
     </header>
     <div class="entry">
       
-		
-			<h3 id="1-ziplist"><a href="#1-ziplist" class="headerlink" title="1.ziplist"></a>1.ziplist</h3><h4 id="1-1-ziplist概述"><a href="#1-1-ziplist概述" class="headerlink" title="1.1.ziplist概述"></a>1.1.ziplist概述</h4><p> The ziplist is a specially encoded dually linked list that is designed to be very memory efficient. It stores both strings and integer values, where integers are encoded as actual integers(integer内存表示) instead of a series of characters（ASCII码）. It allows push and pop operations on either side of the list in O(1) time. However, because every operation requires a reallocation of the memory used by the ziplist, the actual complexity is related to the amount of memory used by the ziplist.</p>
+		  
+		<h3 id="1-ziplist"><a href="#1-ziplist" class="headerlink" title="1.ziplist"></a>1.ziplist</h3><h4 id="1-1-ziplist概述"><a href="#1-1-ziplist概述" class="headerlink" title="1.1.ziplist概述"></a>1.1.ziplist概述</h4><p> The ziplist is a specially encoded dually linked list that is designed to be very memory efficient. It stores both strings and integer values, where integers are encoded as actual integers(integer内存表示) instead of a series of characters（ASCII码）. It allows push and pop operations on either side of the list in O(1) time. However, because every operation requires a reallocation of the memory used by the ziplist, the actual complexity is related to the amount of memory used by the ziplist.</p>
 <h4 id="1-2-ziplist整体内存布局"><a href="#1-2-ziplist整体内存布局" class="headerlink" title="1.2.ziplist整体内存布局"></a>1.2.ziplist整体内存布局</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"> |-----------|----------|---------|---------|---------|----|----------|---------|</div><div class="line"> | &lt;zlbytes&gt; | &lt;zltail&gt; | &lt;zllen&gt; | &lt;entry0&gt;| &lt;entry1&gt;| ...| &lt;entryn&gt; | &lt;zlend&gt; |</div><div class="line"> |-----------|----------|---------|---------|---------|----|----------|---------|</div><div class="line"> |低地址            &lt;----------------------------                       高地址  |</div><div class="line"></div><div class="line">NOTE: all fields are stored <span class="keyword">in</span> little endian(即：低位在地地址，高位在高地址), <span class="keyword">if</span> not specified otherwise.</div></pre></td></tr></table></figure>
 <ul>
 <li>The general layout of the ziplist is as follows:<ul>
@@ -382,17 +144,23 @@ var _hmt = _hmt || [];
 <li>《<a href="https://github.com/Qinch/redis_reading/tree/4.0/src" target="_blank" rel="external">redis_reading</a>》</li>
 </ol>
 
-		
 	
     </div>
     <footer>
       
         
+  
+  <div class="categories">
+    <a href="/categories/redis/">redis</a>
+  </div>
+
         
-        <div class="alignright">
-          <a href="/2016/10/03/redis4-ziplist/#comment" class="comment-link">评论</a>
-        </div>
-        
+  
+  <div class="tags">
+    <a href="/tags/redis4-0/">redis4.0</a>, <a href="/tags/sourcecode/">sourcecode</a>, <a href="/tags/ziplist/">ziplist</a>
+  </div>
+
+	
       
     
       <div class="clearfix"></div>
@@ -401,221 +169,30 @@ var _hmt = _hmt || [];
 </article>
 
 
+<section id="comment">
+<!-- Duoshuo Comment BEGIN -->
+	<div class="ds-thread"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"qinch"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = 'http://static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		|| document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- Duoshuo Comment END -->  
 
 
 
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
-    <h1 class="title"><a href="/2016/10/02/redis4-adlist/">redis4.0_adlist</a></h1>
-
- 
-	
-	<time  datetime="2016-10-01T16:00:00.000Z"><p>发表于 2016-10-02 | 字数 <span class="post-count">32</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<h4 id="1-adlist介绍"><a href="#1-adlist介绍" class="headerlink" title="1.adlist介绍"></a>1.adlist介绍</h4><h4 id="2-adlist-h源码分析"><a href="#2-adlist-h源码分析" class="headerlink" title="2.adlist.h源码分析"></a>2.adlist.h源码分析</h4><h4 id="3-addlist-c-源码分析"><a href="#3-addlist-c-源码分析" class="headerlink" title="3.addlist.c.源码分析"></a>3.addlist.c.源码分析</h4><h4 id="4-参考文献"><a href="#4-参考文献" class="headerlink" title="4.参考文献"></a>4.参考文献</h4><ol>
-<li>《Redis设计与实现》</li>
-<li>《<a href="https://github.com/Qinch/redis_reading/tree/4.0/src" target="_blank" rel="external">redis_reading</a>》</li>
-</ol>
-
-		
-	
-    </div>
-    <footer>
-      
-        
-        
-        <div class="alignright">
-          <a href="/2016/10/02/redis4-adlist/#comment" class="comment-link">评论</a>
-        </div>
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
+</section>
 
 
 
 
 
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
-    <h1 class="title"><a href="/2016/10/01/redis4-sds/">redis4.0_sds</a></h1>
-
- 
-	
-	<time  datetime="2016-09-30T16:00:00.000Z"><p>发表于 2016-10-01 | 字数 <span class="post-count">1,343</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<h4 id="1-sds介绍"><a href="#1-sds介绍" class="headerlink" title="1.sds介绍"></a>1.sds介绍</h4><ol>
-<li>sds:Simple Dynamic String即简单动态字符串，为redis的默认字符串表示。</li>
-</ol>
-<h4 id="2-sds-h源码分析"><a href="#2-sds-h源码分析" class="headerlink" title="2.sds.h源码分析"></a>2.sds.h源码分析</h4><ol>
-<li><p>sds结构体的内存布局</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">/*    0长度数组的妙用</div><div class="line"> *    ----------------</div><div class="line"> *    |    len       |</div><div class="line"> *    |——————————————|</div><div class="line"> *    |    alloc     |</div><div class="line"> *    |——————————————|</div><div class="line"> *    |    flags     |</div><div class="line"> *    |——————————————|&lt;----buf</div><div class="line"> *    |    buf[0~n]  |</div><div class="line"> *    |     .        |</div><div class="line"> *    |     .        |</div><div class="line">      |     .        |</div><div class="line"> *    |——————————————|</div><div class="line"> */</div></pre></td></tr></table></figure>
-</li>
-<li><p>sds结构体的定义</p>
-</li>
-<li><p>sds结构体定义在src/sds.h，其中根据buf[]中字符串的长度来选择不同的sds结构体</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div></pre></td><td class="code"><pre><div class="line">typedef char *sds;</div><div class="line"></div><div class="line">/* Note: sdshdr5 is never used, we just access the flags byte directly.</div><div class="line"> * However is here to document the layout of <span class="built_in">type</span> 5 SDS strings. */</div><div class="line">//sdshdr5与其他sds结构体的区别是：没有alloc字段，即无法获得free=alloc-len</div><div class="line">//sdshdr5中flags字段的低3bits表示sds类型，高5bits位buf的length字段</div><div class="line">struct __attribute__ ((__packed__)) sdshdr5 &#123;</div><div class="line">    unsigned char flags; /* 3 lsb of <span class="built_in">type</span>, and 5 msb of string length */</div><div class="line">    char buf[];//等价于char buf[0];</div><div class="line">&#125;;</div><div class="line">struct __attribute__ ((__packed__)) sdshdr8 &#123;</div><div class="line">    uint8_t len; /* used */</div><div class="line">    uint8_t alloc; /* excluding the header and null terminator */</div><div class="line">    unsigned char flags; /* 3 lsb of <span class="built_in">type</span>, 5 unused bits */</div><div class="line">	//0长度数组 char buf[]等价于char buf[0]</div><div class="line">    char buf[];</div><div class="line">&#125;;</div><div class="line">struct __attribute__ ((__packed__)) sdshdr16 &#123;</div><div class="line">    uint16_t len; /* used */</div><div class="line">    uint16_t alloc; /* excluding the header and null terminator */</div><div class="line">    unsigned char flags; /* 3 lsb of <span class="built_in">type</span>, 5 unused bits */</div><div class="line">    char buf[];</div><div class="line">&#125;;</div><div class="line">struct __attribute__ ((__packed__)) sdshdr32 &#123;</div><div class="line">    uint32_t len; /* used */</div><div class="line">    uint32_t alloc; /* excluding the header and null terminator */</div><div class="line">    unsigned char flags; /* 3 lsb of <span class="built_in">type</span>, 5 unused bits */</div><div class="line">    char buf[];</div><div class="line">&#125;;</div><div class="line">struct __attribute__ ((__packed__)) sdshdr64 &#123;</div><div class="line">    uint64_t len; /* used */</div><div class="line">    uint64_t alloc; /* excluding the header and null terminator */</div><div class="line">	//sdsnhdr的类型</div><div class="line">    unsigned char flags; /* 3 lsb of <span class="built_in">type</span>, 5 unused bits */</div><div class="line">    char buf[];</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
-</li>
-<li><p>sds.h中相关函数</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div></pre></td><td class="code"><pre><div class="line">//返回sds的已使用空间字节数即：sds结构体中的len字段</div><div class="line">//函数的参数s为sds结构体中buf[]的首地址</div><div class="line">static inline size_t sdslen(const sds s) &#123;</div><div class="line">	//s[-1]即:*(s-1)</div><div class="line">    unsigned char flags = s[-1];</div><div class="line">	//判断结构体的类型</div><div class="line">    switch(flags&amp;SDS_TYPE_MASK) &#123;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_5:</div><div class="line">            <span class="built_in">return</span> SDS_TYPE_5_LEN(flags);//高5bits表示buf len</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_8:</div><div class="line">            <span class="built_in">return</span> __SDS_HR(8,s)-&gt;len;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_16:</div><div class="line">            <span class="built_in">return</span> SDS_HDR(16,s)-&gt;len;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_32:</div><div class="line">            <span class="built_in">return</span> SDS_HDR(32,s)-&gt;len;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_64:</div><div class="line">            <span class="built_in">return</span> SDS_HDR(64,s)-&gt;len;</div><div class="line">    &#125;</div><div class="line">    <span class="built_in">return</span> 0;</div><div class="line">&#125;</div><div class="line"></div><div class="line">//获取可用的buf空间大小，即：free = alloc-len</div><div class="line">static inline size_t sdsavail(const sds s) &#123;</div><div class="line">    unsigned char flags = s[-1];</div><div class="line">    switch(flags&amp;SDS_TYPE_MASK) &#123;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_5: &#123;</div><div class="line">            <span class="built_in">return</span> 0;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_8: &#123;</div><div class="line">            SDS_HDR_VAR(8,s);</div><div class="line">            <span class="built_in">return</span> sh-&gt;alloc - sh-&gt;len;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_16: &#123;</div><div class="line">            SDS_HDR_VAR(16,s);</div><div class="line">            <span class="built_in">return</span> sh-&gt;alloc - sh-&gt;len;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_32: &#123;</div><div class="line">            SDS_HDR_VAR(32,s);</div><div class="line">            <span class="built_in">return</span> sh-&gt;alloc - sh-&gt;len;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_64: &#123;</div><div class="line">            SDS_HDR_VAR(64,s);</div><div class="line">            <span class="built_in">return</span> sh-&gt;alloc - sh-&gt;len;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    <span class="built_in">return</span> 0;</div><div class="line">&#125;</div><div class="line">//设置sds结构体len</div><div class="line">static inline void sdssetlen(sds s, size_t newlen) &#123;</div><div class="line">    unsigned char flags = s[-1];</div><div class="line">    switch(flags&amp;SDS_TYPE_MASK) &#123;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_5:</div><div class="line">            &#123;</div><div class="line">                unsigned char *fp = ((unsigned char*)s)-1;</div><div class="line">                *fp = SDS_TYPE_5 | (newlen &lt;&lt; SDS_TYPE_BITS);</div><div class="line">            &#125;</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_8:</div><div class="line">            SDS_HDR(8,s)-&gt;len = newlen;</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_16:</div><div class="line">            SDS_HDR(16,s)-&gt;len = newlen;</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_32:</div><div class="line">            SDS_HDR(32,s)-&gt;len = newlen;</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_64:</div><div class="line">            SDS_HDR(64,s)-&gt;len = newlen;</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">static inline void sdsinclen(sds s, size_t inc) &#123;</div><div class="line">    unsigned char flags = s[-1];</div><div class="line">    switch(flags&amp;SDS_TYPE_MASK) &#123;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_5:</div><div class="line">            &#123;</div><div class="line">                unsigned char *fp = ((unsigned char*)s)-1;</div><div class="line">                unsigned char newlen = SDS_TYPE_5_LEN(flags)+inc;</div><div class="line">                *fp = SDS_TYPE_5 | (newlen &lt;&lt; SDS_TYPE_BITS);</div><div class="line">            &#125;</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_8:</div><div class="line">            SDS_HDR(8,s)-&gt;len += inc;</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_16:</div><div class="line">            SDS_HDR(16,s)-&gt;len += inc;</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_32:</div><div class="line">            SDS_HDR(32,s)-&gt;len += inc;</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_64:</div><div class="line">            SDS_HDR(64,s)-&gt;len += inc;</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line">//alloc不包括\0</div><div class="line">/* sdsalloc() = sdsavail() + sdslen() */</div><div class="line">static inline size_t sdsalloc(const sds s) &#123;</div><div class="line">    unsigned char flags = s[-1];</div><div class="line">    switch(flags&amp;SDS_TYPE_MASK) &#123;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_5:</div><div class="line">            <span class="built_in">return</span> SDS_TYPE_5_LEN(flags);</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_8:</div><div class="line">            <span class="built_in">return</span> SDS_HDR(8,s)-&gt;alloc;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_16:</div><div class="line">            <span class="built_in">return</span> SDS_HDR(16,s)-&gt;alloc;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_32:</div><div class="line">            <span class="built_in">return</span> SDS_HDR(32,s)-&gt;alloc;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_64:</div><div class="line">            <span class="built_in">return</span> SDS_HDR(64,s)-&gt;alloc;</div><div class="line">    &#125;</div><div class="line">    <span class="built_in">return</span> 0;</div><div class="line">&#125;</div><div class="line"></div><div class="line">//设置sds中alloc字段为newlen</div><div class="line">static inline void sdssetalloc(sds s, size_t newlen) &#123;</div><div class="line">    unsigned char flags = s[-1];</div><div class="line">    switch(flags&amp;SDS_TYPE_MASK) &#123;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_5:</div><div class="line">            /* Nothing to <span class="keyword">do</span>, this <span class="built_in">type</span> has no total allocation info. */</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_8:</div><div class="line">            SDS_HDR(8,s)-&gt;alloc = newlen;</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_16:</div><div class="line">            SDS_HDR(16,s)-&gt;alloc = newlen;</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_32:</div><div class="line">            SDS_HDR(32,s)-&gt;alloc = newlen;</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_64:</div><div class="line">            SDS_HDR(64,s)-&gt;alloc = newlen;</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-</ol>
-		
-	
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2016/10/01/redis4-sds/#more" class="more-link">阅读全文</a>
-          </div>
-        
-        
-        <div class="alignright">
-          <a href="/2016/10/01/redis4-sds/#comment" class="comment-link">评论</a>
-        </div>
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
-    <h1 class="title"><a href="/2016/04/09/cpp-model-5/">C++对象模型-关于对象</a></h1>
-
- 
-	
-	<time  datetime="2016-04-08T16:00:00.000Z"><p>发表于 2016-04-09 | 字数 <span class="post-count">1,396</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<h5 id="开发环境"><a href="#开发环境" class="headerlink" title="开发环境"></a>开发环境</h5><ul>
-<li>Ubuntu 14.04(32bits)</li>
-<li>GCC      </li>
-<li>编辑器 Cmd Markdown</li>
-<li>画图工具 Processon    </li>
-</ul>
-<h5 id="1-关于对象"><a href="#1-关于对象" class="headerlink" title="1,关于对象"></a>1,关于对象</h5><p>从这篇博客开始真正介绍C++对象模型，前边BB了那么多没用的，终于开始了C++对模型的分析。关于C++对象模型的介绍，我将根据《深度探索C++对象模型》这本书，其书中的每一章，对应一篇博客，博客内容为自己对这本书的理解和补充吧。</p>
-<h6 id="1-1C语言中的struct"><a href="#1-1C语言中的struct" class="headerlink" title="1.1C语言中的struct"></a>1.1C语言中的struct</h6><p>我们知道，C语言是面向过程的，即数据和处理数据的函数时分开的，也就是说，struct中不能包含函数（当然也不能包含static变量）。但是我们可以在struct中声明指向函数的指针来模拟数据和处理数据的函数指针。其中，需要指出的是，c语言中struct变量的数据成员的访问方式都是基于该结构体变量的首地址的偏移量来访问的（同样适用于C++中的class/struct）。<br>即，见如下代码:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#include&lt;stdio.h&gt;</span></div><div class="line"></div><div class="line">struct point3d;</div><div class="line">typedef void (*initfun)(struct point3d*);</div><div class="line"></div><div class="line">struct point3d&#123;</div><div class="line">        <span class="built_in">float</span> x;</div><div class="line">        <span class="built_in">float</span> y;</div><div class="line">        <span class="built_in">float</span> z;</div><div class="line">        initfun init;//指向初始化数据函数的指针</div><div class="line">&#125;;</div><div class="line">void initp(struct point3d* p3d) //struct point3d变量初始化函数</div><div class="line">&#123;</div><div class="line">        p3d-&gt;x=1;</div><div class="line">        p3d-&gt;y=2;</div><div class="line">        p3d-&gt;z=3;</div><div class="line">        <span class="built_in">printf</span>(<span class="string">"%f %f %f\n"</span>,p3d-&gt;x,p3d-&gt;y,p3d-&gt;z);</div><div class="line">        <span class="built_in">return</span>;</div><div class="line">&#125;</div><div class="line"></div><div class="line">int <span class="function"><span class="title">main</span></span>()</div><div class="line">&#123;</div><div class="line">        struct point3d pd;</div><div class="line">        pd.init=initp;//将initp函数地址赋给结构体中指向函数的指针pd.init。</div><div class="line">        pd.init(&amp;pd);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-		
-	
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2016/04/09/cpp-model-5/#more" class="more-link">阅读全文</a>
-          </div>
-        
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
-    <h1 class="title"><a href="/2016/04/08/cpp-model-4/">基础类型的内存表示</a></h1>
-
- 
-	
-	<time  datetime="2016-04-07T16:00:00.000Z"><p>发表于 2016-04-08 | 字数 <span class="post-count">532</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<h5 id="开发环境"><a href="#开发环境" class="headerlink" title="开发环境"></a>开发环境</h5><ul>
-<li>Ubuntu 14.04(32bits)</li>
-<li>GCC      </li>
-<li>编辑器 Cmd Markdown</li>
-<li>画图工具 Processon    </li>
-</ul>
-<h5 id="1-基础类型内存表示"><a href="#1-基础类型内存表示" class="headerlink" title="1,基础类型内存表示"></a>1,基础类型内存表示</h5><p><a href="http://chinchao.xyz/2016/04/07/cpp-model-2/">上一节</a> 介绍了swich/if-else的实现机制。本文准备介绍一下基础类型的内存表示。</p>
-<h6 id="1-1大端法和小端法"><a href="#1-1大端法和小端法" class="headerlink" title="1.1大端法和小端法"></a>1.1大端法和小端法</h6><p>小端法，即数字的低位在低地址。大端法，即数字高位在低地址。大小端法的最小单位为byte,而不是bit.<br>举例：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">int i=-16;</div><div class="line">对应的小端法表示为（从低地址到高地址（从左到右为地址增长方向）对应的每个byte）：</div><div class="line">0xf0 ff ff ff </div><div class="line">大端法表示为（从低地址到高地址（从左到右为地址增长方向）对应的每个byte）：</div><div class="line">0x FF FF FF F0</div></pre></td></tr></table></figure></p>
-<p>在实际开发中，可以需要做大小端法互换，其代码如下：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">void swap1(int *rhs)</div><div class="line">&#123;</div><div class="line">    unsigned char *p=rhs;</div><div class="line">    unsigned char tmp;</div><div class="line">    tmp=p[0];</div><div class="line">    p[0]=[3];</div><div class="line">    p[3]=tmp;</div><div class="line"></div><div class="line">    tmp=p[1];</div><div class="line">    p[1]=[2];</div><div class="line">    p[2]=tmp;</div><div class="line">    <span class="built_in">return</span> ;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>在小端机上，如下程序的输出结果为-16.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">int <span class="function"><span class="title">main</span></span>()</div><div class="line">&#123;</div><div class="line">        int i;</div><div class="line">        unsigned char *p=(unsigned char*)&amp;i;</div><div class="line">        p[0]=0xF0;</div><div class="line">        p[1]=0XFF;</div><div class="line">        p[2]=0XFF;</div><div class="line">        p[3]=0Xff;</div><div class="line">        <span class="built_in">printf</span>(<span class="string">"%d\n"</span>,i);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-		
-	
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2016/04/08/cpp-model-4/#more" class="more-link">阅读全文</a>
-          </div>
-        
-        
-        <div class="alignright">
-          <a href="/2016/04/08/cpp-model-4/#comment" class="comment-link">评论</a>
-        </div>
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-
-  <nav id="page-nav" class="clearfix">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">下一页 &raquo;</a>
-  </nav>
 </div></div>
     <aside id="sidebar" class="alignright">
   
