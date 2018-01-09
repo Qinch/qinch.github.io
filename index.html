@@ -87,71 +87,11 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2018/01/09/redis4-sds/">redis4.0_sds</a></h1>
+    <h1 class="title"><a href="/2017/12/03/redis4-ziplist/">redis4.0_ziplist源码剖析</a></h1>
 
  
 	
-	<time  datetime="2018-01-08T16:45:26.000Z"><p>发表于 2018-01-09 | 字数 <span class="post-count">1,343</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<h4 id="1-sds介绍"><a href="#1-sds介绍" class="headerlink" title="1.sds介绍"></a>1.sds介绍</h4><ol>
-<li>sds:Simple Dynamic String即简单动态字符串，为redis的默认字符串表示。</li>
-</ol>
-<h4 id="2-sds-h源码分析"><a href="#2-sds-h源码分析" class="headerlink" title="2.sds.h源码分析"></a>2.sds.h源码分析</h4><ol>
-<li><p>sds结构体的内存布局</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">/*    0长度数组的妙用</div><div class="line"> *    ----------------</div><div class="line"> *    |    len       |</div><div class="line"> *    |——————————————|</div><div class="line"> *    |    alloc     |</div><div class="line"> *    |——————————————|</div><div class="line"> *    |    flags     |</div><div class="line"> *    |——————————————|&lt;----buf</div><div class="line"> *    |    buf[0~n]  |</div><div class="line"> *    |     .        |</div><div class="line"> *    |     .        |</div><div class="line">      |     .        |</div><div class="line"> *    |——————————————|</div><div class="line"> */</div></pre></td></tr></table></figure>
-</li>
-<li><p>sds结构体的定义</p>
-</li>
-<li><p>sds结构体定义在src/sds.h，其中根据buf[]中字符串的长度来选择不同的sds结构体</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div></pre></td><td class="code"><pre><div class="line">typedef char *sds;</div><div class="line"></div><div class="line">/* Note: sdshdr5 is never used, we just access the flags byte directly.</div><div class="line"> * However is here to document the layout of <span class="built_in">type</span> 5 SDS strings. */</div><div class="line">//sdshdr5与其他sds结构体的区别是：没有alloc字段，即无法获得free=alloc-len</div><div class="line">//sdshdr5中flags字段的低3bits表示sds类型，高5bits位buf的length字段</div><div class="line">struct __attribute__ ((__packed__)) sdshdr5 &#123;</div><div class="line">    unsigned char flags; /* 3 lsb of <span class="built_in">type</span>, and 5 msb of string length */</div><div class="line">    char buf[];//等价于char buf[0];</div><div class="line">&#125;;</div><div class="line">struct __attribute__ ((__packed__)) sdshdr8 &#123;</div><div class="line">    uint8_t len; /* used */</div><div class="line">    uint8_t alloc; /* excluding the header and null terminator */</div><div class="line">    unsigned char flags; /* 3 lsb of <span class="built_in">type</span>, 5 unused bits */</div><div class="line">	//0长度数组 char buf[]等价于char buf[0]</div><div class="line">    char buf[];</div><div class="line">&#125;;</div><div class="line">struct __attribute__ ((__packed__)) sdshdr16 &#123;</div><div class="line">    uint16_t len; /* used */</div><div class="line">    uint16_t alloc; /* excluding the header and null terminator */</div><div class="line">    unsigned char flags; /* 3 lsb of <span class="built_in">type</span>, 5 unused bits */</div><div class="line">    char buf[];</div><div class="line">&#125;;</div><div class="line">struct __attribute__ ((__packed__)) sdshdr32 &#123;</div><div class="line">    uint32_t len; /* used */</div><div class="line">    uint32_t alloc; /* excluding the header and null terminator */</div><div class="line">    unsigned char flags; /* 3 lsb of <span class="built_in">type</span>, 5 unused bits */</div><div class="line">    char buf[];</div><div class="line">&#125;;</div><div class="line">struct __attribute__ ((__packed__)) sdshdr64 &#123;</div><div class="line">    uint64_t len; /* used */</div><div class="line">    uint64_t alloc; /* excluding the header and null terminator */</div><div class="line">	//sdsnhdr的类型</div><div class="line">    unsigned char flags; /* 3 lsb of <span class="built_in">type</span>, 5 unused bits */</div><div class="line">    char buf[];</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
-</li>
-<li><p>sds.h中相关函数</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div></pre></td><td class="code"><pre><div class="line">//返回sds的已使用空间字节数即：sds结构体中的len字段</div><div class="line">//函数的参数s为sds结构体中buf[]的首地址</div><div class="line">static inline size_t sdslen(const sds s) &#123;</div><div class="line">	//s[-1]即:*(s-1)</div><div class="line">    unsigned char flags = s[-1];</div><div class="line">	//判断结构体的类型</div><div class="line">    switch(flags&amp;SDS_TYPE_MASK) &#123;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_5:</div><div class="line">            <span class="built_in">return</span> SDS_TYPE_5_LEN(flags);//高5bits表示buf len</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_8:</div><div class="line">            <span class="built_in">return</span> __SDS_HR(8,s)-&gt;len;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_16:</div><div class="line">            <span class="built_in">return</span> SDS_HDR(16,s)-&gt;len;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_32:</div><div class="line">            <span class="built_in">return</span> SDS_HDR(32,s)-&gt;len;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_64:</div><div class="line">            <span class="built_in">return</span> SDS_HDR(64,s)-&gt;len;</div><div class="line">    &#125;</div><div class="line">    <span class="built_in">return</span> 0;</div><div class="line">&#125;</div><div class="line"></div><div class="line">//获取可用的buf空间大小，即：free = alloc-len</div><div class="line">static inline size_t sdsavail(const sds s) &#123;</div><div class="line">    unsigned char flags = s[-1];</div><div class="line">    switch(flags&amp;SDS_TYPE_MASK) &#123;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_5: &#123;</div><div class="line">            <span class="built_in">return</span> 0;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_8: &#123;</div><div class="line">            SDS_HDR_VAR(8,s);</div><div class="line">            <span class="built_in">return</span> sh-&gt;alloc - sh-&gt;len;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_16: &#123;</div><div class="line">            SDS_HDR_VAR(16,s);</div><div class="line">            <span class="built_in">return</span> sh-&gt;alloc - sh-&gt;len;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_32: &#123;</div><div class="line">            SDS_HDR_VAR(32,s);</div><div class="line">            <span class="built_in">return</span> sh-&gt;alloc - sh-&gt;len;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_64: &#123;</div><div class="line">            SDS_HDR_VAR(64,s);</div><div class="line">            <span class="built_in">return</span> sh-&gt;alloc - sh-&gt;len;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    <span class="built_in">return</span> 0;</div><div class="line">&#125;</div><div class="line">//设置sds结构体len</div><div class="line">static inline void sdssetlen(sds s, size_t newlen) &#123;</div><div class="line">    unsigned char flags = s[-1];</div><div class="line">    switch(flags&amp;SDS_TYPE_MASK) &#123;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_5:</div><div class="line">            &#123;</div><div class="line">                unsigned char *fp = ((unsigned char*)s)-1;</div><div class="line">                *fp = SDS_TYPE_5 | (newlen &lt;&lt; SDS_TYPE_BITS);</div><div class="line">            &#125;</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_8:</div><div class="line">            SDS_HDR(8,s)-&gt;len = newlen;</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_16:</div><div class="line">            SDS_HDR(16,s)-&gt;len = newlen;</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_32:</div><div class="line">            SDS_HDR(32,s)-&gt;len = newlen;</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_64:</div><div class="line">            SDS_HDR(64,s)-&gt;len = newlen;</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">static inline void sdsinclen(sds s, size_t inc) &#123;</div><div class="line">    unsigned char flags = s[-1];</div><div class="line">    switch(flags&amp;SDS_TYPE_MASK) &#123;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_5:</div><div class="line">            &#123;</div><div class="line">                unsigned char *fp = ((unsigned char*)s)-1;</div><div class="line">                unsigned char newlen = SDS_TYPE_5_LEN(flags)+inc;</div><div class="line">                *fp = SDS_TYPE_5 | (newlen &lt;&lt; SDS_TYPE_BITS);</div><div class="line">            &#125;</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_8:</div><div class="line">            SDS_HDR(8,s)-&gt;len += inc;</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_16:</div><div class="line">            SDS_HDR(16,s)-&gt;len += inc;</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_32:</div><div class="line">            SDS_HDR(32,s)-&gt;len += inc;</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_64:</div><div class="line">            SDS_HDR(64,s)-&gt;len += inc;</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line">//alloc不包括\0</div><div class="line">/* sdsalloc() = sdsavail() + sdslen() */</div><div class="line">static inline size_t sdsalloc(const sds s) &#123;</div><div class="line">    unsigned char flags = s[-1];</div><div class="line">    switch(flags&amp;SDS_TYPE_MASK) &#123;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_5:</div><div class="line">            <span class="built_in">return</span> SDS_TYPE_5_LEN(flags);</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_8:</div><div class="line">            <span class="built_in">return</span> SDS_HDR(8,s)-&gt;alloc;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_16:</div><div class="line">            <span class="built_in">return</span> SDS_HDR(16,s)-&gt;alloc;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_32:</div><div class="line">            <span class="built_in">return</span> SDS_HDR(32,s)-&gt;alloc;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_64:</div><div class="line">            <span class="built_in">return</span> SDS_HDR(64,s)-&gt;alloc;</div><div class="line">    &#125;</div><div class="line">    <span class="built_in">return</span> 0;</div><div class="line">&#125;</div><div class="line"></div><div class="line">//设置sds中alloc字段为newlen</div><div class="line">static inline void sdssetalloc(sds s, size_t newlen) &#123;</div><div class="line">    unsigned char flags = s[-1];</div><div class="line">    switch(flags&amp;SDS_TYPE_MASK) &#123;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_5:</div><div class="line">            /* Nothing to <span class="keyword">do</span>, this <span class="built_in">type</span> has no total allocation info. */</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_8:</div><div class="line">            SDS_HDR(8,s)-&gt;alloc = newlen;</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_16:</div><div class="line">            SDS_HDR(16,s)-&gt;alloc = newlen;</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_32:</div><div class="line">            SDS_HDR(32,s)-&gt;alloc = newlen;</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_64:</div><div class="line">            SDS_HDR(64,s)-&gt;alloc = newlen;</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-</ol>
-		
-	
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2018/01/09/redis4-sds/#more" class="more-link">阅读全文</a>
-          </div>
-        
-        
-        <div class="alignright">
-          <a href="/2018/01/09/redis4-sds/#comment" class="comment-link">评论</a>
-        </div>
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
-    <h1 class="title"><a href="/2018/01/09/redis4-ziplist/">redis4.0_ziplist源码剖析</a></h1>
-
- 
-	
-	<time  datetime="2018-01-08T16:44:41.000Z"><p>发表于 2018-01-09 | 字数 <span class="post-count">9,729</span>
+	<time  datetime="2017-12-02T16:00:00.000Z"><p>发表于 2017-12-03 | 字数 <span class="post-count">9,729</span>
 
 </p></time>
       
@@ -206,12 +146,117 @@ var _hmt = _hmt || [];
       
         
           <div class="alignleft">
-            <a href="/2018/01/09/redis4-ziplist/#more" class="more-link">阅读全文</a>
+            <a href="/2017/12/03/redis4-ziplist/#more" class="more-link">阅读全文</a>
           </div>
         
         
         <div class="alignright">
-          <a href="/2018/01/09/redis4-ziplist/#comment" class="comment-link">评论</a>
+          <a href="/2017/12/03/redis4-ziplist/#comment" class="comment-link">评论</a>
+        </div>
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
+    <h1 class="title"><a href="/2017/12/02/redis4-adlist/">redis4.0_adlist</a></h1>
+
+ 
+	
+	<time  datetime="2017-12-01T16:00:00.000Z"><p>发表于 2017-12-02 | 字数 <span class="post-count">32</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<h4 id="1-adlist介绍"><a href="#1-adlist介绍" class="headerlink" title="1.adlist介绍"></a>1.adlist介绍</h4><h4 id="2-adlist-h源码分析"><a href="#2-adlist-h源码分析" class="headerlink" title="2.adlist.h源码分析"></a>2.adlist.h源码分析</h4><h4 id="3-addlist-c-源码分析"><a href="#3-addlist-c-源码分析" class="headerlink" title="3.addlist.c.源码分析"></a>3.addlist.c.源码分析</h4><h4 id="4-参考文献"><a href="#4-参考文献" class="headerlink" title="4.参考文献"></a>4.参考文献</h4><ol>
+<li>《Redis设计与实现》</li>
+<li>《<a href="https://github.com/Qinch/redis_reading/tree/4.0/src" target="_blank" rel="external">redis_reading</a>》</li>
+</ol>
+
+		
+	
+    </div>
+    <footer>
+      
+        
+        
+        <div class="alignright">
+          <a href="/2017/12/02/redis4-adlist/#comment" class="comment-link">评论</a>
+        </div>
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
+    <h1 class="title"><a href="/2017/12/01/redis4-sds/">redis4.0_sds</a></h1>
+
+ 
+	
+	<time  datetime="2017-11-30T16:00:00.000Z"><p>发表于 2017-12-01 | 字数 <span class="post-count">1,343</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<h4 id="1-sds介绍"><a href="#1-sds介绍" class="headerlink" title="1.sds介绍"></a>1.sds介绍</h4><ol>
+<li>sds:Simple Dynamic String即简单动态字符串，为redis的默认字符串表示。</li>
+</ol>
+<h4 id="2-sds-h源码分析"><a href="#2-sds-h源码分析" class="headerlink" title="2.sds.h源码分析"></a>2.sds.h源码分析</h4><ol>
+<li><p>sds结构体的内存布局</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">/*    0长度数组的妙用</div><div class="line"> *    ----------------</div><div class="line"> *    |    len       |</div><div class="line"> *    |——————————————|</div><div class="line"> *    |    alloc     |</div><div class="line"> *    |——————————————|</div><div class="line"> *    |    flags     |</div><div class="line"> *    |——————————————|&lt;----buf</div><div class="line"> *    |    buf[0~n]  |</div><div class="line"> *    |     .        |</div><div class="line"> *    |     .        |</div><div class="line">      |     .        |</div><div class="line"> *    |——————————————|</div><div class="line"> */</div></pre></td></tr></table></figure>
+</li>
+<li><p>sds结构体的定义</p>
+</li>
+<li><p>sds结构体定义在src/sds.h，其中根据buf[]中字符串的长度来选择不同的sds结构体</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div></pre></td><td class="code"><pre><div class="line">typedef char *sds;</div><div class="line"></div><div class="line">/* Note: sdshdr5 is never used, we just access the flags byte directly.</div><div class="line"> * However is here to document the layout of <span class="built_in">type</span> 5 SDS strings. */</div><div class="line">//sdshdr5与其他sds结构体的区别是：没有alloc字段，即无法获得free=alloc-len</div><div class="line">//sdshdr5中flags字段的低3bits表示sds类型，高5bits位buf的length字段</div><div class="line">struct __attribute__ ((__packed__)) sdshdr5 &#123;</div><div class="line">    unsigned char flags; /* 3 lsb of <span class="built_in">type</span>, and 5 msb of string length */</div><div class="line">    char buf[];//等价于char buf[0];</div><div class="line">&#125;;</div><div class="line">struct __attribute__ ((__packed__)) sdshdr8 &#123;</div><div class="line">    uint8_t len; /* used */</div><div class="line">    uint8_t alloc; /* excluding the header and null terminator */</div><div class="line">    unsigned char flags; /* 3 lsb of <span class="built_in">type</span>, 5 unused bits */</div><div class="line">	//0长度数组 char buf[]等价于char buf[0]</div><div class="line">    char buf[];</div><div class="line">&#125;;</div><div class="line">struct __attribute__ ((__packed__)) sdshdr16 &#123;</div><div class="line">    uint16_t len; /* used */</div><div class="line">    uint16_t alloc; /* excluding the header and null terminator */</div><div class="line">    unsigned char flags; /* 3 lsb of <span class="built_in">type</span>, 5 unused bits */</div><div class="line">    char buf[];</div><div class="line">&#125;;</div><div class="line">struct __attribute__ ((__packed__)) sdshdr32 &#123;</div><div class="line">    uint32_t len; /* used */</div><div class="line">    uint32_t alloc; /* excluding the header and null terminator */</div><div class="line">    unsigned char flags; /* 3 lsb of <span class="built_in">type</span>, 5 unused bits */</div><div class="line">    char buf[];</div><div class="line">&#125;;</div><div class="line">struct __attribute__ ((__packed__)) sdshdr64 &#123;</div><div class="line">    uint64_t len; /* used */</div><div class="line">    uint64_t alloc; /* excluding the header and null terminator */</div><div class="line">	//sdsnhdr的类型</div><div class="line">    unsigned char flags; /* 3 lsb of <span class="built_in">type</span>, 5 unused bits */</div><div class="line">    char buf[];</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+</li>
+<li><p>sds.h中相关函数</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div></pre></td><td class="code"><pre><div class="line">//返回sds的已使用空间字节数即：sds结构体中的len字段</div><div class="line">//函数的参数s为sds结构体中buf[]的首地址</div><div class="line">static inline size_t sdslen(const sds s) &#123;</div><div class="line">	//s[-1]即:*(s-1)</div><div class="line">    unsigned char flags = s[-1];</div><div class="line">	//判断结构体的类型</div><div class="line">    switch(flags&amp;SDS_TYPE_MASK) &#123;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_5:</div><div class="line">            <span class="built_in">return</span> SDS_TYPE_5_LEN(flags);//高5bits表示buf len</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_8:</div><div class="line">            <span class="built_in">return</span> __SDS_HR(8,s)-&gt;len;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_16:</div><div class="line">            <span class="built_in">return</span> SDS_HDR(16,s)-&gt;len;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_32:</div><div class="line">            <span class="built_in">return</span> SDS_HDR(32,s)-&gt;len;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_64:</div><div class="line">            <span class="built_in">return</span> SDS_HDR(64,s)-&gt;len;</div><div class="line">    &#125;</div><div class="line">    <span class="built_in">return</span> 0;</div><div class="line">&#125;</div><div class="line"></div><div class="line">//获取可用的buf空间大小，即：free = alloc-len</div><div class="line">static inline size_t sdsavail(const sds s) &#123;</div><div class="line">    unsigned char flags = s[-1];</div><div class="line">    switch(flags&amp;SDS_TYPE_MASK) &#123;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_5: &#123;</div><div class="line">            <span class="built_in">return</span> 0;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_8: &#123;</div><div class="line">            SDS_HDR_VAR(8,s);</div><div class="line">            <span class="built_in">return</span> sh-&gt;alloc - sh-&gt;len;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_16: &#123;</div><div class="line">            SDS_HDR_VAR(16,s);</div><div class="line">            <span class="built_in">return</span> sh-&gt;alloc - sh-&gt;len;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_32: &#123;</div><div class="line">            SDS_HDR_VAR(32,s);</div><div class="line">            <span class="built_in">return</span> sh-&gt;alloc - sh-&gt;len;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_64: &#123;</div><div class="line">            SDS_HDR_VAR(64,s);</div><div class="line">            <span class="built_in">return</span> sh-&gt;alloc - sh-&gt;len;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    <span class="built_in">return</span> 0;</div><div class="line">&#125;</div><div class="line">//设置sds结构体len</div><div class="line">static inline void sdssetlen(sds s, size_t newlen) &#123;</div><div class="line">    unsigned char flags = s[-1];</div><div class="line">    switch(flags&amp;SDS_TYPE_MASK) &#123;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_5:</div><div class="line">            &#123;</div><div class="line">                unsigned char *fp = ((unsigned char*)s)-1;</div><div class="line">                *fp = SDS_TYPE_5 | (newlen &lt;&lt; SDS_TYPE_BITS);</div><div class="line">            &#125;</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_8:</div><div class="line">            SDS_HDR(8,s)-&gt;len = newlen;</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_16:</div><div class="line">            SDS_HDR(16,s)-&gt;len = newlen;</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_32:</div><div class="line">            SDS_HDR(32,s)-&gt;len = newlen;</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_64:</div><div class="line">            SDS_HDR(64,s)-&gt;len = newlen;</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">static inline void sdsinclen(sds s, size_t inc) &#123;</div><div class="line">    unsigned char flags = s[-1];</div><div class="line">    switch(flags&amp;SDS_TYPE_MASK) &#123;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_5:</div><div class="line">            &#123;</div><div class="line">                unsigned char *fp = ((unsigned char*)s)-1;</div><div class="line">                unsigned char newlen = SDS_TYPE_5_LEN(flags)+inc;</div><div class="line">                *fp = SDS_TYPE_5 | (newlen &lt;&lt; SDS_TYPE_BITS);</div><div class="line">            &#125;</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_8:</div><div class="line">            SDS_HDR(8,s)-&gt;len += inc;</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_16:</div><div class="line">            SDS_HDR(16,s)-&gt;len += inc;</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_32:</div><div class="line">            SDS_HDR(32,s)-&gt;len += inc;</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_64:</div><div class="line">            SDS_HDR(64,s)-&gt;len += inc;</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line">//alloc不包括\0</div><div class="line">/* sdsalloc() = sdsavail() + sdslen() */</div><div class="line">static inline size_t sdsalloc(const sds s) &#123;</div><div class="line">    unsigned char flags = s[-1];</div><div class="line">    switch(flags&amp;SDS_TYPE_MASK) &#123;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_5:</div><div class="line">            <span class="built_in">return</span> SDS_TYPE_5_LEN(flags);</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_8:</div><div class="line">            <span class="built_in">return</span> SDS_HDR(8,s)-&gt;alloc;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_16:</div><div class="line">            <span class="built_in">return</span> SDS_HDR(16,s)-&gt;alloc;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_32:</div><div class="line">            <span class="built_in">return</span> SDS_HDR(32,s)-&gt;alloc;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_64:</div><div class="line">            <span class="built_in">return</span> SDS_HDR(64,s)-&gt;alloc;</div><div class="line">    &#125;</div><div class="line">    <span class="built_in">return</span> 0;</div><div class="line">&#125;</div><div class="line"></div><div class="line">//设置sds中alloc字段为newlen</div><div class="line">static inline void sdssetalloc(sds s, size_t newlen) &#123;</div><div class="line">    unsigned char flags = s[-1];</div><div class="line">    switch(flags&amp;SDS_TYPE_MASK) &#123;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_5:</div><div class="line">            /* Nothing to <span class="keyword">do</span>, this <span class="built_in">type</span> has no total allocation info. */</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_8:</div><div class="line">            SDS_HDR(8,s)-&gt;alloc = newlen;</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_16:</div><div class="line">            SDS_HDR(16,s)-&gt;alloc = newlen;</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_32:</div><div class="line">            SDS_HDR(32,s)-&gt;alloc = newlen;</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> SDS_TYPE_64:</div><div class="line">            SDS_HDR(64,s)-&gt;alloc = newlen;</div><div class="line">            <span class="built_in">break</span>;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+		
+	
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2017/12/01/redis4-sds/#more" class="more-link">阅读全文</a>
+          </div>
+        
+        
+        <div class="alignright">
+          <a href="/2017/12/01/redis4-sds/#comment" class="comment-link">评论</a>
         </div>
         
       
@@ -468,51 +513,6 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2016/10/02/redis4-adlist/">redis4.0_adlist</a></h1>
-
- 
-	
-	<time  datetime="2016-10-01T16:00:00.000Z"><p>发表于 2016-10-02 | 字数 <span class="post-count">32</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<h4 id="1-adlist介绍"><a href="#1-adlist介绍" class="headerlink" title="1.adlist介绍"></a>1.adlist介绍</h4><h4 id="2-adlist-h源码分析"><a href="#2-adlist-h源码分析" class="headerlink" title="2.adlist.h源码分析"></a>2.adlist.h源码分析</h4><h4 id="3-addlist-c-源码分析"><a href="#3-addlist-c-源码分析" class="headerlink" title="3.addlist.c.源码分析"></a>3.addlist.c.源码分析</h4><h4 id="4-参考文献"><a href="#4-参考文献" class="headerlink" title="4.参考文献"></a>4.参考文献</h4><ol>
-<li>《Redis设计与实现》</li>
-<li>《<a href="https://github.com/Qinch/redis_reading/tree/4.0/src" target="_blank" rel="external">redis_reading</a>》</li>
-</ol>
-
-		
-	
-    </div>
-    <footer>
-      
-        
-        
-        <div class="alignright">
-          <a href="/2016/10/02/redis4-adlist/#comment" class="comment-link">评论</a>
-        </div>
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
     <h1 class="title"><a href="/2016/04/09/cpp-model-5/">C++对象模型-关于对象</a></h1>
 
  
@@ -622,11 +622,15 @@ var _hmt = _hmt || [];
   <ul class="entry">
     
       <li>
-        <a href="/2018/01/09/redis4-sds/">redis4.0_sds</a>
+        <a href="/2017/12/03/redis4-ziplist/">redis4.0_ziplist源码剖析</a>
       </li>
     
       <li>
-        <a href="/2018/01/09/redis4-ziplist/">redis4.0_ziplist源码剖析</a>
+        <a href="/2017/12/02/redis4-adlist/">redis4.0_adlist</a>
+      </li>
+    
+      <li>
+        <a href="/2017/12/01/redis4-sds/">redis4.0_sds</a>
       </li>
     
       <li>
@@ -635,10 +639,6 @@ var _hmt = _hmt || [];
     
       <li>
         <a href="/2017/04/19/mk/">Makefile</a>
-      </li>
-    
-      <li>
-        <a href="/2017/04/19/thread_signal/">线程-信号</a>
       </li>
     
   </ul>
