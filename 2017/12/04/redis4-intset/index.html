@@ -90,7 +90,7 @@ var _hmt = _hmt || [];
 
  
 	
-	<time  datetime="2017-12-03T16:00:00.000Z"><p>发表于 2017-12-04 | 字数 <span class="post-count">14</span>
+	<time  datetime="2017-12-03T16:00:00.000Z"><p>发表于 2017-12-04 | 字数 <span class="post-count">134</span>
 
 </p></time>
       
@@ -98,7 +98,10 @@ var _hmt = _hmt || [];
     <div class="entry">
       
 		  
-		<h4 id="3-参考文献"><a href="#3-参考文献" class="headerlink" title="3.参考文献"></a>3.参考文献</h4><ol>
+		<h4 id="1-intset概述"><a href="#1-intset概述" class="headerlink" title="1.intset概述"></a>1.intset概述</h4><p>intset(整数集合)可以用于保存类型为int16_t, int32_t, int64_t的整数值，并且保证intset中不会出现重复元素。</p>
+<h4 id="2-intst结构体"><a href="#2-intst结构体" class="headerlink" title="2.intst结构体"></a>2.intst结构体</h4><p>表示intset的结构体定义如下：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">typedef struct intset &#123;</div><div class="line">	//intset的编码方式：int*_t</div><div class="line">    uint32_t encoding;</div><div class="line">	//intset中元素的数量</div><div class="line">    uint32_t length;</div><div class="line">	//用于保存元素的数组（0长度数组的妙用）</div><div class="line">    int8_t contents[];</div><div class="line">&#125; intset;</div></pre></td></tr></table></figure></p>
+<p>intset对应的图示如下<br>|———-|<br>| encoding |<br>|———-|<br>|  length  |<br>|———-|<br>|int<em>_t v0 |<br>|———-|<br>|int</em>_t v1 |<br>|———-|<br>|int*_t    |<br>|vlength-1 |<br>|———-|</p>
+<h4 id="3-intset源码"><a href="#3-intset源码" class="headerlink" title="3.intset源码"></a>3.intset源码</h4><h4 id="4-参考文献"><a href="#4-参考文献" class="headerlink" title="4.参考文献"></a>4.参考文献</h4><ol>
 <li>《Redis设计与实现》</li>
 <li>《<a href="https://github.com/Qinch/redis_reading/tree/4.0/src" target="_blank" rel="external">redis_reading</a>》</li>
 </ol>
@@ -116,7 +119,7 @@ var _hmt = _hmt || [];
         
   
   <div class="tags">
-    <a href="/tags/redis4-0/">redis4.0</a>, <a href="/tags/sourcecode/">sourcecode</a>, <a href="/tags/ziplist/">ziplist</a>
+    <a href="/tags/redis4-0/">redis4.0</a>, <a href="/tags/sourcecode/">sourcecode</a>, <a href="/tags/intset/">intset</a>
   </div>
 
 	
@@ -216,7 +219,7 @@ var duoshuoQuery = {short_name:"qinch"};
 <div class="widget tagcloud">
   <h3 class="title">标签云</h3>
   <div class="entry">
-    <a href="/tags/Asm/" style="font-size: 20px;">Asm</a> <a href="/tags/C/" style="font-size: 20px;">C</a> <a href="/tags/Cpp/" style="font-size: 17.5px;">Cpp</a> <a href="/tags/adlist/" style="font-size: 10px;">adlist</a> <a href="/tags/apue/" style="font-size: 12.5px;">apue</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/heap/" style="font-size: 10px;">heap</a> <a href="/tags/icp/" style="font-size: 10px;">icp</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/make/" style="font-size: 10px;">make</a> <a href="/tags/makefile/" style="font-size: 10px;">makefile</a> <a href="/tags/redis4-0/" style="font-size: 15px;">redis4.0</a> <a href="/tags/sds/" style="font-size: 10px;">sds</a> <a href="/tags/signal/" style="font-size: 10px;">signal</a> <a href="/tags/sort/" style="font-size: 10px;">sort</a> <a href="/tags/sourcecode/" style="font-size: 15px;">sourcecode</a> <a href="/tags/stl/" style="font-size: 12.5px;">stl</a> <a href="/tags/thread/" style="font-size: 10px;">thread</a> <a href="/tags/unpv2/" style="font-size: 10px;">unpv2</a> <a href="/tags/ziplist/" style="font-size: 12.5px;">ziplist</a> <a href="/tags/内存流/" style="font-size: 10px;">内存流</a> <a href="/tags/勘误/" style="font-size: 10px;">勘误</a>
+    <a href="/tags/Asm/" style="font-size: 20px;">Asm</a> <a href="/tags/C/" style="font-size: 20px;">C</a> <a href="/tags/Cpp/" style="font-size: 17.5px;">Cpp</a> <a href="/tags/adlist/" style="font-size: 10px;">adlist</a> <a href="/tags/apue/" style="font-size: 12.5px;">apue</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/heap/" style="font-size: 10px;">heap</a> <a href="/tags/icp/" style="font-size: 10px;">icp</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/intset/" style="font-size: 10px;">intset</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/make/" style="font-size: 10px;">make</a> <a href="/tags/makefile/" style="font-size: 10px;">makefile</a> <a href="/tags/redis4-0/" style="font-size: 15px;">redis4.0</a> <a href="/tags/sds/" style="font-size: 10px;">sds</a> <a href="/tags/signal/" style="font-size: 10px;">signal</a> <a href="/tags/sort/" style="font-size: 10px;">sort</a> <a href="/tags/sourcecode/" style="font-size: 15px;">sourcecode</a> <a href="/tags/stl/" style="font-size: 12.5px;">stl</a> <a href="/tags/thread/" style="font-size: 10px;">thread</a> <a href="/tags/unpv2/" style="font-size: 10px;">unpv2</a> <a href="/tags/ziplist/" style="font-size: 10px;">ziplist</a> <a href="/tags/内存流/" style="font-size: 10px;">内存流</a> <a href="/tags/勘误/" style="font-size: 10px;">勘误</a>
   </div>
 </div>
 
