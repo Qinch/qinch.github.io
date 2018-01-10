@@ -90,7 +90,7 @@ var _hmt = _hmt || [];
 
  
 	
-	<time  datetime="2017-12-03T16:00:00.000Z"><p>发表于 2017-12-04 | 字数 <span class="post-count">134</span>
+	<time  datetime="2017-12-03T16:00:00.000Z"><p>发表于 2017-12-04 | 字数 <span class="post-count">137</span>
 
 </p></time>
       
@@ -99,8 +99,14 @@ var _hmt = _hmt || [];
       
 		  
 		<h4 id="1-intset概述"><a href="#1-intset概述" class="headerlink" title="1.intset概述"></a>1.intset概述</h4><p>intset(整数集合)可以用于保存类型为int16_t, int32_t, int64_t的整数值，并且保证intset中不会出现重复元素。</p>
-<h4 id="2-intst结构体"><a href="#2-intst结构体" class="headerlink" title="2.intst结构体"></a>2.intst结构体</h4><p>表示intset的结构体定义如下：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">typedef struct intset &#123;</div><div class="line">	//intset的编码方式：int*_t</div><div class="line">    uint32_t encoding;</div><div class="line">	//intset中元素的数量</div><div class="line">    uint32_t length;</div><div class="line">	//用于保存元素的数组（0长度数组的妙用）</div><div class="line">    int8_t contents[];</div><div class="line">&#125; intset;</div></pre></td></tr></table></figure></p>
-<p>intset对应的图示如下<br>|———-|<br>| encoding |<br>|———-|<br>|  length  |<br>|———-|<br>|int<em>_t v0 |<br>|———-|<br>|int</em>_t v1 |<br>|———-|<br>|int*_t    |<br>|vlength-1 |<br>|———-|</p>
+<h4 id="2-intst结构体"><a href="#2-intst结构体" class="headerlink" title="2.intst结构体"></a>2.intst结构体</h4><ul>
+<li><p>表示intset的结构体定义如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">typedef struct intset &#123;</div><div class="line">	//intset的编码方式：int*_t</div><div class="line">    uint32_t encoding;</div><div class="line">	//intset中元素的数量</div><div class="line">    uint32_t length;</div><div class="line">	//用于保存元素的数组（0长度数组的妙用）</div><div class="line">    int8_t contents[];</div><div class="line">&#125; intset;</div></pre></td></tr></table></figure>
+</li>
+<li><p>intset对应的图示如下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">|----------|</div><div class="line">| encoding |</div><div class="line">|----------|</div><div class="line">|  length  |</div><div class="line">|----------|</div><div class="line">|int*_t v0 |</div><div class="line">|----------|</div><div class="line">|int*_t v1 |</div><div class="line">|----------|</div><div class="line">|int*_t    |</div><div class="line">|vlength-1 |</div><div class="line">|----------|</div></pre></td></tr></table></figure>
+</li>
+</ul>
 <h4 id="3-intset源码"><a href="#3-intset源码" class="headerlink" title="3.intset源码"></a>3.intset源码</h4><h4 id="4-参考文献"><a href="#4-参考文献" class="headerlink" title="4.参考文献"></a>4.参考文献</h4><ol>
 <li>《Redis设计与实现》</li>
 <li>《<a href="https://github.com/Qinch/redis_reading/tree/4.0/src" target="_blank" rel="external">redis_reading</a>》</li>
