@@ -138,22 +138,21 @@ var _hmt = _hmt || [];
 
 
 <section id="comment">
-<!-- Duoshuo Comment BEGIN -->
-	<div class="ds-thread"></div>
-<script type="text/javascript">
-var duoshuoQuery = {short_name:"qinch"};
-	(function() {
-		var ds = document.createElement('script');
-		ds.type = 'text/javascript';ds.async = true;
-		ds.src = 'http://static.duoshuo.com/embed.js';
-		ds.charset = 'UTF-8';
-		(document.getElementsByTagName('head')[0] 
-		|| document.getElementsByTagName('body')[0]).appendChild(ds);
-	})();
-	</script>
-<!-- Duoshuo Comment END -->  
 
-
+<link rel="stylesheet" href="https://qinch.github.io/gitment/style/default.css">
+<script src="https://qinch.github.io/gitment/dist/gitment.browser.js"></script>
+<script>
+  var gitment = new Gitment({
+    id: '{{page.articleId}}',
+    owner: 'qinch',
+    repo: 'qinch.github.io',
+    oauth: {
+      client_id: 'dc573da081e8c36499cc',
+      client_secret: '0906d5ed2b31df8c3a9593d9becb68d4abbb3bcf',
+    },
+  })
+  gitment.render('comments')
+</script>
 
 </section>
 
