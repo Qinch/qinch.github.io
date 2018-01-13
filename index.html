@@ -228,7 +228,7 @@ var _hmt = _hmt || [];
 
  
 	
-	<time  datetime="2017-12-01T16:00:00.000Z"><p>发表于 2017-12-02 | 字数 <span class="post-count">104</span>
+	<time  datetime="2017-12-01T16:00:00.000Z"><p>发表于 2017-12-02 | 字数 <span class="post-count">1,130</span>
 
 </p></time>
       
@@ -240,6 +240,7 @@ var _hmt = _hmt || [];
 <li>skiplist(跳跃表)是一种有序数据结构，它通过在每个节点中维持多个指向其他节点指针，从而达到快速访问节点的目的。</li>
 <li>skiplist支持平均O(logN),最坏O(N)复杂度的节点查找，还可以通过顺序性操作来批量处理节点。</li>
 </ul>
+<h4 id="2-skiplist结构体"><a href="#2-skiplist结构体" class="headerlink" title="2.skiplist结构体"></a>2.skiplist结构体</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">/* ZSETs use a specialized version of Skiplists */</div><div class="line">typedef struct zskiplistNode &#123;</div><div class="line">    sds ele;</div><div class="line">    double score;</div><div class="line">    struct zskiplistNode *backward;</div><div class="line">    struct zskiplistLevel &#123;</div><div class="line">        struct zskiplistNode *forward;</div><div class="line">        unsigned int span;</div><div class="line">    &#125; level[];</div><div class="line">&#125; zskiplistNode;</div><div class="line"></div><div class="line">typedef struct zskiplist &#123;</div><div class="line">    struct zskiplistNode *header, *tail;</div><div class="line">    unsigned long length;</div><div class="line">    int level;</div><div class="line">&#125; zskiplist;</div></pre></td></tr></table></figure>
 		
 	
     </div>
