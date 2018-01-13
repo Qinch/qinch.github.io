@@ -87,11 +87,11 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2017/12/05/redis4-skiplist/">redis4.0_skiplist</a></h1>
+    <h1 class="title"><a href="/2017/12/05/redis4-skiplist/">redis4.0_skiplist源码剖析</a></h1>
 
  
 	
-	<time  datetime="2017-12-04T16:00:00.000Z"><p>发表于 2017-12-05 | 字数 <span class="post-count">22</span>
+	<time  datetime="2017-12-04T16:00:00.000Z"><p>发表于 2017-12-05 | 字数 <span class="post-count">104</span>
 
 </p></time>
       
@@ -99,7 +99,10 @@ var _hmt = _hmt || [];
     <div class="entry">
       
 		
-			<h4 id="1-dict概述"><a href="#1-dict概述" class="headerlink" title="1.dict概述"></a>1.dict概述</h4>
+			<h4 id="1-skiplist概述"><a href="#1-skiplist概述" class="headerlink" title="1.skiplist概述"></a>1.skiplist概述</h4><ul>
+<li>skiplist(跳跃表)是一种有序数据结构，它通过在每个节点中维持多个指向其他节点指针，从而达到快速访问节点的目的。</li>
+<li>skiplist支持平均O(logN),最坏O(N)复杂度的节点查找，还可以通过顺序性操作来批量处理节点。</li>
+</ul>
 		
 	
     </div>
@@ -110,10 +113,6 @@ var _hmt = _hmt || [];
             <a href="/2017/12/05/redis4-skiplist/#more" class="more-link">阅读全文</a>
           </div>
         
-        
-        <div class="alignright">
-          <a href="/2017/12/05/redis4-skiplist/#comment" class="comment-link">评论</a>
-        </div>
         
       
     
@@ -621,7 +620,7 @@ var _hmt = _hmt || [];
   <ul class="entry">
     
       <li>
-        <a href="/2017/12/05/redis4-skiplist/">redis4.0_skiplist</a>
+        <a href="/2017/12/05/redis4-skiplist/">redis4.0_skiplist源码剖析</a>
       </li>
     
       <li>

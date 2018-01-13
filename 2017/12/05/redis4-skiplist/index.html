@@ -4,7 +4,7 @@
 
   <meta charset="utf-8">
   
-  <title>redis4.0_skiplist | Just For Fun</title>
+  <title>redis4.0_skiplist源码剖析 | Just For Fun</title>
   <meta name="author" content="qinchao">
   
   <meta name="description" content="qinchao&#39;s blog">
@@ -12,7 +12,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-  <meta property="og:title" content="redis4.0_skiplist"/>
+  <meta property="og:title" content="redis4.0_skiplist源码剖析"/>
   <meta property="og:site_name" content="Just For Fun"/>
 
   
@@ -86,11 +86,11 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title">redis4.0_skiplist</h1>
+    <h1 class="title">redis4.0_skiplist源码剖析</h1>
 
  
 	
-	<time  datetime="2017-12-04T16:00:00.000Z"><p>发表于 2017-12-05 | 字数 <span class="post-count">22</span>
+	<time  datetime="2017-12-04T16:00:00.000Z"><p>发表于 2017-12-05 | 字数 <span class="post-count">104</span>
 
 </p></time>
       
@@ -98,7 +98,11 @@ var _hmt = _hmt || [];
     <div class="entry">
       
 		  
-		<h4 id="1-dict概述"><a href="#1-dict概述" class="headerlink" title="1.dict概述"></a>1.dict概述</h4><a id="more"></a>
+		<h4 id="1-skiplist概述"><a href="#1-skiplist概述" class="headerlink" title="1.skiplist概述"></a>1.skiplist概述</h4><ul>
+<li>skiplist(跳跃表)是一种有序数据结构，它通过在每个节点中维持多个指向其他节点指针，从而达到快速访问节点的目的。</li>
+<li>skiplist支持平均O(logN),最坏O(N)复杂度的节点查找，还可以通过顺序性操作来批量处理节点。</li>
+</ul>
+<a id="more"></a>
 <h4 id="3-dict源码"><a href="#3-dict源码" class="headerlink" title="3.dict源码"></a>3.dict源码</h4><pre><code class="bash">
 </code></pre>
 <h4 id="4-参考文献"><a href="#4-参考文献" class="headerlink" title="4.参考文献"></a>4.参考文献</h4><ol>
@@ -131,28 +135,6 @@ var _hmt = _hmt || [];
 </article>
 
 
-<section id="comment">
-<!-- Duoshuo Comment BEGIN -->
-	<div class="ds-thread"></div>
-<script type="text/javascript">
-var duoshuoQuery = {short_name:"qinch"};
-	(function() {
-		var ds = document.createElement('script');
-		ds.type = 'text/javascript';ds.async = true;
-		ds.src = 'http://static.duoshuo.com/embed.js';
-		ds.charset = 'UTF-8';
-		(document.getElementsByTagName('head')[0] 
-		|| document.getElementsByTagName('body')[0]).appendChild(ds);
-	})();
-	</script>
-<!-- Duoshuo Comment END -->  
-
-
-
-</section>
-
-
-
 
 
 </div></div>
@@ -163,7 +145,7 @@ var duoshuoQuery = {short_name:"qinch"};
   <ul class="entry">
     
       <li>
-        <a href="/2017/12/05/redis4-skiplist/">redis4.0_skiplist</a>
+        <a href="/2017/12/05/redis4-skiplist/">redis4.0_skiplist源码剖析</a>
       </li>
     
       <li>
