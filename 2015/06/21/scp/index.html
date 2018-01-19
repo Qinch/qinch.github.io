@@ -4,7 +4,7 @@
 
   <meta charset="utf-8">
   
-  <title>stl | Just For Fun</title>
+  <title>scp.exp脚本:scp命令自动输入密码 | Just For Fun</title>
   <meta name="author" content="qinchao">
   
   <meta name="description" content="qinchao&#39;s blog">
@@ -12,7 +12,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-  
+  <meta property="og:title" content="scp.exp脚本:scp命令自动输入密码"/>
   <meta property="og:site_name" content="Just For Fun"/>
 
   
@@ -81,27 +81,83 @@ var _hmt = _hmt || [];
 
 </header>
   <div id="content" class="inner">
-    <div id="main-col" class="alignleft"><div id="wrapper">
-<h2 class="archive-title tag">stl </h2>
-<div class="archive">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  <div class="post-content">
+    <header>
+      
+	
+    <h1 class="title">scp.exp脚本:scp命令自动输入密码</h1>
+
+ 
+	
+	<time  datetime="2015-06-20T16:00:00.000Z"><p>发表于 2015-06-21 | 字数 <span class="post-count">148</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		  
+		<ul>
+<li><p>用法(ubuntu):</p>
+<ul>
+<li>sudo apt-get install expect</li>
+<li>expect scp.exp 127.0.0.1 root passwd srcfile destfile 300</li>
+</ul>
+</li>
+<li><p>脚本文件名scp.exp</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#!/usr/bin/expect</span></div><div class="line"><span class="comment">#目的机器的ip</span></div><div class="line"><span class="built_in">set</span> host [lindex <span class="variable">$argv</span> 0]</div><div class="line"><span class="comment">#目的机器的用户名</span></div><div class="line"><span class="built_in">set</span> username [lindex <span class="variable">$argv</span> 1]</div><div class="line"><span class="comment">#目的机器的用户密码</span></div><div class="line"><span class="built_in">set</span> password [lindex <span class="variable">$argv</span> 2]</div><div class="line"><span class="comment">#源文件或源目录</span></div><div class="line"><span class="built_in">set</span> src_file [lindex <span class="variable">$argv</span> 3]</div><div class="line"><span class="comment">#目的文件或目的目录</span></div><div class="line"><span class="built_in">set</span> dest_file [lindex <span class="variable">$argv</span> 4]</div><div class="line"><span class="comment">#expect超时时间</span></div><div class="line"><span class="built_in">set</span> time_out [lindex <span class="variable">$argv</span> 5]</div><div class="line"></div><div class="line">spawn scp -r <span class="variable">$src_file</span> <span class="variable">$username</span>@<span class="variable">$host</span>:<span class="variable">$dest_file</span></div><div class="line"><span class="built_in">set</span> timeout <span class="variable">$time_out</span></div><div class="line">expect &#123;</div><div class="line"> <span class="string">"(yes/no)?"</span></div><div class="line">  &#123;</div><div class="line">    send <span class="string">"yes\n"</span></div><div class="line">    exp_continue</div><div class="line">  &#125;</div><div class="line"> <span class="string">"*assword:"</span></div><div class="line">  &#123;</div><div class="line">    send <span class="string">"<span class="variable">$password</span>\n"</span></div><div class="line">    exp_continue</div><div class="line">  &#125;</div><div class="line"> <span class="string">"ermission denied"</span></div><div class="line">  &#123;</div><div class="line">    send_user <span class="string">"Copy <span class="variable">$src_file</span> to <span class="variable">$dest_file</span> failed.\n"</span></div><div class="line">    <span class="built_in">exit</span> 1</div><div class="line">  &#125;</div><div class="line">  eof</div><div class="line">  &#123;</div><div class="line">    send_user <span class="string">"Copy <span class="variable">$src_file</span> to <span class="variable">$dest_file</span> succ.\n"</span></div><div class="line">    <span class="built_in">exit</span> 0</div><div class="line">  &#125;</div><div class="line">&#125;</div><div class="line"><span class="comment">#expect超时</span></div><div class="line"><span class="built_in">exit</span> 2</div></pre></td></tr></table></figure>
+</li>
+</ul>
+
+	
+    </div>
+    <footer>
+      
+        
+  
+  <div class="categories">
+    <a href="/categories/shell/">shell</a>
+  </div>
+
+        
+  
+  <div class="tags">
+    <a href="/tags/tips/">tips</a>, <a href="/tags/scp/">scp</a>
+  </div>
+
+	
+      
     
-      <article class="post">
-        <div class="post-content">
-          <header>
-              <h1 class="title">2015/12/11 » &nbsp<a href="/2015/12/11/stl-heap/">STL heap源码分析</a></h1>
-          </header>
-        </div>
-      </article>
-    
-      <article class="post">
-        <div class="post-content">
-          <header>
-              <h1 class="title">2015/12/10 » &nbsp<a href="/2015/12/10/stl-sort/">STL IntroSort源码分析</a></h1>
-          </header>
-        </div>
-      </article>
-    
- </div>
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+<section id="comment">
+<!-- Duoshuo Comment BEGIN -->
+	<div class="ds-thread"></div>
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"qinch"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = 'http://static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		|| document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- Duoshuo Comment END -->  
+
+
+
+</section>
+
+
+
+
 
 </div></div>
     <aside id="sidebar" class="alignright">
