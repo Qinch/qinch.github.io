@@ -4,7 +4,7 @@
 
   <meta charset="utf-8">
   
-  <title>signal | Just For Fun</title>
+  <title>redis4.0_object源码剖析 | Just For Fun</title>
   <meta name="author" content="qinchao">
   
   <meta name="description" content="qinchao&#39;s blog">
@@ -12,7 +12,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-  
+  <meta property="og:title" content="redis4.0_object源码剖析"/>
   <meta property="og:site_name" content="Just For Fun"/>
 
   
@@ -81,19 +81,59 @@ var _hmt = _hmt || [];
 
 </header>
   <div id="content" class="inner">
-    <div id="main-col" class="alignleft"><div id="wrapper">
-<h2 class="archive-title tag">signal </h2>
-<div class="archive">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  <div class="post-content">
+    <header>
+      
+	
+    <h1 class="title">redis4.0_object源码剖析</h1>
+
+ 
+	
+	<time  datetime="2017-12-02T16:00:00.000Z"><p>发表于 2017-12-03 | 字数 <span class="post-count">175</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		  
+		<h4 id="1-redisObject介绍"><a href="#1-redisObject介绍" class="headerlink" title="1.redisObject介绍"></a>1.redisObject介绍</h4><ul>
+<li>Redis使用对象来表示数据库中的key和value,每次在redis中创建一个新的键值对时，至少需要创建两个对象对象:键对象和值对象。</li>
+<li>Redis中的每个对象都由一个robj结构体表示。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">typedef struct redisObject &#123;                                                                                                                                          </div><div class="line">     //对象的类型</div><div class="line">     unsigned <span class="built_in">type</span>:4;</div><div class="line">     //对象采用的编码方式                                                                                                                                                </div><div class="line">     unsigned encoding:4;</div><div class="line">     //对象最后一次被命令程序访问的时间                                                                                                                                           </div><div class="line">     unsigned lru:LRU_BITS; /* LRU time (relative to global lru_clock) or                                                                                              </div><div class="line">                             * LFU data (least significant 8 bits frequency                                                                                            </div><div class="line">                             * and most significant 16 bits decreas time). */                                                                                          </div><div class="line">     //对象引用计数</div><div class="line">     int refcount; </div><div class="line">     //指向底层数据结构的指针                                                                                                                                                   </div><div class="line">     void *ptr;                                                                                                                                                        </div><div class="line">&#125; robj;</div></pre></td></tr></table></figure>
+<h4 id="2-object-c源码分析"><a href="#2-object-c源码分析" class="headerlink" title="2.object.c源码分析"></a>2.object.c源码分析</h4><h4 id="4-参考文献"><a href="#4-参考文献" class="headerlink" title="4.参考文献"></a>4.参考文献</h4><ol>
+<li>《Redis设计与实现》</li>
+<li>《<a href="https://github.com/Qinch/redis_reading/tree/read/" target="_blank" rel="external">redis_reading</a>》</li>
+</ol>
+
+	
+    </div>
+    <footer>
+      
+        
+  
+  <div class="categories">
+    <a href="/categories/redis/">redis</a>
+  </div>
+
+        
+  
+  <div class="tags">
+    <a href="/tags/redis4-0/">redis4.0</a>, <a href="/tags/sourcecode/">sourcecode</a>, <a href="/tags/object/">object</a>
+  </div>
+
+	
+      
     
-      <article class="post">
-        <div class="post-content">
-          <header>
-              <h1 class="title">2017/04/19 » &nbsp<a href="/2017/04/19/thread_signal/">线程-信号</a></h1>
-          </header>
-        </div>
-      </article>
-    
- </div>
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
 
 </div></div>
     <aside id="sidebar" class="alignright">
