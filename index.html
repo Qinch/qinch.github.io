@@ -144,7 +144,7 @@ var _hmt = _hmt || [];
 
  
 	
-	<time  datetime="2017-12-02T16:00:00.000Z"><p>发表于 2017-12-03 | 字数 <span class="post-count">786</span>
+	<time  datetime="2017-12-02T16:00:00.000Z"><p>发表于 2017-12-03 | 字数 <span class="post-count">804</span>
 
 </p></time>
       
@@ -153,7 +153,10 @@ var _hmt = _hmt || [];
       
 		
 			<h4 id="1-string对象介绍"><a href="#1-string对象介绍" class="headerlink" title="1.string对象介绍"></a>1.string对象介绍</h4><ul>
-<li>encoding为REDIS_ENCODING_INT<br><img src="/img/t_string_int.png" alt="encoding_int"></li>
+<li>encoding为REDIS_ENCODING_INT<ul>
+<li>字符串的内容为“123456”，对应的redisObject内存布局如下：<br><img src="/img/t_string_int.png" alt="encoding_int"></li>
+</ul>
+</li>
 </ul>
 <h4 id="2-t-string-c源码分析"><a href="#2-t-string-c源码分析" class="headerlink" title="2.t_string.c源码分析"></a>2.t_string.c源码分析</h4><ul>
 <li>set命令解析</li>
