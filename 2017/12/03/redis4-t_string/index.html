@@ -1,0 +1,262 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+
+  <meta charset="utf-8">
+  
+  <title>redis4.0_t_string源码剖析 | Just For Fun</title>
+  <meta name="author" content="qinchao">
+  
+  <meta name="description" content="qinchao&#39;s blog">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="redis4.0_t_string源码剖析"/>
+  <meta property="og:site_name" content="Just For Fun"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico">
+  <link rel="alternate" href="/atom.xml" title="Just For Fun" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?a296c886e0b03b87da36df65dff53cba";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+</head>
+
+
+
+ <body>
+  <header id="header" class="inner"><div class= "header-content">
+		<div class="header-div">
+		    <h1><a href="/">Just For Fun</a></h1>
+		    <h2><a>&nbsp;If no fun Why do it</a></h2>
+		</div>
+	<div class="clearfix"></div>
+</div>
+
+<div class= "header-nav">
+	<div id="main-nav" class="alignleft">
+	    
+	      <a href="/">首页</a>
+	    
+	      <a href="/archives">归档</a>
+	    
+	      <a href="/about">关于</a>
+	    
+	</div>
+	<div id="sub-nav" class="alignright">
+
+
+	
+		<form class="search" action="/search/index.html" method="get" accept-charset="utf-8" >
+		<input type="text" id="search" style="width: 100px; height: 9px;" " class="st-default-search-input" maxlength="20" placeholder="Search" />
+		</form>
+	
+　
+	</div>
+	<div class="clearfix"></div>
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+  (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+  e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install','F9-FFdkxc43TCEzy_894','2.0.0');
+</script>
+</div>
+
+
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  <div class="post-content">
+    <header>
+      
+	
+    <h1 class="title">redis4.0_t_string源码剖析</h1>
+
+ 
+	
+	<time  datetime="2017-12-02T16:00:00.000Z"><p>发表于 2017-12-03 | 字数 <span class="post-count">784</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		  
+		<h4 id="1-string对象介绍"><a href="#1-string对象介绍" class="headerlink" title="1.string对象介绍"></a>1.string对象介绍</h4><h4 id="2-t-string-c源码分析"><a href="#2-t-string-c源码分析" class="headerlink" title="2.t_string.c源码分析"></a>2.t_string.c源码分析</h4><ul>
+<li>set命令解析</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div></pre></td><td class="code"><pre><div class="line">void <span class="built_in">set</span>GenericCommand(client *c, int flags, robj *key, robj *val, robj *expire, int unit, robj *ok_reply, robj *abort_reply) &#123;</div><div class="line">    long long milliseconds = 0; /* initialized to avoid any harmness warning */</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (expire) &#123;</div><div class="line">		//获取EX/PX后边参数的值</div><div class="line">        <span class="keyword">if</span> (getLongLongFromObjectOrReply(c, expire, &amp;milliseconds, NULL) != C_OK)</div><div class="line">            <span class="built_in">return</span>;</div><div class="line">        <span class="keyword">if</span> (milliseconds &lt;= 0) &#123;</div><div class="line">            addReplyErrorFormat(c,<span class="string">"invalid expire time in %s"</span>,c-&gt;cmd-&gt;name);</div><div class="line">            <span class="built_in">return</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (unit == UNIT_SECONDS) milliseconds *= 1000;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">if</span> ((flags &amp; OBJ_SET_NX &amp;&amp; lookupKeyWrite(c-&gt;db,key) != NULL) ||</div><div class="line">        (flags &amp; OBJ_SET_XX &amp;&amp; lookupKeyWrite(c-&gt;db,key) == NULL))</div><div class="line">    &#123;</div><div class="line">        addReply(c, abort_reply ? abort_reply : shared.nullbulk);</div><div class="line">        <span class="built_in">return</span>;</div><div class="line">    &#125;</div><div class="line">    <span class="built_in">set</span>Key(c-&gt;db,key,val);</div><div class="line">    server.dirty++;</div><div class="line">    <span class="keyword">if</span> (expire) <span class="built_in">set</span>Expire(c,c-&gt;db,key,mstime()+milliseconds);</div><div class="line">    notifyKeyspaceEvent(NOTIFY_STRING,<span class="string">"set"</span>,key,c-&gt;db-&gt;id);</div><div class="line">    <span class="keyword">if</span> (expire) notifyKeyspaceEvent(NOTIFY_GENERIC,</div><div class="line">        <span class="string">"expire"</span>,key,c-&gt;db-&gt;id);</div><div class="line">    addReply(c, ok_reply ? ok_reply : shared.ok);</div><div class="line">&#125;</div><div class="line"></div><div class="line">/* SET key value [NX] [XX] [EX &lt;seconds&gt;] [PX &lt;milliseconds&gt;] */</div><div class="line">void <span class="built_in">set</span>Command(client *c) &#123;</div><div class="line">    int j;</div><div class="line">    robj *expire = NULL;</div><div class="line">    int unit = UNIT_SECONDS;</div><div class="line">    int flags = OBJ_SET_NO_FLAGS;</div><div class="line"></div><div class="line">    <span class="keyword">for</span> (j = 3; j &lt; c-&gt;argc; j++) &#123;</div><div class="line">        char *a = c-&gt;argv[j]-&gt;ptr;</div><div class="line">	//当解析参数为EX或者PX时，用于获取参数的值</div><div class="line">        robj *next = (j == c-&gt;argc-1) ? NULL : c-&gt;argv[j+1];</div><div class="line"></div><div class="line">	//NX(NX与XX不能并存)</div><div class="line">        <span class="keyword">if</span> ((a[0] == <span class="string">'n'</span> || a[0] == <span class="string">'N'</span>) &amp;&amp;</div><div class="line">            (a[1] == <span class="string">'x'</span> || a[1] == <span class="string">'X'</span>) &amp;&amp; a[2] == <span class="string">'\0'</span> &amp;&amp;</div><div class="line">            !(flags &amp; OBJ_SET_XX))</div><div class="line">        &#123;</div><div class="line">            flags |= OBJ_SET_NX;</div><div class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> ((a[0] == <span class="string">'x'</span> || a[0] == <span class="string">'X'</span>) &amp;&amp;</div><div class="line">                   (a[1] == <span class="string">'x'</span> || a[1] == <span class="string">'X'</span>) &amp;&amp; a[2] == <span class="string">'\0'</span> &amp;&amp;</div><div class="line">                   !(flags &amp; OBJ_SET_NX))</div><div class="line">        &#123;</div><div class="line">            flags |= OBJ_SET_XX;</div><div class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> ((a[0] == <span class="string">'e'</span> || a[0] == <span class="string">'E'</span>) &amp;&amp;</div><div class="line">                   (a[1] == <span class="string">'x'</span> || a[1] == <span class="string">'X'</span>) &amp;&amp; a[2] == <span class="string">'\0'</span> &amp;&amp;</div><div class="line">                   !(flags &amp; OBJ_SET_PX) &amp;&amp; next)</div><div class="line">        &#123;</div><div class="line">	    //EX与PX不能并存</div><div class="line">            flags |= OBJ_SET_EX;</div><div class="line">            unit = UNIT_SECONDS;</div><div class="line">            expire = next;</div><div class="line">            j++;</div><div class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> ((a[0] == <span class="string">'p'</span> || a[0] == <span class="string">'P'</span>) &amp;&amp;</div><div class="line">                   (a[1] == <span class="string">'x'</span> || a[1] == <span class="string">'X'</span>) &amp;&amp; a[2] == <span class="string">'\0'</span> &amp;&amp;</div><div class="line">                   !(flags &amp; OBJ_SET_EX) &amp;&amp; next)</div><div class="line">        &#123;</div><div class="line">            flags |= OBJ_SET_PX;</div><div class="line">            unit = UNIT_MILLISECONDS;</div><div class="line">            expire = next;</div><div class="line">            j++;</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            addReply(c,shared.syntaxerr);</div><div class="line">            <span class="built_in">return</span>;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    //try to save value(argv[2]-&gt;ptr)中的space</div><div class="line">    c-&gt;argv[2] = tryObjectEncoding(c-&gt;argv[2]);</div><div class="line">    <span class="built_in">set</span>GenericCommand(c,flags,c-&gt;argv[1],c-&gt;argv[2],expire,unit,NULL,NULL);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div></pre></td><td class="code"><pre><div class="line">/* Try to encode a string object <span class="keyword">in</span> order to save space */</div><div class="line">robj *tryObjectEncoding(robj *o) &#123;</div><div class="line">    long value;</div><div class="line">    sds s = o-&gt;ptr;</div><div class="line">    size_t len;</div><div class="line"></div><div class="line">    /* Make sure this is a string object, the only <span class="built_in">type</span> we encode</div><div class="line">     * <span class="keyword">in</span> this function. Other types use encoded memory efficient</div><div class="line">     * representations but are handled by the commands implementing</div><div class="line">     * the type. */</div><div class="line">    serverAssertWithInfo(NULL,o,o-&gt;<span class="built_in">type</span> == OBJ_STRING);</div><div class="line"></div><div class="line">    /* We try some specialized encoding only <span class="keyword">for</span> objects that are</div><div class="line">     * RAW or EMBSTR encoded, <span class="keyword">in</span> other words objects that are still</div><div class="line">     * <span class="keyword">in</span> represented by an actually array of chars. */</div><div class="line">	//sds or embstr</div><div class="line">    <span class="keyword">if</span> (!sdsEncodedObject(o)) <span class="built_in">return</span> o;</div><div class="line"></div><div class="line">    /* It<span class="string">'s not safe to encode shared objects: shared objects can be shared</span></div><div class="line">     * everywhere in the "object space" of Redis and may end in places where</div><div class="line">     * they are not handled. We handle them only as values in the keyspace. */</div><div class="line">     if (o-&gt;refcount &gt; 1) return o;</div><div class="line"></div><div class="line">    /* Check if we can represent this string as a long integer.</div><div class="line">     * Note that we are sure that a string larger than 20 chars is not</div><div class="line">     * representable as a 32 nor 64 bit integer. */</div><div class="line">    len = sdslen(s);</div><div class="line">    if (len &lt;= 20 &amp;&amp; string2l(s,len,&amp;value)) &#123;</div><div class="line">        /* This object is encodable as a long. Try to use a shared object.</div><div class="line">         * Note that we avoid using shared integers when maxmemory is used</div><div class="line">         * because every object needs to have a private LRU field for the LRU</div><div class="line">         * algorithm to work well. */</div><div class="line">        if ((server.maxmemory == 0 ||</div><div class="line">            !(server.maxmemory_policy &amp; MAXMEMORY_FLAG_NO_SHARED_INTEGERS)) &amp;&amp;</div><div class="line">            value &gt;= 0 &amp;&amp;</div><div class="line">            value &lt; OBJ_SHARED_INTEGERS)</div><div class="line">        &#123;</div><div class="line">			//0~10000共享对象</div><div class="line">            decrRefCount(o);</div><div class="line">            incrRefCount(shared.integers[value]);</div><div class="line">            return shared.integers[value];</div><div class="line">        &#125; else &#123;</div><div class="line">			//ptr=(void*)value</div><div class="line">            if (o-&gt;encoding == OBJ_ENCODING_RAW) sdsfree(o-&gt;ptr);</div><div class="line">            o-&gt;encoding = OBJ_ENCODING_INT;</div><div class="line">            o-&gt;ptr = (void*) value;</div><div class="line">            return o;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    /* If the string is small and is still RAW encoded,</div><div class="line">     * try the EMBSTR encoding which is more efficient.</div><div class="line">     * In this representation the object and the SDS string are allocated</div><div class="line">     * in the same chunk of memory to save space and cache misses. */</div><div class="line">    if (len &lt;= OBJ_ENCODING_EMBSTR_SIZE_LIMIT) &#123;</div><div class="line">        robj *emb;</div><div class="line"></div><div class="line">        if (o-&gt;encoding == OBJ_ENCODING_EMBSTR) return o;</div><div class="line">        emb = createEmbeddedStringObject(s,sdslen(s));</div><div class="line">        decrRefCount(o);</div><div class="line">        return emb;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    /* We can't encode the object...</div><div class="line">     *</div><div class="line">     * Do the last try, and at least optimize the SDS string inside</div><div class="line">     * the string object to require little space, <span class="keyword">in</span> <span class="keyword">case</span> there</div><div class="line">     * is more than 10% of free space at the end of the SDS string.</div><div class="line">     *</div><div class="line">     * We <span class="keyword">do</span> that only <span class="keyword">for</span> relatively large strings as this branch</div><div class="line">     * is only entered <span class="keyword">if</span> the length of the string is greater than</div><div class="line">     * OBJ_ENCODING_EMBSTR_SIZE_LIMIT. */</div><div class="line">    <span class="keyword">if</span> (o-&gt;encoding == OBJ_ENCODING_RAW &amp;&amp;</div><div class="line">        sdsavail(s) &gt; len/10)</div><div class="line">    &#123;</div><div class="line">        o-&gt;ptr = sdsRemoveFreeSpace(o-&gt;ptr);</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<h4 id="4-参考文献"><a href="#4-参考文献" class="headerlink" title="4.参考文献"></a>4.参考文献</h4><ol>
+<li>《Redis设计与实现》</li>
+<li>《<a href="https://github.com/Qinch/redis_reading/tree/read/" target="_blank" rel="external">redis_reading</a>》</li>
+</ol>
+
+	
+    </div>
+    <footer>
+      
+        
+  
+  <div class="categories">
+    <a href="/categories/redis/">redis</a>
+  </div>
+
+        
+  
+  <div class="tags">
+    <a href="/tags/redis4-0/">redis4.0</a>, <a href="/tags/sourcecode/">sourcecode</a>, <a href="/tags/t-string/">t_string</a>
+  </div>
+
+	
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  
+<div class="widget tag">
+  <h3 class="title">最新文章</h3>
+  <ul class="entry">
+    
+      <li>
+        <a href="/2017/12/04/redis4-intset/">redis4.0_intset源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2017/12/03/redis4-t_string/">redis4.0_t_string源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2017/12/03/redis4-ziplist/">redis4.0_ziplist源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2017/12/03/redis4-object/">redis4.0_object源码剖析</a>
+      </li>
+    
+      <li>
+        <a href="/2017/12/02/redis4-skiplist/">redis4.0_skiplist源码剖析</a>
+      </li>
+    
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">分类</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/Asm-C/">Asm/C</a><small>1</small></li>
+  
+    <li><a href="/categories/Asm-Cpp/">Asm/Cpp</a><small>7</small></li>
+  
+    <li><a href="/categories/C-C/">C/C++</a><small>1</small></li>
+  
+    <li><a href="/categories/C-Linux/">C/Linux</a><small>1</small></li>
+  
+    <li><a href="/categories/Linux/">Linux</a><small>1</small></li>
+  
+    <li><a href="/categories/STL源码剖析/">STL源码剖析</a><small>2</small></li>
+  
+    <li><a href="/categories/gdb/">gdb</a><small>1</small></li>
+  
+    <li><a href="/categories/linux/">linux</a><small>1</small></li>
+  
+    <li><a href="/categories/makefile/">makefile</a><small>1</small></li>
+  
+    <li><a href="/categories/mysql/">mysql</a><small>1</small></li>
+  
+    <li><a href="/categories/redis/">redis</a><small>8</small></li>
+  
+    <li><a href="/categories/shell/">shell</a><small>1</small></li>
+  
+    <li><a href="/categories/unpv2/">unpv2</a><small>1</small></li>
+  
+    <li><a href="/categories/线程/">线程</a><small>1</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tagcloud">
+  <h3 class="title">标签云</h3>
+  <div class="entry">
+    <a href="/tags/Asm/" style="font-size: 20px;">Asm</a> <a href="/tags/C/" style="font-size: 20px;">C</a> <a href="/tags/Cpp/" style="font-size: 16.67px;">Cpp</a> <a href="/tags/adlist/" style="font-size: 10px;">adlist</a> <a href="/tags/apue/" style="font-size: 13.33px;">apue</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/database/" style="font-size: 10px;">database</a> <a href="/tags/dict/" style="font-size: 10px;">dict</a> <a href="/tags/gdb/" style="font-size: 10px;">gdb</a> <a href="/tags/heap/" style="font-size: 10px;">heap</a> <a href="/tags/icp/" style="font-size: 10px;">icp</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/intset/" style="font-size: 10px;">intset</a> <a href="/tags/linux/" style="font-size: 13.33px;">linux</a> <a href="/tags/make/" style="font-size: 10px;">make</a> <a href="/tags/makefile/" style="font-size: 10px;">makefile</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/object/" style="font-size: 10px;">object</a> <a href="/tags/perf/" style="font-size: 10px;">perf</a> <a href="/tags/redis4-0/" style="font-size: 20px;">redis4.0</a> <a href="/tags/scp/" style="font-size: 10px;">scp</a> <a href="/tags/sds/" style="font-size: 10px;">sds</a> <a href="/tags/signal/" style="font-size: 10px;">signal</a> <a href="/tags/skiplist/" style="font-size: 10px;">skiplist</a> <a href="/tags/sort/" style="font-size: 10px;">sort</a> <a href="/tags/sourcecode/" style="font-size: 20px;">sourcecode</a> <a href="/tags/stl/" style="font-size: 13.33px;">stl</a> <a href="/tags/t-string/" style="font-size: 10px;">t_string</a> <a href="/tags/thread/" style="font-size: 10px;">thread</a> <a href="/tags/tips/" style="font-size: 13.33px;">tips</a> <a href="/tags/unpv2/" style="font-size: 10px;">unpv2</a> <a href="/tags/ziplist/" style="font-size: 10px;">ziplist</a> <a href="/tags/内存流/" style="font-size: 10px;">内存流</a> <a href="/tags/勘误/" style="font-size: 10px;">勘误</a>
+  </div>
+</div>
+
+
+  
+<div class="widget blogroll">
+  <h3 class="title">链接</h3>
+  <ul class="entry">
+    
+	<li><a href="http://zhangwenli.com" title="http://zhangwenli.com" target="_blank"]);">Ovilia</a></li>
+    
+	<li><a href="http://zcheng.ren" title="" target="_blank"]);">Zee-张程</a></li>
+    
+	<li><a href="https://coolshell.cn" title="" target="_blank"]);">coolshell</a></li>
+    
+	<li><a href="http://hedengcheng.com" title="" target="_blank"]);">何登成的技术博客</a></li>
+    
+	<li><a href="http://blog.yufeng.info" title="" target="_blank"]);">系统技术非业余研究</a></li>
+    
+	<li><a href="https://blog.codingnow.com" title="" target="_blank"]);">云风的BLOG</a></li>
+    
+  </ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="copyright">
+  
+  &copy; 2015-2018 qinchao
+  
+  | Powered by hexo and Theme by <a href=https://github.com/Qinch/hexo-theme-light_mod target="_blank">light </a>
+  <a href="/atom.xml" target="_blank">| RSS</a>
+</div>
+<div class="clearfix"></div>
+
+</footer>
+  <script src="//libs.baidu.com/jquery/2.0.3/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+</body>
+</html>
