@@ -191,6 +191,68 @@ var _hmt = _hmt || [];
     <header>
       
 	
+    <h1 class="title"><a href="/2017/12/03/redis4-object/">redis4.0_object源码剖析</a></h1>
+
+ 
+	
+	<time  datetime="2017-12-02T16:00:00.000Z"><p>发表于 2017-12-03 | 字数 <span class="post-count">538</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<h4 id="1-redisObject介绍"><a href="#1-redisObject介绍" class="headerlink" title="1.redisObject介绍"></a>1.redisObject介绍</h4><ul>
+<li>Redis使用对象来表示数据库中的key和value,每次在redis中创建一个新的键值对时，至少需要创建两个对象对象:键对象和值对象。</li>
+<li><p>Redis中的每个对象都由一个redisObject结构体表示。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">typedef struct redisObject &#123;                                          </div><div class="line">     //对象的类型</div><div class="line">     unsigned <span class="built_in">type</span>:4;</div><div class="line">     //对象采用的编码方式                                             </div><div class="line">     unsigned encoding:4;</div><div class="line">     //对象最后一次被命令程序访问的时间                             </div><div class="line">     unsigned lru:LRU_BITS; /* LRU time (relative to global lru_clock) or</div><div class="line">                             * LFU data (least significant 8 bits frequency</div><div class="line">                             * and most significant 16 bits decreas time). */</div><div class="line">     //对象引用计数</div><div class="line">     int refcount; </div><div class="line">     //指向底层数据结构的指针</div><div class="line">     void *ptr;                                                                                                                                                        </div><div class="line">&#125; robj;</div></pre></td></tr></table></figure>
+</li>
+<li><p>redisObject结构体中type表示对象的类型，type的取值如下：</p>
+</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">/* A redis object, that is a <span class="built_in">type</span> able to hold a string / list / <span class="built_in">set</span> */</div><div class="line"></div><div class="line">/* The actual Redis Object */</div><div class="line"><span class="comment">#define OBJ_STRING 0</span></div><div class="line"><span class="comment">#define OBJ_LIST 1</span></div><div class="line"><span class="comment">#define OBJ_SET 2</span></div><div class="line"><span class="comment">#define OBJ_ZSET 3</span></div><div class="line"><span class="comment">#define OBJ_HASH 4</span></div></pre></td></tr></table></figure>
+<ul>
+<li>redisObject结构体中encoding表示type类型的对象采用哪种数据结构作为底层实现，encoding的取值如下:</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">/* Objects encoding. Some kind of objects like Strings and Hashes can be</div><div class="line"> * internally represented <span class="keyword">in</span> multiple ways. The <span class="string">'encoding'</span> field of the object</div><div class="line"> * is <span class="built_in">set</span> to one of this fields <span class="keyword">for</span> this object. */</div><div class="line">//sds</div><div class="line"><span class="comment">#define OBJ_ENCODING_RAW 0     /* Raw representation */</span></div><div class="line">//<span class="string">"1234"</span>存储为数字1234，即ptr=(void*)1234;</div><div class="line"><span class="comment">#define OBJ_ENCODING_INT 1     /* Encoded as integer */</span></div><div class="line"><span class="comment">#define OBJ_ENCODING_HT 2      /* Encoded as hash table */</span></div><div class="line"><span class="comment">#define OBJ_ENCODING_ZIPMAP 3  /* Encoded as zipmap */</span></div><div class="line"><span class="comment">#define OBJ_ENCODING_LINKEDLIST 4 /* No longer used: old list encoding. */</span></div><div class="line"><span class="comment">#define OBJ_ENCODING_ZIPLIST 5 /* Encoded as ziplist */</span></div><div class="line"><span class="comment">#define OBJ_ENCODING_INTSET 6  /* Encoded as intset */</span></div><div class="line"><span class="comment">#define OBJ_ENCODING_SKIPLIST 7  /* Encoded as skiplist */</span></div><div class="line"><span class="comment">#define OBJ_ENCODING_EMBSTR 8  /* Embedded sds string encoding */</span></div><div class="line"><span class="comment">#define OBJ_ENCODING_QUICKLIST 9 /* Encoded as linked list of ziplists */</span></div></pre></td></tr></table></figure>
+<h4 id="2-object-c源码分析"><a href="#2-object-c源码分析" class="headerlink" title="2.object.c源码分析"></a>2.object.c源码分析</h4><ul>
+<li><p>创建一个redisObject对象</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">//创建一个redisObject对象</div><div class="line">robj *createObject(int <span class="built_in">type</span>, void *ptr) &#123;</div><div class="line">    robj *o = zmalloc(sizeof(*o));</div><div class="line">    o-&gt;<span class="built_in">type</span> = <span class="built_in">type</span>;</div><div class="line">	//sds</div><div class="line">    o-&gt;encoding = OBJ_ENCODING_RAW;</div><div class="line">    o-&gt;ptr = ptr;</div><div class="line">	//引用计数</div><div class="line">    o-&gt;refcount = 1;</div><div class="line"></div><div class="line">    /* Set the LRU to the current lruclock (minutes resolution), or</div><div class="line">     * alternatively the LFU counter. */</div><div class="line">	//lru字段用于记录对象最后一次被命令程序访问的时间</div><div class="line">    <span class="keyword">if</span> (server.maxmemory_policy &amp; MAXMEMORY_FLAG_LFU) &#123;</div><div class="line">        o-&gt;lru = (LFUGetTimeInMinutes()&lt;&lt;8) | LFU_INIT_VAL;</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        o-&gt;lru = LRU_CLOCK();</div><div class="line">    &#125;</div><div class="line">    <span class="built_in">return</span> o;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>redisObject对象refcount字段减1.</p>
+</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">void decrRefCount(robj *o) &#123;</div><div class="line">    <span class="keyword">if</span> (o-&gt;refcount == 1) &#123;</div><div class="line">        switch(o-&gt;<span class="built_in">type</span>) &#123;</div><div class="line">        <span class="keyword">case</span> OBJ_STRING: freeStringObject(o); <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> OBJ_LIST: freeListObject(o); <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> OBJ_SET: freeSetObject(o); <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> OBJ_ZSET: freeZ<span class="built_in">set</span>Object(o); <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> OBJ_HASH: freeHashObject(o); <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> OBJ_MODULE: freeModuleObject(o); <span class="built_in">break</span>;</div><div class="line">        default: serverPanic(<span class="string">"Unknown object type"</span>); <span class="built_in">break</span>;</div><div class="line">        &#125;</div><div class="line">        zfree(o);</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="keyword">if</span> (o-&gt;refcount &lt;= 0) serverPanic(<span class="string">"decrRefCount against refcount &lt;= 0"</span>);</div><div class="line">        <span class="keyword">if</span> (o-&gt;refcount != OBJ_SHARED_REFCOUNT) o-&gt;refcount--;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="4-参考文献"><a href="#4-参考文献" class="headerlink" title="4.参考文献"></a>4.参考文献</h4><ol>
+<li>《Redis设计与实现》</li>
+<li>《<a href="https://github.com/Qinch/redis_reading/tree/read/" target="_blank" rel="external">redis_reading</a>》</li>
+</ol>
+
+		
+	
+    </div>
+    <footer>
+      
+        
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
     <h1 class="title"><a href="/2017/12/03/redis4-ziplist/">redis4.0_ziplist源码剖析</a></h1>
 
  
@@ -257,68 +319,6 @@ var _hmt = _hmt || [];
         <div class="alignright">
           <a href="/2017/12/03/redis4-ziplist/#comment" class="comment-link">评论</a>
         </div>
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
-    <h1 class="title"><a href="/2017/12/03/redis4-object/">redis4.0_object源码剖析</a></h1>
-
- 
-	
-	<time  datetime="2017-12-02T16:00:00.000Z"><p>发表于 2017-12-03 | 字数 <span class="post-count">538</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<h4 id="1-redisObject介绍"><a href="#1-redisObject介绍" class="headerlink" title="1.redisObject介绍"></a>1.redisObject介绍</h4><ul>
-<li>Redis使用对象来表示数据库中的key和value,每次在redis中创建一个新的键值对时，至少需要创建两个对象对象:键对象和值对象。</li>
-<li><p>Redis中的每个对象都由一个redisObject结构体表示。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">typedef struct redisObject &#123;                                          </div><div class="line">     //对象的类型</div><div class="line">     unsigned <span class="built_in">type</span>:4;</div><div class="line">     //对象采用的编码方式                                             </div><div class="line">     unsigned encoding:4;</div><div class="line">     //对象最后一次被命令程序访问的时间                             </div><div class="line">     unsigned lru:LRU_BITS; /* LRU time (relative to global lru_clock) or</div><div class="line">                             * LFU data (least significant 8 bits frequency</div><div class="line">                             * and most significant 16 bits decreas time). */</div><div class="line">     //对象引用计数</div><div class="line">     int refcount; </div><div class="line">     //指向底层数据结构的指针</div><div class="line">     void *ptr;                                                                                                                                                        </div><div class="line">&#125; robj;</div></pre></td></tr></table></figure>
-</li>
-<li><p>redisObject结构体中type表示对象的类型，type的取值如下：</p>
-</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">/* A redis object, that is a <span class="built_in">type</span> able to hold a string / list / <span class="built_in">set</span> */</div><div class="line"></div><div class="line">/* The actual Redis Object */</div><div class="line"><span class="comment">#define OBJ_STRING 0</span></div><div class="line"><span class="comment">#define OBJ_LIST 1</span></div><div class="line"><span class="comment">#define OBJ_SET 2</span></div><div class="line"><span class="comment">#define OBJ_ZSET 3</span></div><div class="line"><span class="comment">#define OBJ_HASH 4</span></div></pre></td></tr></table></figure>
-<ul>
-<li>redisObject结构体中encoding表示type类型的对象采用哪种数据结构作为底层实现，encoding的取值如下:</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">/* Objects encoding. Some kind of objects like Strings and Hashes can be</div><div class="line"> * internally represented <span class="keyword">in</span> multiple ways. The <span class="string">'encoding'</span> field of the object</div><div class="line"> * is <span class="built_in">set</span> to one of this fields <span class="keyword">for</span> this object. */</div><div class="line">//sds</div><div class="line"><span class="comment">#define OBJ_ENCODING_RAW 0     /* Raw representation */</span></div><div class="line">//<span class="string">"1234"</span>存储为数字1234，即ptr=(void*)1234;</div><div class="line"><span class="comment">#define OBJ_ENCODING_INT 1     /* Encoded as integer */</span></div><div class="line"><span class="comment">#define OBJ_ENCODING_HT 2      /* Encoded as hash table */</span></div><div class="line"><span class="comment">#define OBJ_ENCODING_ZIPMAP 3  /* Encoded as zipmap */</span></div><div class="line"><span class="comment">#define OBJ_ENCODING_LINKEDLIST 4 /* No longer used: old list encoding. */</span></div><div class="line"><span class="comment">#define OBJ_ENCODING_ZIPLIST 5 /* Encoded as ziplist */</span></div><div class="line"><span class="comment">#define OBJ_ENCODING_INTSET 6  /* Encoded as intset */</span></div><div class="line"><span class="comment">#define OBJ_ENCODING_SKIPLIST 7  /* Encoded as skiplist */</span></div><div class="line"><span class="comment">#define OBJ_ENCODING_EMBSTR 8  /* Embedded sds string encoding */</span></div><div class="line"><span class="comment">#define OBJ_ENCODING_QUICKLIST 9 /* Encoded as linked list of ziplists */</span></div></pre></td></tr></table></figure>
-<h4 id="2-object-c源码分析"><a href="#2-object-c源码分析" class="headerlink" title="2.object.c源码分析"></a>2.object.c源码分析</h4><ul>
-<li><p>创建一个redisObject对象</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">//创建一个redisObject对象</div><div class="line">robj *createObject(int <span class="built_in">type</span>, void *ptr) &#123;</div><div class="line">    robj *o = zmalloc(sizeof(*o));</div><div class="line">    o-&gt;<span class="built_in">type</span> = <span class="built_in">type</span>;</div><div class="line">	//sds</div><div class="line">    o-&gt;encoding = OBJ_ENCODING_RAW;</div><div class="line">    o-&gt;ptr = ptr;</div><div class="line">	//引用计数</div><div class="line">    o-&gt;refcount = 1;</div><div class="line"></div><div class="line">    /* Set the LRU to the current lruclock (minutes resolution), or</div><div class="line">     * alternatively the LFU counter. */</div><div class="line">	//lru字段用于记录对象最后一次被命令程序访问的时间</div><div class="line">    <span class="keyword">if</span> (server.maxmemory_policy &amp; MAXMEMORY_FLAG_LFU) &#123;</div><div class="line">        o-&gt;lru = (LFUGetTimeInMinutes()&lt;&lt;8) | LFU_INIT_VAL;</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        o-&gt;lru = LRU_CLOCK();</div><div class="line">    &#125;</div><div class="line">    <span class="built_in">return</span> o;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>redisObject对象refcount字段减1.</p>
-</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">void decrRefCount(robj *o) &#123;</div><div class="line">    <span class="keyword">if</span> (o-&gt;refcount == 1) &#123;</div><div class="line">        switch(o-&gt;<span class="built_in">type</span>) &#123;</div><div class="line">        <span class="keyword">case</span> OBJ_STRING: freeStringObject(o); <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> OBJ_LIST: freeListObject(o); <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> OBJ_SET: freeSetObject(o); <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> OBJ_ZSET: freeZ<span class="built_in">set</span>Object(o); <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> OBJ_HASH: freeHashObject(o); <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> OBJ_MODULE: freeModuleObject(o); <span class="built_in">break</span>;</div><div class="line">        default: serverPanic(<span class="string">"Unknown object type"</span>); <span class="built_in">break</span>;</div><div class="line">        &#125;</div><div class="line">        zfree(o);</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="keyword">if</span> (o-&gt;refcount &lt;= 0) serverPanic(<span class="string">"decrRefCount against refcount &lt;= 0"</span>);</div><div class="line">        <span class="keyword">if</span> (o-&gt;refcount != OBJ_SHARED_REFCOUNT) o-&gt;refcount--;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h4 id="4-参考文献"><a href="#4-参考文献" class="headerlink" title="4.参考文献"></a>4.参考文献</h4><ol>
-<li>《Redis设计与实现》</li>
-<li>《<a href="https://github.com/Qinch/redis_reading/tree/read/" target="_blank" rel="external">redis_reading</a>》</li>
-</ol>
-
-		
-	
-    </div>
-    <footer>
-      
-        
         
       
     
@@ -590,11 +590,11 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2017/04/19/thread_signal/">线程-信号</a></h1>
+    <h1 class="title"><a href="/2017/04/19/mk/">Makefile</a></h1>
 
  
 	
-	<time  datetime="2017-04-18T16:00:00.000Z"><p>发表于 2017-04-19 | 字数 <span class="post-count">218</span>
+	<time  datetime="2017-04-18T16:00:00.000Z"><p>发表于 2017-04-19 | 字数 <span class="post-count">99</span>
 
 </p></time>
       
@@ -602,10 +602,7 @@ var _hmt = _hmt || [];
     <div class="entry">
       
 		
-			<h4 id="1-线程与信号"><a href="#1-线程与信号" class="headerlink" title="1,线程与信号"></a>1,线程与信号</h4><ol>
-<li>每个线程都有自己的信号屏蔽字，但是信号的处理是先进程中所有线程共享的。这就意味着单个线程可以阻止某些信号，但当某个线程修改了与某个给定信号相关的处理行为以后，所有的线程都必须共享这个处理行为的改变。</li>
-<li>进程中的信号是递送给单个线程的。（Signals are delivered to a single thread in the process. If the signal is related to a hardware fault, the signal is usually sent to the thread whose action caused the event. Other signals, on the other hand, are delivered to an arbitrary thread.)对于该句的理解是：因为进程中所有线程共享信号的处理，所以发送给任意进程（只要该进程没有屏蔽该信号），对该信号的处理都是相同的。</li>
-</ol>
+			<h4 id="1-makefile的规则"><a href="#1-makefile的规则" class="headerlink" title="1,makefile的规则"></a>1,makefile的规则</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">target ...: prerequisites ...</div><div class="line">	cmd</div><div class="line">	...</div><div class="line">	...</div><div class="line"></div><div class="line">其中，target可以是一个obj file,也可以是一个执行文件，还可以是一个label.</div><div class="line">prerequisites：为生成该target所依赖的文件或target</div><div class="line">cmd(必须以一个Tab键作为开头)：为target要执行的命令</div><div class="line">注：prerequisites中如果有一个以上的文件比target文件要新的话，cmd所定义的命令就会被执行。</div></pre></td></tr></table></figure>
 		
 	
     </div>
@@ -613,12 +610,12 @@ var _hmt = _hmt || [];
       
         
           <div class="alignleft">
-            <a href="/2017/04/19/thread_signal/#more" class="more-link">阅读全文</a>
+            <a href="/2017/04/19/mk/#more" class="more-link">阅读全文</a>
           </div>
         
         
         <div class="alignright">
-          <a href="/2017/04/19/thread_signal/#comment" class="comment-link">评论</a>
+          <a href="/2017/04/19/mk/#comment" class="comment-link">评论</a>
         </div>
         
       
@@ -653,11 +650,11 @@ var _hmt = _hmt || [];
       </li>
     
       <li>
-        <a href="/2017/12/03/redis4-ziplist/">redis4.0_ziplist源码剖析</a>
+        <a href="/2017/12/03/redis4-object/">redis4.0_object源码剖析</a>
       </li>
     
       <li>
-        <a href="/2017/12/03/redis4-object/">redis4.0_object源码剖析</a>
+        <a href="/2017/12/03/redis4-ziplist/">redis4.0_ziplist源码剖析</a>
       </li>
     
       <li>
@@ -685,9 +682,9 @@ var _hmt = _hmt || [];
   
     <li><a href="/categories/STL源码剖析/">STL源码剖析</a><small>2</small></li>
   
-    <li><a href="/categories/gdb/">gdb</a><small>1</small></li>
+    <li><a href="/categories/gdb/">gdb</a><small>0</small></li>
   
-    <li><a href="/categories/linux/">linux</a><small>1</small></li>
+    <li><a href="/categories/linux/">linux</a><small>0</small></li>
   
     <li><a href="/categories/makefile/">makefile</a><small>1</small></li>
   
@@ -709,7 +706,7 @@ var _hmt = _hmt || [];
 <div class="widget tagcloud">
   <h3 class="title">标签云</h3>
   <div class="entry">
-    <a href="/tags/Asm/" style="font-size: 20px;">Asm</a> <a href="/tags/C/" style="font-size: 20px;">C</a> <a href="/tags/Cpp/" style="font-size: 16.67px;">Cpp</a> <a href="/tags/adlist/" style="font-size: 10px;">adlist</a> <a href="/tags/apue/" style="font-size: 13.33px;">apue</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/database/" style="font-size: 10px;">database</a> <a href="/tags/dict/" style="font-size: 10px;">dict</a> <a href="/tags/gdb/" style="font-size: 10px;">gdb</a> <a href="/tags/heap/" style="font-size: 10px;">heap</a> <a href="/tags/icp/" style="font-size: 10px;">icp</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/intset/" style="font-size: 10px;">intset</a> <a href="/tags/linux/" style="font-size: 13.33px;">linux</a> <a href="/tags/make/" style="font-size: 10px;">make</a> <a href="/tags/makefile/" style="font-size: 10px;">makefile</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/object/" style="font-size: 10px;">object</a> <a href="/tags/perf/" style="font-size: 10px;">perf</a> <a href="/tags/redis4-0/" style="font-size: 20px;">redis4.0</a> <a href="/tags/scp/" style="font-size: 10px;">scp</a> <a href="/tags/sds/" style="font-size: 10px;">sds</a> <a href="/tags/signal/" style="font-size: 10px;">signal</a> <a href="/tags/skiplist/" style="font-size: 10px;">skiplist</a> <a href="/tags/sort/" style="font-size: 10px;">sort</a> <a href="/tags/sourcecode/" style="font-size: 20px;">sourcecode</a> <a href="/tags/stl/" style="font-size: 13.33px;">stl</a> <a href="/tags/t-string/" style="font-size: 10px;">t_string</a> <a href="/tags/thread/" style="font-size: 10px;">thread</a> <a href="/tags/tips/" style="font-size: 13.33px;">tips</a> <a href="/tags/unpv2/" style="font-size: 10px;">unpv2</a> <a href="/tags/ziplist/" style="font-size: 10px;">ziplist</a> <a href="/tags/内存流/" style="font-size: 10px;">内存流</a> <a href="/tags/勘误/" style="font-size: 10px;">勘误</a>
+    <a href="/tags/Asm/" style="font-size: 20px;">Asm</a> <a href="/tags/C/" style="font-size: 20px;">C</a> <a href="/tags/Cpp/" style="font-size: 16.67px;">Cpp</a> <a href="/tags/adlist/" style="font-size: 10px;">adlist</a> <a href="/tags/apue/" style="font-size: 13.33px;">apue</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/database/" style="font-size: 10px;">database</a> <a href="/tags/dict/" style="font-size: 10px;">dict</a> <a href="/tags/heap/" style="font-size: 10px;">heap</a> <a href="/tags/icp/" style="font-size: 10px;">icp</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/intset/" style="font-size: 10px;">intset</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/make/" style="font-size: 10px;">make</a> <a href="/tags/makefile/" style="font-size: 10px;">makefile</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/object/" style="font-size: 10px;">object</a> <a href="/tags/redis4-0/" style="font-size: 20px;">redis4.0</a> <a href="/tags/scp/" style="font-size: 10px;">scp</a> <a href="/tags/sds/" style="font-size: 10px;">sds</a> <a href="/tags/signal/" style="font-size: 10px;">signal</a> <a href="/tags/skiplist/" style="font-size: 10px;">skiplist</a> <a href="/tags/sort/" style="font-size: 10px;">sort</a> <a href="/tags/sourcecode/" style="font-size: 20px;">sourcecode</a> <a href="/tags/stl/" style="font-size: 13.33px;">stl</a> <a href="/tags/t-string/" style="font-size: 10px;">t_string</a> <a href="/tags/thread/" style="font-size: 10px;">thread</a> <a href="/tags/tips/" style="font-size: 10px;">tips</a> <a href="/tags/unpv2/" style="font-size: 10px;">unpv2</a> <a href="/tags/ziplist/" style="font-size: 10px;">ziplist</a> <a href="/tags/内存流/" style="font-size: 10px;">内存流</a> <a href="/tags/勘误/" style="font-size: 10px;">勘误</a>
   </div>
 </div>
 
