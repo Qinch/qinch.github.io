@@ -375,58 +375,6 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2017/12/02/redis4-skiplist/">redis4.0_skiplist源码剖析</a></h1>
-
- 
-	
-	<time  datetime="2017-12-01T16:00:00.000Z"><p>发表于 2017-12-02 | 字数 <span class="post-count">1,236</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<h4 id="1-skiplist概述"><a href="#1-skiplist概述" class="headerlink" title="1.skiplist概述"></a>1.skiplist概述</h4><ul>
-<li>skiplist(跳跃表)是一种有序数据结构，它通过在每个节点中维持多个指向其他节点指针，从而达到快速访问节点的目的。</li>
-<li>skiplist支持平均O(logN),最坏O(N)复杂度的节点查找，还可以通过顺序性操作来批量处理节点。</li>
-<li>This skiplist implementation is almost a C translation of the original algorithm described by William Pugh in “Skip Lists: A Probabilistic Alternative to Balanced Trees”, modified in three ways:<ul>
-<li>a) this implementation allows for repeated scores.</li>
-<li>b) the comparison is not just by key (our ‘score’) but by satellite data.</li>
-<li>c) there is a back pointer, so it’s a doubly linked list with the back  pointers being only at “level 1”. This allows to traverse the list from tail to head, useful for ZREVRANGE. */</li>
-</ul>
-</li>
-</ul>
-<h4 id="2-skiplist结构体"><a href="#2-skiplist结构体" class="headerlink" title="2.skiplist结构体"></a>2.skiplist结构体</h4><p><img src="/img/skiplist0.png" alt="单击图片进行放大"></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">/* ZSETs use a specialized version of Skiplists */</div><div class="line">typedef struct zskiplistNode &#123;</div><div class="line">    sds ele;</div><div class="line">    double score;</div><div class="line">    struct zskiplistNode *backward;</div><div class="line">    struct zskiplistLevel &#123;</div><div class="line">        struct zskiplistNode *forward;</div><div class="line">        unsigned int span;//跨度：用于记录与forward指向节点的距离</div><div class="line">    &#125; level[]; //0长度数组的妙用</div><div class="line">&#125; zskiplistNode;</div><div class="line"></div><div class="line">typedef struct zskiplist &#123;</div><div class="line">    //指向skiplist中表头节点和表尾节点</div><div class="line">    struct zskiplistNode *header, *tail;</div><div class="line">    //skiplist中节点的数量（不包括表头节点）</div><div class="line">    unsigned long length;</div><div class="line">    //skiplist中层数最高的节点的层数</div><div class="line">    int level;</div><div class="line">&#125; zskiplist;</div></pre></td></tr></table></figure>
-		
-	
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2017/12/02/redis4-skiplist/#more" class="more-link">阅读全文</a>
-          </div>
-        
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
     <h1 class="title"><a href="/2017/12/02/redis4-adlist/">redis4.0_adlist源码剖析</a></h1>
 
  
@@ -473,11 +421,11 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2017/12/01/redis4-dict/">redis4.0_dict源码剖析</a></h1>
+    <h1 class="title"><a href="/2017/12/02/redis4-skiplist/">redis4.0_skiplist源码剖析</a></h1>
 
  
 	
-	<time  datetime="2017-11-30T16:00:00.000Z"><p>发表于 2017-12-01 | 字数 <span class="post-count">6,389</span>
+	<time  datetime="2017-12-01T16:00:00.000Z"><p>发表于 2017-12-02 | 字数 <span class="post-count">1,236</span>
 
 </p></time>
       
@@ -485,18 +433,18 @@ var _hmt = _hmt || [];
     <div class="entry">
       
 		
-			<h4 id="1-dict概述"><a href="#1-dict概述" class="headerlink" title="1.dict概述"></a>1.dict概述</h4><ul>
-<li>dict(字典)：又称为符号表（symbol table）,关联数组（associative array）或者映射（map）,是一种用于保存键值对（key-value pair）的抽象数据结构。字典中每个键都是独一无二的，程序可以在字典中根据键查找与之关联的值，或者根据键来删除整个键值对。</li>
+			<h4 id="1-skiplist概述"><a href="#1-skiplist概述" class="headerlink" title="1.skiplist概述"></a>1.skiplist概述</h4><ul>
+<li>skiplist(跳跃表)是一种有序数据结构，它通过在每个节点中维持多个指向其他节点指针，从而达到快速访问节点的目的。</li>
+<li>skiplist支持平均O(logN),最坏O(N)复杂度的节点查找，还可以通过顺序性操作来批量处理节点。</li>
+<li>This skiplist implementation is almost a C translation of the original algorithm described by William Pugh in “Skip Lists: A Probabilistic Alternative to Balanced Trees”, modified in three ways:<ul>
+<li>a) this implementation allows for repeated scores.</li>
+<li>b) the comparison is not just by key (our ‘score’) but by satellite data.</li>
+<li>c) there is a back pointer, so it’s a doubly linked list with the back  pointers being only at “level 1”. This allows to traverse the list from tail to head, useful for ZREVRANGE. */</li>
 </ul>
-<h4 id="2-dict结构体"><a href="#2-dict结构体" class="headerlink" title="2.dict结构体"></a>2.dict结构体</h4><ul>
-<li><p>hash table结构体<br><img src="/img/dict0.png" alt="ht"></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">/* Unused arguments generate annoying warnings... */</div><div class="line"><span class="comment">#define DICT_NOTUSED(V) ((void) V)</span></div><div class="line">//<span class="built_in">hash</span> table节点</div><div class="line">typedef struct dictEntry &#123;</div><div class="line">    //键</div><div class="line">    void *key;</div><div class="line">    //值</div><div class="line">    union &#123;</div><div class="line">        void *val;</div><div class="line">        uint64_t u64;</div><div class="line">        int64_t s64;</div><div class="line">        double d;</div><div class="line">    &#125; v;</div><div class="line">    //指向下一个<span class="built_in">hash</span> table节点</div><div class="line">    struct dictEntry *next;</div><div class="line">&#125; dictEntry;</div><div class="line"></div><div class="line">/* This is our <span class="built_in">hash</span> table structure. Every dictionary has two of this as we</div><div class="line"> * implement incremental rehashing, <span class="keyword">for</span> the old to the new table. */</div><div class="line">//<span class="built_in">hash</span> table</div><div class="line">typedef struct dictht &#123;</div><div class="line">    //<span class="built_in">hash</span> table数组[动态二维数组内存布局](http://chinchao.xyz/2016/04/07/cpp-model-2/)</div><div class="line">    dictEntry **table;</div><div class="line">    //<span class="built_in">hash</span> table数组的大小,size=2^n</div><div class="line">    unsigned long size;</div><div class="line">    //sizemash=size-1,<span class="built_in">hash</span> table掩码，用于计算索引值</div><div class="line">    unsigned long sizemask;</div><div class="line">    //<span class="built_in">hash</span> table中节点(dictEntry)的数量</div><div class="line">    unsigned long used;</div><div class="line">&#125; dictht;</div></pre></td></tr></table></figure>
-</li>
-<li><p>dict结构体</p>
 </li>
 </ul>
-<p><img src="/img/dict1.png" alt="ht"></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">//字典</div><div class="line">typedef struct dict &#123;</div><div class="line">    dictType *<span class="built_in">type</span>;</div><div class="line">    void *privdata;</div><div class="line">    dictht ht[2];</div><div class="line">    //rehashidx=-1表示没有进行<span class="built_in">rehash</span>，否则rehashidx表示<span class="built_in">hash</span> table数组中当前待<span class="built_in">rehash</span>的元素的索引</div><div class="line">    long rehashidx; /* rehashing not <span class="keyword">in</span> progress <span class="keyword">if</span> rehashidx == -1 */</div><div class="line">    //安全迭代器的数量</div><div class="line">    unsigned long iterators; /* number of iterators currently running */</div><div class="line">&#125; dict;</div><div class="line"></div><div class="line">//类型特定函数</div><div class="line">typedef struct dictType &#123;</div><div class="line">    uint64_t (*<span class="built_in">hash</span>Function)(const void *key);</div><div class="line">    void *(*keyDup)(void *privdata, const void *key);</div><div class="line">    void *(*valDup)(void *privdata, const void *obj);</div><div class="line">    int (*keyCompare)(void *privdata, const void *key1, const void *key2);</div><div class="line">    void (*keyDestructor)(void *privdata, void *key);</div><div class="line">    void (*valDestructor)(void *privdata, void *obj);</div><div class="line">&#125; dictType;</div></pre></td></tr></table></figure>
+<h4 id="2-skiplist结构体"><a href="#2-skiplist结构体" class="headerlink" title="2.skiplist结构体"></a>2.skiplist结构体</h4><p><img src="/img/skiplist0.png" alt="单击图片进行放大"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">/* ZSETs use a specialized version of Skiplists */</div><div class="line">typedef struct zskiplistNode &#123;</div><div class="line">    sds ele;</div><div class="line">    double score;</div><div class="line">    struct zskiplistNode *backward;</div><div class="line">    struct zskiplistLevel &#123;</div><div class="line">        struct zskiplistNode *forward;</div><div class="line">        unsigned int span;//跨度：用于记录与forward指向节点的距离</div><div class="line">    &#125; level[]; //0长度数组的妙用</div><div class="line">&#125; zskiplistNode;</div><div class="line"></div><div class="line">typedef struct zskiplist &#123;</div><div class="line">    //指向skiplist中表头节点和表尾节点</div><div class="line">    struct zskiplistNode *header, *tail;</div><div class="line">    //skiplist中节点的数量（不包括表头节点）</div><div class="line">    unsigned long length;</div><div class="line">    //skiplist中层数最高的节点的层数</div><div class="line">    int level;</div><div class="line">&#125; zskiplist;</div></pre></td></tr></table></figure>
 		
 	
     </div>
@@ -504,7 +452,7 @@ var _hmt = _hmt || [];
       
         
           <div class="alignleft">
-            <a href="/2017/12/01/redis4-dict/#more" class="more-link">阅读全文</a>
+            <a href="/2017/12/02/redis4-skiplist/#more" class="more-link">阅读全文</a>
           </div>
         
         
@@ -563,6 +511,58 @@ var _hmt = _hmt || [];
         <div class="alignright">
           <a href="/2017/12/01/redis4-sds/#comment" class="comment-link">评论</a>
         </div>
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
+    <h1 class="title"><a href="/2017/12/01/redis4-dict/">redis4.0_dict源码剖析</a></h1>
+
+ 
+	
+	<time  datetime="2017-11-30T16:00:00.000Z"><p>发表于 2017-12-01 | 字数 <span class="post-count">6,389</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<h4 id="1-dict概述"><a href="#1-dict概述" class="headerlink" title="1.dict概述"></a>1.dict概述</h4><ul>
+<li>dict(字典)：又称为符号表（symbol table）,关联数组（associative array）或者映射（map）,是一种用于保存键值对（key-value pair）的抽象数据结构。字典中每个键都是独一无二的，程序可以在字典中根据键查找与之关联的值，或者根据键来删除整个键值对。</li>
+</ul>
+<h4 id="2-dict结构体"><a href="#2-dict结构体" class="headerlink" title="2.dict结构体"></a>2.dict结构体</h4><ul>
+<li><p>hash table结构体<br><img src="/img/dict0.png" alt="ht"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">/* Unused arguments generate annoying warnings... */</div><div class="line"><span class="comment">#define DICT_NOTUSED(V) ((void) V)</span></div><div class="line">//<span class="built_in">hash</span> table节点</div><div class="line">typedef struct dictEntry &#123;</div><div class="line">    //键</div><div class="line">    void *key;</div><div class="line">    //值</div><div class="line">    union &#123;</div><div class="line">        void *val;</div><div class="line">        uint64_t u64;</div><div class="line">        int64_t s64;</div><div class="line">        double d;</div><div class="line">    &#125; v;</div><div class="line">    //指向下一个<span class="built_in">hash</span> table节点</div><div class="line">    struct dictEntry *next;</div><div class="line">&#125; dictEntry;</div><div class="line"></div><div class="line">/* This is our <span class="built_in">hash</span> table structure. Every dictionary has two of this as we</div><div class="line"> * implement incremental rehashing, <span class="keyword">for</span> the old to the new table. */</div><div class="line">//<span class="built_in">hash</span> table</div><div class="line">typedef struct dictht &#123;</div><div class="line">    //<span class="built_in">hash</span> table数组[动态二维数组内存布局](http://chinchao.xyz/2016/04/07/cpp-model-2/)</div><div class="line">    dictEntry **table;</div><div class="line">    //<span class="built_in">hash</span> table数组的大小,size=2^n</div><div class="line">    unsigned long size;</div><div class="line">    //sizemash=size-1,<span class="built_in">hash</span> table掩码，用于计算索引值</div><div class="line">    unsigned long sizemask;</div><div class="line">    //<span class="built_in">hash</span> table中节点(dictEntry)的数量</div><div class="line">    unsigned long used;</div><div class="line">&#125; dictht;</div></pre></td></tr></table></figure>
+</li>
+<li><p>dict结构体</p>
+</li>
+</ul>
+<p><img src="/img/dict1.png" alt="ht"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">//字典</div><div class="line">typedef struct dict &#123;</div><div class="line">    dictType *<span class="built_in">type</span>;</div><div class="line">    void *privdata;</div><div class="line">    dictht ht[2];</div><div class="line">    //rehashidx=-1表示没有进行<span class="built_in">rehash</span>，否则rehashidx表示<span class="built_in">hash</span> table数组中当前待<span class="built_in">rehash</span>的元素的索引</div><div class="line">    long rehashidx; /* rehashing not <span class="keyword">in</span> progress <span class="keyword">if</span> rehashidx == -1 */</div><div class="line">    //安全迭代器的数量</div><div class="line">    unsigned long iterators; /* number of iterators currently running */</div><div class="line">&#125; dict;</div><div class="line"></div><div class="line">//类型特定函数</div><div class="line">typedef struct dictType &#123;</div><div class="line">    uint64_t (*<span class="built_in">hash</span>Function)(const void *key);</div><div class="line">    void *(*keyDup)(void *privdata, const void *key);</div><div class="line">    void *(*valDup)(void *privdata, const void *obj);</div><div class="line">    int (*keyCompare)(void *privdata, const void *key1, const void *key2);</div><div class="line">    void (*keyDestructor)(void *privdata, void *key);</div><div class="line">    void (*valDestructor)(void *privdata, void *obj);</div><div class="line">&#125; dictType;</div></pre></td></tr></table></figure>
+		
+	
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2017/12/01/redis4-dict/#more" class="more-link">阅读全文</a>
+          </div>
+        
         
       
     
@@ -674,10 +674,6 @@ var _hmt = _hmt || [];
     <li><a href="/categories/Linux/">Linux</a><small>1</small></li>
   
     <li><a href="/categories/STL源码剖析/">STL源码剖析</a><small>2</small></li>
-  
-    <li><a href="/categories/gdb/">gdb</a><small>0</small></li>
-  
-    <li><a href="/categories/linux/">linux</a><small>0</small></li>
   
     <li><a href="/categories/makefile/">makefile</a><small>1</small></li>
   

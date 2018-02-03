@@ -87,11 +87,11 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2016/04/05/cpp-model-0/">函数调用过程(栈帧)</a></h1>
+    <h1 class="title"><a href="/2016/04/05/cpp-model-list/">C++对象模型-目录</a></h1>
 
  
 	
-	<time  datetime="2016-04-04T16:00:00.000Z"><p>发表于 2016-04-05 | 字数 <span class="post-count">744</span>
+	<time  datetime="2016-04-04T16:00:00.000Z"><p>发表于 2016-04-05 | 字数 <span class="post-count">358</span>
 
 </p></time>
       
@@ -99,27 +99,26 @@ var _hmt = _hmt || [];
     <div class="entry">
       
 		
-			<h5 id="开发环境"><a href="#开发环境" class="headerlink" title="开发环境"></a>开发环境</h5><ul>
-<li>Ubuntu 14.04(32bits)</li>
-<li>GCC      </li>
-<li>编辑器 Cmd Markdown</li>
-<li>画图工具 Processon    </li>
-</ul>
-<h5 id="1-函数调用过程"><a href="#1-函数调用过程" class="headerlink" title="1,函数调用过程"></a>1,函数调用过程</h5><p>今天先介绍下基本的函数调用过程，即栈帧。</p>
-<h6 id="1-1栈帧"><a href="#1-1栈帧" class="headerlink" title="1.1栈帧"></a>1.1栈帧</h6><p>每个函数调用都对应一个栈帧。每个栈帧由ESP和EBP寄存器来确定。每个函数执行时，其局部变量都是在自己对应的栈帧内分配内存。假设A函数调用B函数，此时正在执行B函数，需要指出的是，当执行完当前函数B后，返回调用函数A，此时执行函数B时，为B函数的局部变量分配的的内存空间也就不存在了。也就是说，函数返回值不能是函数体内局部变量的地址，也不能是局部变量的引用。即如不能出现如下两种形式之一：<br>
+			<p>研究生马上要毕业了，至今感觉一事无成。在毕业之前，希望写一些真正留在自己心里的东西。接下来准备每天写一篇用汇编分析一下C语言和C++对象模型的博客，也算是给自己的大学生涯画上一个句号。      </p>
+<h4 id="TODO"><a href="#TODO" class="headerlink" title="TODO:"></a>TODO:</h4><p>准备开始几天先介绍下C语言的东西(自己也努力回忆下汇编语言，参看《CSAPP》第3章)，如栈帧，基础类型的内存布局/结构体变量的内存布局，结构体变量作为函数参数/作为函数返回值，switch/if-else实现机制，变长参数实现机制，二维数组内存布局等，然后再对C++进行深入分析，如C++对象内存布局，引用/指针，构造/析构函数的执行过程，多继承类对象的内存布局，虚继承类对象的内存布局，C++对象作为函数参数/作为函数返回值等。</p>
+<h4 id="1-目录"><a href="#1-目录" class="headerlink" title="1,目录"></a>1,目录</h4><ol>
+<li><a href="http://chinchao.xyz/2016/04/05/cpp-model-0/">C++对象模型-0</a> stack frame    </li>
+<li><a href="http://chinchao.xyz/2016/04/06/cpp-model-1/">C++对象模型-1</a> struct</li>
+<li><a href="http://chinchao.xyz/2016/04/07/cpp-model-2/">C++对象模型-2</a> array</li>
+<li><a href="http://chinchao.xyz/2016/04/07/cpp-model-4/">C++对象模型-4</a> int/float/Big-Endian/Little-Endian</li>
+<li><a href="http://chinchao.xyz/2016/04/07/cpp-model-5/">C++对象模型-5</a> Object Lessons</li>
+</ol>
+<h4 id="2-参考文献"><a href="#2-参考文献" class="headerlink" title="2,参考文献"></a>2,参考文献</h4><p>《深度探索C++对象模型》<br>《CSAPP中文第二版》<br>《程序员的自我修养》<br>《C++反汇编与逆向分析技术揭秘》<br>《老码识途》<br>《Computer Systems A Programmer’s Perspective THIRD EDITION》</p>
+
 		
 	
     </div>
     <footer>
       
         
-          <div class="alignleft">
-            <a href="/2016/04/05/cpp-model-0/#more" class="more-link">阅读全文</a>
-          </div>
-        
         
         <div class="alignright">
-          <a href="/2016/04/05/cpp-model-0/#comment" class="comment-link">评论</a>
+          <a href="/2016/04/05/cpp-model-list/#comment" class="comment-link">评论</a>
         </div>
         
       
@@ -461,10 +460,6 @@ var _hmt = _hmt || [];
     <li><a href="/categories/Linux/">Linux</a><small>1</small></li>
   
     <li><a href="/categories/STL源码剖析/">STL源码剖析</a><small>2</small></li>
-  
-    <li><a href="/categories/gdb/">gdb</a><small>0</small></li>
-  
-    <li><a href="/categories/linux/">linux</a><small>0</small></li>
   
     <li><a href="/categories/makefile/">makefile</a><small>1</small></li>
   
