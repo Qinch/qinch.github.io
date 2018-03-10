@@ -90,7 +90,7 @@ var _hmt = _hmt || [];
 
  
 	
-	<time  datetime="2017-12-01T16:00:00.000Z"><p>发表于 2017-12-02 | 字数 <span class="post-count">1,236</span>
+	<time  datetime="2017-12-01T16:00:00.000Z"><p>发表于 2017-12-02 | 字数 <span class="post-count">1,228</span>
 
 </p></time>
       
@@ -124,10 +124,7 @@ var _hmt = _hmt || [];
 <li>skiplist中删除一个节点</li>
 </ul>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div></pre></td><td class="code"><pre><div class="line">/* Internal <span class="keyword">function</span> used by zslDelete, zslDeleteByScore and zslDeleteByRank */</div><div class="line">void zslDeleteNode(zskiplist *zsl, zskiplistNode *x, zskiplistNode **update) &#123;</div><div class="line">    int i;</div><div class="line">    <span class="keyword">for</span> (i = 0; i &lt; zsl-&gt;level; i++) &#123;</div><div class="line">        <span class="keyword">if</span> (update[i]-&gt;level[i].forward == x) &#123;</div><div class="line">            update[i]-&gt;level[i].span += x-&gt;level[i].span - 1;</div><div class="line">            update[i]-&gt;level[i].forward = x-&gt;level[i].forward;</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            update[i]-&gt;level[i].span -= 1;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">if</span> (x-&gt;level[0].forward) &#123;</div><div class="line">        x-&gt;level[0].forward-&gt;backward = x-&gt;backward;</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        zsl-&gt;tail = x-&gt;backward;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">while</span>(zsl-&gt;level &gt; 1 &amp;&amp; zsl-&gt;header-&gt;level[zsl-&gt;level-1].forward == NULL)</div><div class="line">        zsl-&gt;level--;</div><div class="line">    zsl-&gt;length--;</div><div class="line">&#125;</div><div class="line"></div><div class="line">/* Delete an element with matching score/element from the skiplist.</div><div class="line"> * The <span class="keyword">function</span> returns 1 <span class="keyword">if</span> the node was found and deleted, otherwise</div><div class="line"> * 0 is returned.</div><div class="line"> *</div><div class="line"> * If <span class="string">'node'</span> is NULL the deleted node is freed by zslFreeNode(), otherwise</div><div class="line"> * it is not freed (but just unlinked) and *node is <span class="built_in">set</span> to the node pointer,</div><div class="line"> * so that it is possible <span class="keyword">for</span> the <span class="built_in">caller</span> to reuse the node (including the</div><div class="line"> * referenced SDS string at node-&gt;ele). */</div><div class="line">//从skiplist删除指定节点</div><div class="line">int zslDelete(zskiplist *zsl, double score, sds ele, zskiplistNode **node) &#123;</div><div class="line">    zskiplistNode *update[ZSKIPLIST_MAXLEVEL], *x;</div><div class="line">    int i;</div><div class="line"></div><div class="line">    x = zsl-&gt;header;</div><div class="line">    <span class="keyword">for</span> (i = zsl-&gt;level-1; i &gt;= 0; i--) &#123;</div><div class="line">        <span class="keyword">while</span> (x-&gt;level[i].forward &amp;&amp;</div><div class="line">                (x-&gt;level[i].forward-&gt;score &lt; score ||</div><div class="line">                    (x-&gt;level[i].forward-&gt;score == score &amp;&amp;</div><div class="line">                     sdscmp(x-&gt;level[i].forward-&gt;ele,ele) &lt; 0)))</div><div class="line">        &#123;</div><div class="line">            x = x-&gt;level[i].forward;</div><div class="line">        &#125;</div><div class="line">        update[i] = x;</div><div class="line">    &#125;</div><div class="line">    /* We may have multiple elements with the same score, what we need</div><div class="line">     * is to find the element with both the right score and object. */</div><div class="line">    x = x-&gt;level[0].forward;</div><div class="line">    <span class="keyword">if</span> (x &amp;&amp; score == x-&gt;score &amp;&amp; sdscmp(x-&gt;ele,ele) == 0) &#123;</div><div class="line">        zslDeleteNode(zsl, x, update);</div><div class="line">        <span class="keyword">if</span> (!node)</div><div class="line">            zslFreeNode(x);</div><div class="line">        <span class="keyword">else</span></div><div class="line">            *node = x;</div><div class="line">        <span class="built_in">return</span> 1;</div><div class="line">    &#125;</div><div class="line">    <span class="built_in">return</span> 0; /* not found */</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h4 id="4-参考文献"><a href="#4-参考文献" class="headerlink" title="4.参考文献"></a>4.参考文献</h4><ol>
-<li>《Redis设计与实现》</li>
-<li>《<a href="https://github.com/Qinch/redis_reading/tree/read/" target="_blank" rel="external">redis_reading</a>》</li>
-</ol>
+<h4 id="4-参考文献"><a href="#4-参考文献" class="headerlink" title="4.参考文献"></a>4.参考文献</h4><p>《<a href="https://github.com/Qinch/redis_reading/tree/read/" target="_blank" rel="external">redis_reading</a>》</p>
 
 	
     </div>
@@ -168,6 +165,10 @@ var _hmt = _hmt || [];
       </li>
     
       <li>
+        <a href="/2017/12/04/redis4-rdb-aof/">redis4.0_RDB&amp;AOF源码剖析</a>
+      </li>
+    
+      <li>
         <a href="/2017/12/04/redis4-intset/">redis4.0_intset源码剖析</a>
       </li>
     
@@ -177,10 +178,6 @@ var _hmt = _hmt || [];
     
       <li>
         <a href="/2017/12/03/redis4-t_string/">redis4.0_t_string源码剖析</a>
-      </li>
-    
-      <li>
-        <a href="/2017/12/03/redis4-object/">redis4.0_object源码剖析</a>
       </li>
     
   </ul>
@@ -208,7 +205,7 @@ var _hmt = _hmt || [];
   
     <li><a href="/categories/mysql/">mysql</a><small>1</small></li>
   
-    <li><a href="/categories/redis/">redis</a><small>8</small></li>
+    <li><a href="/categories/redis/">redis</a><small>9</small></li>
   
     <li><a href="/categories/shell/">shell</a><small>1</small></li>
   
@@ -226,7 +223,7 @@ var _hmt = _hmt || [];
 <div class="widget tagcloud">
   <h3 class="title">标签云</h3>
   <div class="entry">
-    <a href="/tags/Asm/" style="font-size: 20px;">Asm</a> <a href="/tags/C/" style="font-size: 20px;">C</a> <a href="/tags/Cpp/" style="font-size: 16.67px;">Cpp</a> <a href="/tags/adlist/" style="font-size: 10px;">adlist</a> <a href="/tags/apue/" style="font-size: 13.33px;">apue</a> <a href="/tags/atoi/" style="font-size: 10px;">atoi</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/database/" style="font-size: 10px;">database</a> <a href="/tags/dict/" style="font-size: 10px;">dict</a> <a href="/tags/heap/" style="font-size: 10px;">heap</a> <a href="/tags/icp/" style="font-size: 10px;">icp</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/intset/" style="font-size: 10px;">intset</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/make/" style="font-size: 10px;">make</a> <a href="/tags/makefile/" style="font-size: 10px;">makefile</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/object/" style="font-size: 10px;">object</a> <a href="/tags/redis4-0/" style="font-size: 20px;">redis4.0</a> <a href="/tags/scp/" style="font-size: 10px;">scp</a> <a href="/tags/sds/" style="font-size: 10px;">sds</a> <a href="/tags/signal/" style="font-size: 10px;">signal</a> <a href="/tags/skiplist/" style="font-size: 10px;">skiplist</a> <a href="/tags/snippet/" style="font-size: 10px;">snippet</a> <a href="/tags/sort/" style="font-size: 10px;">sort</a> <a href="/tags/sourcecode/" style="font-size: 20px;">sourcecode</a> <a href="/tags/stl/" style="font-size: 13.33px;">stl</a> <a href="/tags/string2ll/" style="font-size: 10px;">string2ll</a> <a href="/tags/t-string/" style="font-size: 10px;">t_string</a> <a href="/tags/thread/" style="font-size: 10px;">thread</a> <a href="/tags/tips/" style="font-size: 10px;">tips</a> <a href="/tags/unpv2/" style="font-size: 10px;">unpv2</a> <a href="/tags/ziplist/" style="font-size: 10px;">ziplist</a> <a href="/tags/内存流/" style="font-size: 10px;">内存流</a> <a href="/tags/勘误/" style="font-size: 10px;">勘误</a>
+    <a href="/tags/AOF/" style="font-size: 10px;">AOF</a> <a href="/tags/Asm/" style="font-size: 17.5px;">Asm</a> <a href="/tags/C/" style="font-size: 17.5px;">C</a> <a href="/tags/Cpp/" style="font-size: 15px;">Cpp</a> <a href="/tags/RDB/" style="font-size: 10px;">RDB</a> <a href="/tags/adlist/" style="font-size: 10px;">adlist</a> <a href="/tags/apue/" style="font-size: 12.5px;">apue</a> <a href="/tags/atoi/" style="font-size: 10px;">atoi</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/database/" style="font-size: 10px;">database</a> <a href="/tags/dict/" style="font-size: 10px;">dict</a> <a href="/tags/heap/" style="font-size: 10px;">heap</a> <a href="/tags/icp/" style="font-size: 10px;">icp</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/intset/" style="font-size: 10px;">intset</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/make/" style="font-size: 10px;">make</a> <a href="/tags/makefile/" style="font-size: 10px;">makefile</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/object/" style="font-size: 10px;">object</a> <a href="/tags/redis4-0/" style="font-size: 20px;">redis4.0</a> <a href="/tags/scp/" style="font-size: 10px;">scp</a> <a href="/tags/sds/" style="font-size: 10px;">sds</a> <a href="/tags/signal/" style="font-size: 10px;">signal</a> <a href="/tags/skiplist/" style="font-size: 10px;">skiplist</a> <a href="/tags/snippet/" style="font-size: 10px;">snippet</a> <a href="/tags/sort/" style="font-size: 10px;">sort</a> <a href="/tags/sourcecode/" style="font-size: 17.5px;">sourcecode</a> <a href="/tags/stl/" style="font-size: 12.5px;">stl</a> <a href="/tags/string2ll/" style="font-size: 10px;">string2ll</a> <a href="/tags/t-string/" style="font-size: 10px;">t_string</a> <a href="/tags/thread/" style="font-size: 10px;">thread</a> <a href="/tags/tips/" style="font-size: 10px;">tips</a> <a href="/tags/unpv2/" style="font-size: 10px;">unpv2</a> <a href="/tags/ziplist/" style="font-size: 10px;">ziplist</a> <a href="/tags/内存流/" style="font-size: 10px;">内存流</a> <a href="/tags/勘误/" style="font-size: 10px;">勘误</a>
   </div>
 </div>
 
