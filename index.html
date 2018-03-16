@@ -133,6 +133,53 @@ var _hmt = _hmt || [];
     <header>
       
 	
+    <h1 class="title"><a href="/2017/12/10/redis4-event/">redis4.0_event源码剖析</a></h1>
+
+ 
+	
+	<time  datetime="2017-12-09T16:00:00.000Z"><p>发表于 2017-12-10 | 字数 <span class="post-count">1,221</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<h4 id="1-Event概述"><a href="#1-Event概述" class="headerlink" title="1.Event概述"></a>1.Event概述</h4><p>redis是一个事件驱动程序，服务器处理以下两个事件：</p>
+<ol>
+<li><p>fd事件(IO多路复用)</p>
+</li>
+<li><p>time事件（精确到second）<br>服务器所有的时间事件都放在一个无序链表中，每当时间事件处理器运行时，就遍历整个链表，查找所有已经到达的时间事件，并调用相应的处理函数</p>
+</li>
+</ol>
+<h4 id="2-关键数据结构"><a href="#2-关键数据结构" class="headerlink" title="2.关键数据结构"></a>2.关键数据结构</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div></pre></td><td class="code"><pre><div class="line">/* File event structure */</div><div class="line">typedef struct aeFileEvent &#123;</div><div class="line">	//读或者写</div><div class="line">    int mask; /* one of AE_(READABLE|WRITABLE) */</div><div class="line">	//读处理函数指针</div><div class="line">    aeFileProc *rfileProc;</div><div class="line">	//写函数指针</div><div class="line">    aeFileProc *wfileProc;</div><div class="line">    void *clientData;</div><div class="line">&#125; aeFileEvent;</div><div class="line"></div><div class="line">/* Time event structure */</div><div class="line">typedef struct aeTimeEvent &#123;</div><div class="line">	//时间事件ID</div><div class="line">    long long id; /* time event identifier. */</div><div class="line">    long when_sec; /* seconds */</div><div class="line">    long when_ms; /* milliseconds */</div><div class="line">    aeTimeProc *timeProc;</div><div class="line">    aeEventFinalizerProc *finalizerProc;</div><div class="line">    void *clientData;</div><div class="line">	//无序链表</div><div class="line">    struct aeTimeEvent *next;</div><div class="line">&#125; aeTimeEvent;</div><div class="line"></div><div class="line">/* A fired event */</div><div class="line">//fd有event触发</div><div class="line">typedef struct aeFiredEvent &#123;</div><div class="line">    int fd;</div><div class="line">    int mask;</div><div class="line">&#125; aeFiredEvent;</div><div class="line"></div><div class="line">/* State of an event based program */</div><div class="line">typedef struct aeEventLoop &#123;</div><div class="line">    //当前注册的fd的最大值</div><div class="line">    int maxfd;   /* highest file descriptor currently registered */</div><div class="line">    int setsize; /* max number of file descriptors tracked */</div><div class="line">    long long timeEventNextId;</div><div class="line">    time_t lastTime;     /* Used to detect system clock skew */</div><div class="line">    aeFileEvent *events; /* Registered events */</div><div class="line">    aeFiredEvent *fired; /* Fired events */</div><div class="line">	//时间事件链表</div><div class="line">    aeTimeEvent *timeEventHead;</div><div class="line">    int stop;</div><div class="line">    void *apidata; /* This is used <span class="keyword">for</span> polling API specific data */</div><div class="line">    //select/poll/epoll sleep之前执行的函数指针</div><div class="line">    aeBeforeSleepProc *beforesleep;</div><div class="line">    //select/poll/epoll wakeup之后执行的函数指针</div><div class="line">    aeBeforeSleepProc *aftersleep;</div><div class="line">&#125; aeEventLoop;</div></pre></td></tr></table></figure>
+<h4 id="3-事件处理器"><a href="#3-事件处理器" class="headerlink" title="3.事件处理器"></a>3.事件处理器</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div></pre></td><td class="code"><pre><div class="line">/* Process every pending time event, <span class="keyword">then</span> every pending file event</div><div class="line"> * (that may be registered by time event callbacks just processed).</div><div class="line"> * Without special flags the <span class="keyword">function</span> sleeps until some file event</div><div class="line"> * fires, or when the next time event occurs (<span class="keyword">if</span> any).</div><div class="line"> *</div><div class="line"> * If flags is 0, the <span class="keyword">function</span> does nothing and returns.</div><div class="line"> * <span class="keyword">if</span> flags has AE_ALL_EVENTS <span class="built_in">set</span>, all the kind of events are processed.</div><div class="line"> * <span class="keyword">if</span> flags has AE_FILE_EVENTS <span class="built_in">set</span>, file events are processed.</div><div class="line"> * <span class="keyword">if</span> flags has AE_TIME_EVENTS <span class="built_in">set</span>, time events are processed.</div><div class="line"> * <span class="keyword">if</span> flags has AE_DONT_WAIT <span class="built_in">set</span> the <span class="keyword">function</span> returns ASAP until all</div><div class="line"> * <span class="keyword">if</span> flags has AE_CALL_AFTER_SLEEP <span class="built_in">set</span>, the aftersleep callback is called.</div><div class="line"> * the events that<span class="string">'s possible to process without to wait are processed.</span></div><div class="line"> *</div><div class="line"> * The function returns the number of events processed. */</div><div class="line">int aeProcessEvents(aeEventLoop *eventLoop, int flags)</div><div class="line">&#123;</div><div class="line">    int processed = 0, numevents;</div><div class="line"></div><div class="line">    /* Nothing to do? return ASAP */</div><div class="line">    if (!(flags &amp; AE_TIME_EVENTS) &amp;&amp; !(flags &amp; AE_FILE_EVENTS)) return 0;</div><div class="line"></div><div class="line">    /* Note that we want call select() even if there are no</div><div class="line">     * file events to process as long as we want to process time</div><div class="line">     * events, in order to sleep until the next time event is ready</div><div class="line">     * to fire. */</div><div class="line">    //注册了fd事件或者注册了时间事件并且需要select sleep</div><div class="line">    if (eventLoop-&gt;maxfd != -1 ||</div><div class="line">        ((flags &amp; AE_TIME_EVENTS) &amp;&amp; !(flags &amp; AE_DONT_WAIT))) &#123;</div><div class="line">        int j;</div><div class="line">        aeTimeEvent *shortest = NULL;</div><div class="line">        struct timeval tv, *tvp;</div><div class="line"></div><div class="line">        if (flags &amp; AE_TIME_EVENTS &amp;&amp; !(flags &amp; AE_DONT_WAIT))</div><div class="line">            shortest = aeSearchNearestTimer(eventLoop);</div><div class="line">        if (shortest) &#123;</div><div class="line">            long now_sec, now_ms;</div><div class="line"></div><div class="line">            aeGetTime(&amp;now_sec, &amp;now_ms);</div><div class="line">            tvp = &amp;tv;</div><div class="line"></div><div class="line">            /* How many milliseconds we need to wait for the next</div><div class="line">             * time event to fire? */</div><div class="line">			//select函数阻塞时间</div><div class="line">            long long ms =</div><div class="line">                (shortest-&gt;when_sec - now_sec)*1000 +</div><div class="line">                shortest-&gt;when_ms - now_ms;</div><div class="line"></div><div class="line">            if (ms &gt; 0) &#123;</div><div class="line">                tvp-&gt;tv_sec = ms/1000;</div><div class="line">                tvp-&gt;tv_usec = (ms % 1000)*1000;</div><div class="line">            &#125; else &#123;</div><div class="line">                tvp-&gt;tv_sec = 0;</div><div class="line">                tvp-&gt;tv_usec = 0;</div><div class="line">            &#125;</div><div class="line">        &#125; else &#123;</div><div class="line">            /* If we have to check for events but need to return</div><div class="line">             * ASAP because of AE_DONT_WAIT we need to set the timeout</div><div class="line">             * to zero */</div><div class="line">			//select阻塞时间设置为0,表示立即返回</div><div class="line">            if (flags &amp; AE_DONT_WAIT) &#123;</div><div class="line">                tv.tv_sec = tv.tv_usec = 0;</div><div class="line">                tvp = &amp;tv;</div><div class="line">            &#125; else &#123;</div><div class="line">                /* Otherwise we can block */</div><div class="line">                tvp = NULL; /* wait forever */</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        /* Call the multiplexing API, will return only on timeout or when</div><div class="line">         * some event fires. */</div><div class="line">        numevents = aeApiPoll(eventLoop, tvp);</div><div class="line"></div><div class="line">        /* After sleep callback. */</div><div class="line">	//阻塞唤醒之后回调函数</div><div class="line">        if (eventLoop-&gt;aftersleep != NULL &amp;&amp; flags &amp; AE_CALL_AFTER_SLEEP)</div><div class="line">            eventLoop-&gt;aftersleep(eventLoop);</div><div class="line"></div><div class="line">        for (j = 0; j &lt; numevents; j++) &#123;</div><div class="line">            aeFileEvent *fe = &amp;eventLoop-&gt;events[eventLoop-&gt;fired[j].fd];</div><div class="line">            int mask = eventLoop-&gt;fired[j].mask;</div><div class="line">            int fd = eventLoop-&gt;fired[j].fd;</div><div class="line">            int rfired = 0;</div><div class="line"></div><div class="line">	    /* note the fe-&gt;mask &amp; mask &amp; ... code: maybe an already processed</div><div class="line">             * event removed an element that fired and we still didn't</div><div class="line">             * processed, so we check <span class="keyword">if</span> the event is still valid. */</div><div class="line">            <span class="keyword">if</span> (fe-&gt;mask &amp; mask &amp; AE_READABLE) &#123;</div><div class="line">                rfired = 1;</div><div class="line">                fe-&gt;rfileProc(eventLoop,fd,fe-&gt;clientData,mask);</div><div class="line">            &#125;</div><div class="line">            <span class="keyword">if</span> (fe-&gt;mask &amp; mask &amp; AE_WRITABLE) &#123;</div><div class="line">                <span class="keyword">if</span> (!rfired || fe-&gt;wfileProc != fe-&gt;rfileProc)</div><div class="line">                    fe-&gt;wfileProc(eventLoop,fd,fe-&gt;clientData,mask);</div><div class="line">            &#125;</div><div class="line">            processed++;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    /* Check time events */</div><div class="line">    //检查时间事件</div><div class="line">    <span class="keyword">if</span> (flags &amp; AE_TIME_EVENTS)</div><div class="line">        processed += processTimeEvents(eventLoop);</div><div class="line"></div><div class="line">    <span class="built_in">return</span> processed; /* <span class="built_in">return</span> the number of processed file/time events */</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div></pre></td><td class="code"><pre><div class="line">/* Process time events */</div><div class="line">//返回处理事件事件的数量</div><div class="line">static int processTimeEvents(aeEventLoop *eventLoop) &#123;</div><div class="line">    int processed = 0;</div><div class="line">    aeTimeEvent *te, *prev;</div><div class="line">    long long maxId;</div><div class="line">    time_t now = time(NULL);</div><div class="line"></div><div class="line">    /* If the system clock is moved to the future, and <span class="keyword">then</span> <span class="built_in">set</span> back to the</div><div class="line">     * right value, time events may be delayed <span class="keyword">in</span> a random way. Often this</div><div class="line">     * means that scheduled operations will not be performed soon enough.</div><div class="line">     *</div><div class="line">     * Here we try to detect system clock skews, and force all the time</div><div class="line">     * events to be processed ASAP when this happens: the idea is that</div><div class="line">     * processing events earlier is less dangerous than delaying them</div><div class="line">     * indefinitely, and practice suggests it is. */</div><div class="line">	//如果发生系统时间偏差，比如将系统时间调到未来某个时间点，然后又设置回正确的时间。</div><div class="line">	//此时的处理方法：时间事件链表中所有节点的when_sec时间设置为0,表示立即处理这些时间事件。</div><div class="line">    <span class="keyword">if</span> (now &lt; eventLoop-&gt;lastTime) &#123;</div><div class="line">        te = eventLoop-&gt;timeEventHead;</div><div class="line">        <span class="keyword">while</span>(te) &#123;</div><div class="line">            te-&gt;when_sec = 0;</div><div class="line">            te = te-&gt;next;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">	//用于处理系统时间偏差</div><div class="line">    eventLoop-&gt;lastTime = now;</div><div class="line"></div><div class="line">    prev = NULL;</div><div class="line">    te = eventLoop-&gt;timeEventHead;</div><div class="line">	//因为新的时间事件都是插入首节点</div><div class="line">    maxId = eventLoop-&gt;timeEventNextId-1;</div><div class="line">    <span class="keyword">while</span>(te) &#123;</div><div class="line">        long now_sec, now_ms;</div><div class="line">        long long id;</div><div class="line"></div><div class="line">        /* Remove events scheduled <span class="keyword">for</span> deletion. */</div><div class="line">        <span class="keyword">if</span> (te-&gt;id == AE_DELETED_EVENT_ID) &#123;</div><div class="line">            aeTimeEvent *next = te-&gt;next;</div><div class="line">			//为首个节点</div><div class="line">            <span class="keyword">if</span> (prev == NULL)</div><div class="line">                eventLoop-&gt;timeEventHead = te-&gt;next;</div><div class="line">            <span class="keyword">else</span></div><div class="line">                prev-&gt;next = te-&gt;next;</div><div class="line">            <span class="keyword">if</span> (te-&gt;finalizerProc)</div><div class="line">                te-&gt;finalizerProc(eventLoop, te-&gt;clientData);</div><div class="line">            zfree(te);</div><div class="line">            te = next;</div><div class="line">            <span class="built_in">continue</span>;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        /* Make sure we don<span class="string">'t process time events created by time events in</span></div><div class="line">         * this iteration. Note that this check is currently useless: we always</div><div class="line">         * add new timers on the head, however if we change the implementation</div><div class="line">         * detail, this check may be useful again: we keep it here for future</div><div class="line">         * defense. */</div><div class="line">        if (te-&gt;id &gt; maxId) &#123;</div><div class="line">            te = te-&gt;next;</div><div class="line">            continue;</div><div class="line">        &#125;</div><div class="line">        aeGetTime(&amp;now_sec, &amp;now_ms);</div><div class="line">        if (now_sec &gt; te-&gt;when_sec ||</div><div class="line">            (now_sec == te-&gt;when_sec &amp;&amp; now_ms &gt;= te-&gt;when_ms))</div><div class="line">        &#123;</div><div class="line">            int retval;</div><div class="line"></div><div class="line">            id = te-&gt;id;</div><div class="line">            retval = te-&gt;timeProc(eventLoop, id, te-&gt;clientData);</div><div class="line">            processed++;</div><div class="line">			//如果返回值不是NOMORE，则表示继续注册时间事件</div><div class="line">            if (retval != AE_NOMORE) &#123;</div><div class="line">                aeAddMillisecondsToNow(retval,&amp;te-&gt;when_sec,&amp;te-&gt;when_ms);</div><div class="line">            &#125; else &#123;</div><div class="line">                te-&gt;id = AE_DELETED_EVENT_ID;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        prev = te;</div><div class="line">        te = te-&gt;next;</div><div class="line">    &#125;</div><div class="line">    return processed;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+
+		
+	
+    </div>
+    <footer>
+      
+        
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
     <h1 class="title"><a href="/2017/12/04/redis4-intset/">redis4.0_intset源码剖析</a></h1>
 
  
@@ -380,52 +427,6 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2017/12/02/redis4-adlist/">redis4.0_adlist源码剖析</a></h1>
-
- 
-	
-	<time  datetime="2017-12-01T16:00:00.000Z"><p>发表于 2017-12-02 | 字数 <span class="post-count">1,586</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<h4 id="1-adlist介绍"><a href="#1-adlist介绍" class="headerlink" title="1.adlist介绍"></a>1.adlist介绍</h4><p>adlist：双向非循环链表，如图:<br><img src="/img/adlist.png" alt="adlist"></p>
-<h4 id="2-adlist-h源码分析"><a href="#2-adlist-h源码分析" class="headerlink" title="2.adlist.h源码分析"></a>2.adlist.h源码分析</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">/* Node, List, and Iterator are the only data structures used currently. */</div><div class="line">//链表Node,双向非循环链表</div><div class="line">typedef struct listNode &#123;</div><div class="line">    struct listNode *prev;</div><div class="line">    struct listNode *next;</div><div class="line">    void *value;</div><div class="line">&#125; listNode;</div><div class="line"></div><div class="line">//迭代器</div><div class="line">typedef struct listIter &#123;</div><div class="line">    listNode *next;</div><div class="line">    int direction;</div><div class="line">&#125; listIter;</div><div class="line"></div><div class="line">typedef struct list &#123;</div><div class="line">	//指向list中第一个listnode节点</div><div class="line">    listNode *head;</div><div class="line">	//指向list中最后一个listnode节点</div><div class="line">    listNode *tail;</div><div class="line">    void *(*dup)(void *ptr);</div><div class="line">    void (*free)(void *ptr);//用于释放Node中value字段</div><div class="line">    int (*match)(void *ptr, void *key);</div><div class="line">    unsigned long len;//链表的长度</div><div class="line">&#125; list;</div></pre></td></tr></table></figure>
-		
-	
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2017/12/02/redis4-adlist/#more" class="more-link">阅读全文</a>
-          </div>
-        
-        
-        <div class="alignright">
-          <a href="/2017/12/02/redis4-adlist/#comment" class="comment-link">评论</a>
-        </div>
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
     <h1 class="title"><a href="/2017/12/02/redis4-skiplist/">redis4.0_skiplist源码剖析</a></h1>
 
  
@@ -460,6 +461,52 @@ var _hmt = _hmt || [];
             <a href="/2017/12/02/redis4-skiplist/#more" class="more-link">阅读全文</a>
           </div>
         
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
+    <h1 class="title"><a href="/2017/12/02/redis4-adlist/">redis4.0_adlist源码剖析</a></h1>
+
+ 
+	
+	<time  datetime="2017-12-01T16:00:00.000Z"><p>发表于 2017-12-02 | 字数 <span class="post-count">1,586</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<h4 id="1-adlist介绍"><a href="#1-adlist介绍" class="headerlink" title="1.adlist介绍"></a>1.adlist介绍</h4><p>adlist：双向非循环链表，如图:<br><img src="/img/adlist.png" alt="adlist"></p>
+<h4 id="2-adlist-h源码分析"><a href="#2-adlist-h源码分析" class="headerlink" title="2.adlist.h源码分析"></a>2.adlist.h源码分析</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">/* Node, List, and Iterator are the only data structures used currently. */</div><div class="line">//链表Node,双向非循环链表</div><div class="line">typedef struct listNode &#123;</div><div class="line">    struct listNode *prev;</div><div class="line">    struct listNode *next;</div><div class="line">    void *value;</div><div class="line">&#125; listNode;</div><div class="line"></div><div class="line">//迭代器</div><div class="line">typedef struct listIter &#123;</div><div class="line">    listNode *next;</div><div class="line">    int direction;</div><div class="line">&#125; listIter;</div><div class="line"></div><div class="line">typedef struct list &#123;</div><div class="line">	//指向list中第一个listnode节点</div><div class="line">    listNode *head;</div><div class="line">	//指向list中最后一个listnode节点</div><div class="line">    listNode *tail;</div><div class="line">    void *(*dup)(void *ptr);</div><div class="line">    void (*free)(void *ptr);//用于释放Node中value字段</div><div class="line">    int (*match)(void *ptr, void *key);</div><div class="line">    unsigned long len;//链表的长度</div><div class="line">&#125; list;</div></pre></td></tr></table></figure>
+		
+	
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2017/12/02/redis4-adlist/#more" class="more-link">阅读全文</a>
+          </div>
+        
+        
+        <div class="alignright">
+          <a href="/2017/12/02/redis4-adlist/#comment" class="comment-link">评论</a>
+        </div>
         
       
     
@@ -581,53 +628,6 @@ var _hmt = _hmt || [];
 
 
 
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
-    <h1 class="title"><a href="/2017/10/02/apue-erros/">APUE中文第三版勘误</a></h1>
-
- 
-	
-	<time  datetime="2017-10-01T16:00:00.000Z"><p>发表于 2017-10-02 | 字数 <span class="post-count">150</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<p>本博客根据自己对APUE中文第三版的阅读理解，列出其中自己认为翻译错误或者翻译有歧义的部分。</p>
-<h4 id="1-page81"><a href="#1-page81" class="headerlink" title="1,page81"></a>1,page81</h4><p>中文：其中，如果测试文件是否已经存在，mode就为F_OK；否则mode是图4-7中所列常量的按位或。<br>英文(page102)：The mode is either the value F_OK to test if a file exists, or the bitwise OR of any of the flags shown in Figure 4.7.</p>
-<h4 id="2-page89"><a href="#2-page89" class="headerlink" title="2,page89"></a>2,page89</h4><p>中文：对于符号链接，文件长度是在文件名中的实际字节数。<br>英文(page111):For a symbolic link, the file size is the numberof bytes in the filename.<br>
-		
-	
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2017/10/02/apue-erros/#more" class="more-link">阅读全文</a>
-          </div>
-        
-        
-        <div class="alignright">
-          <a href="/2017/10/02/apue-erros/#comment" class="comment-link">评论</a>
-        </div>
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
 
   <nav id="page-nav" class="clearfix">
     <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/">下一页 &raquo;</a>
@@ -644,6 +644,10 @@ var _hmt = _hmt || [];
       </li>
     
       <li>
+        <a href="/2017/12/10/redis4-event/">redis4.0_event源码剖析</a>
+      </li>
+    
+      <li>
         <a href="/2017/12/04/redis4-intset/">redis4.0_intset源码剖析</a>
       </li>
     
@@ -653,10 +657,6 @@ var _hmt = _hmt || [];
     
       <li>
         <a href="/2017/12/03/redis4-t_string/">redis4.0_t_string源码剖析</a>
-      </li>
-    
-      <li>
-        <a href="/2017/12/03/redis4-object/">redis4.0_object源码剖析</a>
       </li>
     
   </ul>
@@ -684,7 +684,7 @@ var _hmt = _hmt || [];
   
     <li><a href="/categories/mysql/">mysql</a><small>1</small></li>
   
-    <li><a href="/categories/redis/">redis</a><small>8</small></li>
+    <li><a href="/categories/redis/">redis</a><small>9</small></li>
   
     <li><a href="/categories/shell/">shell</a><small>1</small></li>
   
@@ -702,7 +702,7 @@ var _hmt = _hmt || [];
 <div class="widget tagcloud">
   <h3 class="title">标签云</h3>
   <div class="entry">
-    <a href="/tags/Asm/" style="font-size: 20px;">Asm</a> <a href="/tags/C/" style="font-size: 20px;">C</a> <a href="/tags/Cpp/" style="font-size: 16.67px;">Cpp</a> <a href="/tags/adlist/" style="font-size: 10px;">adlist</a> <a href="/tags/apue/" style="font-size: 13.33px;">apue</a> <a href="/tags/atoi/" style="font-size: 10px;">atoi</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/database/" style="font-size: 10px;">database</a> <a href="/tags/dict/" style="font-size: 10px;">dict</a> <a href="/tags/heap/" style="font-size: 10px;">heap</a> <a href="/tags/icp/" style="font-size: 10px;">icp</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/intset/" style="font-size: 10px;">intset</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/make/" style="font-size: 10px;">make</a> <a href="/tags/makefile/" style="font-size: 10px;">makefile</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/object/" style="font-size: 10px;">object</a> <a href="/tags/redis4-0/" style="font-size: 20px;">redis4.0</a> <a href="/tags/scp/" style="font-size: 10px;">scp</a> <a href="/tags/sds/" style="font-size: 10px;">sds</a> <a href="/tags/signal/" style="font-size: 10px;">signal</a> <a href="/tags/skiplist/" style="font-size: 10px;">skiplist</a> <a href="/tags/snippet/" style="font-size: 10px;">snippet</a> <a href="/tags/sort/" style="font-size: 10px;">sort</a> <a href="/tags/sourcecode/" style="font-size: 20px;">sourcecode</a> <a href="/tags/stl/" style="font-size: 13.33px;">stl</a> <a href="/tags/string2ll/" style="font-size: 10px;">string2ll</a> <a href="/tags/t-string/" style="font-size: 10px;">t_string</a> <a href="/tags/thread/" style="font-size: 10px;">thread</a> <a href="/tags/tips/" style="font-size: 10px;">tips</a> <a href="/tags/unpv2/" style="font-size: 10px;">unpv2</a> <a href="/tags/ziplist/" style="font-size: 10px;">ziplist</a> <a href="/tags/内存流/" style="font-size: 10px;">内存流</a> <a href="/tags/勘误/" style="font-size: 10px;">勘误</a>
+    <a href="/tags/Asm/" style="font-size: 17.5px;">Asm</a> <a href="/tags/C/" style="font-size: 17.5px;">C</a> <a href="/tags/Cpp/" style="font-size: 15px;">Cpp</a> <a href="/tags/adlist/" style="font-size: 10px;">adlist</a> <a href="/tags/apue/" style="font-size: 12.5px;">apue</a> <a href="/tags/atoi/" style="font-size: 10px;">atoi</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/database/" style="font-size: 10px;">database</a> <a href="/tags/dict/" style="font-size: 10px;">dict</a> <a href="/tags/event/" style="font-size: 10px;">event</a> <a href="/tags/heap/" style="font-size: 10px;">heap</a> <a href="/tags/icp/" style="font-size: 10px;">icp</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/intset/" style="font-size: 10px;">intset</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/make/" style="font-size: 10px;">make</a> <a href="/tags/makefile/" style="font-size: 10px;">makefile</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/object/" style="font-size: 10px;">object</a> <a href="/tags/redis4-0/" style="font-size: 20px;">redis4.0</a> <a href="/tags/scp/" style="font-size: 10px;">scp</a> <a href="/tags/sds/" style="font-size: 10px;">sds</a> <a href="/tags/signal/" style="font-size: 10px;">signal</a> <a href="/tags/skiplist/" style="font-size: 10px;">skiplist</a> <a href="/tags/snippet/" style="font-size: 10px;">snippet</a> <a href="/tags/sort/" style="font-size: 10px;">sort</a> <a href="/tags/sourcecode/" style="font-size: 20px;">sourcecode</a> <a href="/tags/stl/" style="font-size: 12.5px;">stl</a> <a href="/tags/string2ll/" style="font-size: 10px;">string2ll</a> <a href="/tags/t-string/" style="font-size: 10px;">t_string</a> <a href="/tags/thread/" style="font-size: 10px;">thread</a> <a href="/tags/tips/" style="font-size: 10px;">tips</a> <a href="/tags/unpv2/" style="font-size: 10px;">unpv2</a> <a href="/tags/ziplist/" style="font-size: 10px;">ziplist</a> <a href="/tags/内存流/" style="font-size: 10px;">内存流</a> <a href="/tags/勘误/" style="font-size: 10px;">勘误</a>
   </div>
 </div>
 
