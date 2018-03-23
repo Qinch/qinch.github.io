@@ -4,7 +4,7 @@
 
   <meta charset="utf-8">
   
-  <title>C/C++ | Just For Fun</title>
+  <title>Round up to the next highest power of 2 | Just For Fun</title>
   <meta name="author" content="qinchao">
   
   <meta name="description" content="qinchao&#39;s blog">
@@ -12,7 +12,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-  
+  <meta property="og:title" content="Round up to the next highest power of 2"/>
   <meta property="og:site_name" content="Just For Fun"/>
 
   
@@ -81,19 +81,56 @@ var _hmt = _hmt || [];
 
 </header>
   <div id="content" class="inner">
-    <div id="main-col" class="alignleft"><div id="wrapper">
-<h2 class="archive-title category">C/C++ </h2>
-<div class="archive">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  <div class="post-content">
+    <header>
+      
+	
+    <h1 class="title">Round up to the next highest power of 2</h1>
+
+ 
+	
+	<time  datetime="2018-03-23T16:29:36.000Z"><p>发表于 2018-03-24 | 字数 <span class="post-count">59</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		  
+		<h4 id="version1"><a href="#version1" class="headerlink" title="version1"></a>version1</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">static unsigned int power2gt(unsigned int size) &#123;</div><div class="line">  <span class="keyword">while</span> (1) &#123;</div><div class="line">    <span class="keyword">if</span> (i &gt;= size) <span class="built_in">return</span> i;</div><div class="line">    i *= 2;</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="version2"><a href="#version2" class="headerlink" title="version2"></a>version2</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">static unsigned int power2gt(unsigned int size) &#123;</div><div class="line">    --size;</div><div class="line">    size |= size &gt;&gt; 1;</div><div class="line">    size |= size &gt;&gt; 2;</div><div class="line">    size |= size &gt;&gt; 4;</div><div class="line">    size |= size &gt;&gt; 8;</div><div class="line">    size |= size &gt;&gt; 16;</div><div class="line">    <span class="built_in">return</span> size + 1;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h4><ol>
+<li>the explanation of version2:<a href="http://bits.stephan-brumme.com/roundUpToNextPowerOfTwo.html" target="_blank" rel="external">here</a></li>
+<li><a href="https://github.com/antirez/redis/issues/4776" target="_blank" rel="external">Reidis#issue4776</a></li>
+</ol>
+
+	
+    </div>
+    <footer>
+      
+        
+  
+  <div class="categories">
+    <a href="/categories/snippet/">snippet</a>
+  </div>
+
+        
+  
+  <div class="tags">
+    <a href="/tags/snippet/">snippet</a>
+  </div>
+
+	
+      
     
-      <article class="post">
-        <div class="post-content">
-          <header>
-              <h1 class="title">2016/01/10 » &nbsp<a href="/2016/01/10/bits-int/">24 bits解析为有符号整数</a></h1>
-          </header>
-        </div>
-      </article>
-    
- </div>
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
 
 </div></div>
     <aside id="sidebar" class="alignright">
