@@ -4,7 +4,7 @@
 
   <meta charset="utf-8">
   
-  <title>redis4.0_事物 | Just For Fun</title>
+  <title>redis4.0_事务源码剖析 | Just For Fun</title>
   <meta name="author" content="qinchao">
   
   <meta name="description" content="qinchao&#39;s blog">
@@ -12,7 +12,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-  <meta property="og:title" content="redis4.0_事物"/>
+  <meta property="og:title" content="redis4.0_事务源码剖析"/>
   <meta property="og:site_name" content="Just For Fun"/>
 
   
@@ -86,11 +86,11 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title">redis4.0_事物</h1>
+    <h1 class="title">redis4.0_事务源码剖析</h1>
 
  
 	
-	<time  datetime="2017-12-10T16:00:00.000Z"><p>发表于 2017-12-11 | 字数 <span class="post-count">11</span>
+	<time  datetime="2017-12-10T16:00:00.000Z"><p>发表于 2017-12-11 | 字数 <span class="post-count">108</span>
 
 </p></time>
       
@@ -98,7 +98,14 @@ var _hmt = _hmt || [];
     <div class="entry">
       
 		  
-		<h4 id="1-事物概述"><a href="#1-事物概述" class="headerlink" title="1.事物概述"></a>1.事物概述</h4><h4 id="3-参考文献"><a href="#3-参考文献" class="headerlink" title="3.参考文献"></a>3.参考文献</h4><p>《<a href="https://github.com/Qinch/redis_reading/tree/read/" target="_blank" rel="external">redis_reading</a>》</p>
+		<h4 id="1-Transactions"><a href="#1-Transactions" class="headerlink" title="1.Transactions"></a>1.Transactions</h4><ol>
+<li><p>MULTI, EXEC, DISCARD and WATCH are the foundation of transactions in Redis. They allow the execution of a group of commands in a single step, with two important guarantees:</p>
+<ul>
+<li>All the commands in a transaction are serialized and executed sequentially. It can never happen that a request issued by another client is served in the middle of the execution of a Redis transaction. This guarantees that the commands are executed as a single isolated operation(隔离性).</li>
+<li>Either all of the commands or none are processed, so a Redis transaction is also atomic(原子性). <h4 id="3-参考文献"><a href="#3-参考文献" class="headerlink" title="3.参考文献"></a>3.参考文献</h4><a href="https://redis.io/topics/transactions" target="_blank" rel="external">redis.io</a><br>《<a href="https://github.com/Qinch/redis_reading/tree/read/" target="_blank" rel="external">redis_reading</a>》</li>
+</ul>
+</li>
+</ol>
 
 	
     </div>
@@ -113,7 +120,7 @@ var _hmt = _hmt || [];
         
   
   <div class="tags">
-    <a href="/tags/redis4-0/">redis4.0</a>, <a href="/tags/sourcecode/">sourcecode</a>, <a href="/tags/multi/">multi</a>
+    <a href="/tags/redis4-0/">redis4.0</a>, <a href="/tags/sourcecode/">sourcecode</a>, <a href="/tags/multi/">multi</a>, <a href="/tags/Transations/">Transations</a>
   </div>
 
 	
@@ -143,7 +150,7 @@ var _hmt = _hmt || [];
       </li>
     
       <li>
-        <a href="/2017/12/11/redis4-multi/">redis4.0_事物</a>
+        <a href="/2017/12/11/redis4-multi/">redis4.0_事务源码剖析</a>
       </li>
     
       <li>
@@ -197,7 +204,7 @@ var _hmt = _hmt || [];
 <div class="widget tagcloud">
   <h3 class="title">标签云</h3>
   <div class="entry">
-    <a href="/tags/Asm/" style="font-size: 17.5px;">Asm</a> <a href="/tags/C/" style="font-size: 17.5px;">C</a> <a href="/tags/Cpp/" style="font-size: 15px;">Cpp</a> <a href="/tags/adlist/" style="font-size: 10px;">adlist</a> <a href="/tags/apue/" style="font-size: 12.5px;">apue</a> <a href="/tags/atoi/" style="font-size: 10px;">atoi</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/database/" style="font-size: 10px;">database</a> <a href="/tags/dict/" style="font-size: 10px;">dict</a> <a href="/tags/event/" style="font-size: 10px;">event</a> <a href="/tags/heap/" style="font-size: 10px;">heap</a> <a href="/tags/icp/" style="font-size: 10px;">icp</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/intset/" style="font-size: 10px;">intset</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/make/" style="font-size: 10px;">make</a> <a href="/tags/makefile/" style="font-size: 10px;">makefile</a> <a href="/tags/multi/" style="font-size: 10px;">multi</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/object/" style="font-size: 10px;">object</a> <a href="/tags/redis4-0/" style="font-size: 20px;">redis4.0</a> <a href="/tags/scp/" style="font-size: 10px;">scp</a> <a href="/tags/sds/" style="font-size: 10px;">sds</a> <a href="/tags/signal/" style="font-size: 10px;">signal</a> <a href="/tags/skiplist/" style="font-size: 10px;">skiplist</a> <a href="/tags/snippet/" style="font-size: 12.5px;">snippet</a> <a href="/tags/sort/" style="font-size: 10px;">sort</a> <a href="/tags/sourcecode/" style="font-size: 20px;">sourcecode</a> <a href="/tags/stl/" style="font-size: 12.5px;">stl</a> <a href="/tags/string2ll/" style="font-size: 10px;">string2ll</a> <a href="/tags/t-string/" style="font-size: 10px;">t_string</a> <a href="/tags/thread/" style="font-size: 10px;">thread</a> <a href="/tags/tips/" style="font-size: 10px;">tips</a> <a href="/tags/unpv2/" style="font-size: 10px;">unpv2</a> <a href="/tags/ziplist/" style="font-size: 10px;">ziplist</a> <a href="/tags/内存流/" style="font-size: 10px;">内存流</a> <a href="/tags/勘误/" style="font-size: 10px;">勘误</a>
+    <a href="/tags/Asm/" style="font-size: 17.5px;">Asm</a> <a href="/tags/C/" style="font-size: 17.5px;">C</a> <a href="/tags/Cpp/" style="font-size: 15px;">Cpp</a> <a href="/tags/Transations/" style="font-size: 10px;">Transations</a> <a href="/tags/adlist/" style="font-size: 10px;">adlist</a> <a href="/tags/apue/" style="font-size: 12.5px;">apue</a> <a href="/tags/atoi/" style="font-size: 10px;">atoi</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/database/" style="font-size: 10px;">database</a> <a href="/tags/dict/" style="font-size: 10px;">dict</a> <a href="/tags/event/" style="font-size: 10px;">event</a> <a href="/tags/heap/" style="font-size: 10px;">heap</a> <a href="/tags/icp/" style="font-size: 10px;">icp</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/intset/" style="font-size: 10px;">intset</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/make/" style="font-size: 10px;">make</a> <a href="/tags/makefile/" style="font-size: 10px;">makefile</a> <a href="/tags/multi/" style="font-size: 10px;">multi</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/object/" style="font-size: 10px;">object</a> <a href="/tags/redis4-0/" style="font-size: 20px;">redis4.0</a> <a href="/tags/scp/" style="font-size: 10px;">scp</a> <a href="/tags/sds/" style="font-size: 10px;">sds</a> <a href="/tags/signal/" style="font-size: 10px;">signal</a> <a href="/tags/skiplist/" style="font-size: 10px;">skiplist</a> <a href="/tags/snippet/" style="font-size: 12.5px;">snippet</a> <a href="/tags/sort/" style="font-size: 10px;">sort</a> <a href="/tags/sourcecode/" style="font-size: 20px;">sourcecode</a> <a href="/tags/stl/" style="font-size: 12.5px;">stl</a> <a href="/tags/string2ll/" style="font-size: 10px;">string2ll</a> <a href="/tags/t-string/" style="font-size: 10px;">t_string</a> <a href="/tags/thread/" style="font-size: 10px;">thread</a> <a href="/tags/tips/" style="font-size: 10px;">tips</a> <a href="/tags/unpv2/" style="font-size: 10px;">unpv2</a> <a href="/tags/ziplist/" style="font-size: 10px;">ziplist</a> <a href="/tags/内存流/" style="font-size: 10px;">内存流</a> <a href="/tags/勘误/" style="font-size: 10px;">勘误</a>
   </div>
 </div>
 
