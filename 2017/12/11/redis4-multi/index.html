@@ -109,8 +109,10 @@ var _hmt = _hmt || [];
 </li>
 <li><p>WATCH</p>
 <ul>
-<li>在对应的db结构体中用dict保存WATCHed keys,其中dict的entry的key为WATCHed key robj,value为一个链表，链表的每个Node指向一个Client的指针（表示该client WATCHed该key）</li>
-<li>在每个client结构体中用链表保存了该客户端WATCHed的key的robj，和该key对应的db指针</li>
+<li><p>在对应的db结构体中用dict保存WATCHed keys,其中dict的entry的key为WATCHed key robj,value为一个链表，链表的每个Node指向一个Client的指针（表示该client WATCHed该key）</p>
+</li>
+<li><p>在每个client结构体中用链表保存了该客户端WATCHed的key的robj，和该key对应的db指针</p>
+</li>
 </ul>
 </li>
 </ul>
