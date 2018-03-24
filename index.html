@@ -189,13 +189,16 @@ var _hmt = _hmt || [];
       
 		
 			<h4 id="1-Transactions"><a href="#1-Transactions" class="headerlink" title="1.Transactions"></a>1.Transactions</h4><ul>
-<li>MULTI, EXEC, DISCARD and WATCH are the foundation of transactions in Redis. They allow the execution of a group of commands in a single step, with two important guarantees:<ul>
-<li>All the commands in a transaction are serialized and executed sequentially. It can never happen that a request issued by another client is served in the middle of the execution of a Redis transaction. This guarantees that the commands are executed as a single isolated operation(隔离性).</li>
-<li>Either all of the commands or none are processed, so a Redis transaction is also atomic(原子性). <h4 id="2-Transactions源码"><a href="#2-Transactions源码" class="headerlink" title="2.Transactions源码"></a>2.Transactions源码</h4></li>
+<li><p>MULTI, EXEC, DISCARD and WATCH are the foundation of transactions in Redis. They allow the execution of a group of commands in a single step, with two important guarantees:</p>
+<ul>
+<li><p>All the commands in a transaction are serialized and executed sequentially. It can never happen that a request issued by another client is served in the middle of the execution of a Redis transaction. This guarantees that the commands are executed as a single isolated operation(隔离性).</p>
+</li>
+<li><p>Either all of the commands or none are processed, so a Redis transaction is also atomic(原子性). </p>
+</li>
 </ul>
 </li>
 </ul>
-<h4 id="3-参考文献"><a href="#3-参考文献" class="headerlink" title="3.参考文献"></a>3.参考文献</h4><p><a href="https://redis.io/topics/transactions" target="_blank" rel="external">redis.io</a><br><a href="https://github.com/Qinch/redis_reading/tree/read/" target="_blank" rel="external">redis_reading</a></p>
+<h4 id="2-Transactions源码"><a href="#2-Transactions源码" class="headerlink" title="2.Transactions源码"></a>2.Transactions源码</h4><h4 id="3-参考文献"><a href="#3-参考文献" class="headerlink" title="3.参考文献"></a>3.参考文献</h4><p><a href="https://redis.io/topics/transactions" target="_blank" rel="external">redis.io</a><br><a href="https://github.com/Qinch/redis_reading/tree/read/" target="_blank" rel="external">redis_reading</a></p>
 
 		
 	
