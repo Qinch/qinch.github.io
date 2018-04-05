@@ -4,7 +4,7 @@
 
   <meta charset="utf-8">
   
-  <title>Round up to the next highest power of 2 | Just For Fun</title>
+  <title>MFC thunk技术模拟 | Just For Fun</title>
   <meta name="author" content="qinchao">
   
   <meta name="description" content="qinchao&#39;s blog">
@@ -12,7 +12,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-  <meta property="og:title" content="Round up to the next highest power of 2"/>
+  <meta property="og:title" content="MFC thunk技术模拟"/>
   <meta property="og:site_name" content="Just For Fun"/>
 
   
@@ -86,11 +86,11 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title">Round up to the next highest power of 2</h1>
+    <h1 class="title">MFC thunk技术模拟</h1>
 
  
 	
-	<time  datetime="2018-03-23T16:29:36.000Z"><p>发表于 2018-03-24 | 字数 <span class="post-count">59</span>
+	<time  datetime="2013-04-02T16:00:00.000Z"><p>发表于 2013-04-03 | 字数 <span class="post-count">258</span>
 
 </p></time>
       
@@ -98,12 +98,8 @@ var _hmt = _hmt || [];
     <div class="entry">
       
 		  
-		<h4 id="version1"><a href="#version1" class="headerlink" title="version1"></a>version1</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">static unsigned int power2gt(unsigned int size) &#123;</div><div class="line">  <span class="keyword">while</span> (1) &#123;</div><div class="line">    <span class="keyword">if</span> (i &gt;= size) <span class="built_in">return</span> i;</div><div class="line">    i *= 2;</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h4 id="version2"><a href="#version2" class="headerlink" title="version2"></a>version2</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">static unsigned int power2gt(unsigned int size) &#123;</div><div class="line">    --size;</div><div class="line">    size |= size &gt;&gt; 1;</div><div class="line">    size |= size &gt;&gt; 2;</div><div class="line">    size |= size &gt;&gt; 4;</div><div class="line">    size |= size &gt;&gt; 8;</div><div class="line">    size |= size &gt;&gt; 16;</div><div class="line">    <span class="built_in">return</span> size + 1;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h4 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h4><ol>
-<li>the explanation of version2:<a href="http://bits.stephan-brumme.com/roundUpToNextPowerOfTwo.html" target="_blank" rel="external">here</a></li>
-<li><a href="https://github.com/antirez/redis/issues/4776" target="_blank" rel="external">Reidis#issue4776</a></li>
-</ol>
+		<p>//参考<a href="http://www.cnblogs.com/satng/archive/2010/12/30/2138833.html" target="_blank" rel="external">http://www.cnblogs.com/satng/archive/2010/12/30/2138833.html</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#include&lt;iostream&gt;</span></div><div class="line">using namespace std;</div><div class="line"></div><div class="line">//thunk技术模拟</div><div class="line"></div><div class="line">typedef void (*fun)(void *,int i);</div><div class="line"></div><div class="line">class CFun;//类声明。</div><div class="line"></div><div class="line"><span class="comment">#pragma pack(push)</span></div><div class="line"><span class="comment">#pragma pack(1)</span></div><div class="line">typedef struct Thunk&#123;</div><div class="line">    unsigned char call;</div><div class="line">    int offset;</div><div class="line">    fun pf;//函数指针。</div><div class="line">    unsigned char code[5];</div><div class="line">    CFun *ths;//this指针。</div><div class="line">    unsigned char jmp;</div><div class="line">    unsigned char ecx;</div><div class="line">&#125;Thunk;</div><div class="line"><span class="comment">#pragma pack(pop)</span></div><div class="line"></div><div class="line"><span class="comment">#define OFF(s,m) ((unsigned int)&amp;((s*)0)-&gt;m)//求结构体的偏移量，s为结构体的类型，m为结构体的数据成员。</span></div><div class="line"></div><div class="line">class CFun&#123;</div><div class="line">public:</div><div class="line">    <span class="function"><span class="title">CFun</span></span>()</div><div class="line">    &#123;</div><div class="line">        createThunk();</div><div class="line">    &#125;</div><div class="line">    ~<span class="function"><span class="title">CFun</span></span>()</div><div class="line">    &#123;</div><div class="line">        delete thunk;</div><div class="line">    &#125;</div><div class="line">public:</div><div class="line">    void <span class="function"><span class="title">createThunk</span></span>()</div><div class="line">    &#123;</div><div class="line">        Thunk* tk=new Thunk;</div><div class="line">        //call des</div><div class="line">        tk-&gt;call=0xE8;//call</div><div class="line">        tk-&gt;offset=OFF(Thunk,code[0])-OFF(Thunk,pf);//des</div><div class="line"></div><div class="line">        tk-&gt;pf=CFun::funx;//函数地址。</div><div class="line">        //pop ecx</div><div class="line">        //等价于：</div><div class="line">        //mov ecx,[esp]</div><div class="line">        //sub esp,4</div><div class="line">        tk-&gt;code[0]=0x59;//pop ecx</div><div class="line">        //mov [esp+4],this</div><div class="line">        tk-&gt;code[1]=0xc7;//mov</div><div class="line">        tk-&gt;code[2]=0x44;//dword ptr</div><div class="line">        //4[esp]</div><div class="line">        tk-&gt;code[3]=0x24;//[esp]</div><div class="line">        tk-&gt;code[4]=0x04;//+4</div><div class="line">        tk-&gt;ths=this;//修改栈，设置this指针。</div><div class="line"></div><div class="line">        //jmp [ecx]</div><div class="line">        tk-&gt;jmp=0xFF;//jmp</div><div class="line">        tk-&gt;ecx=0x21;//[ecx]</div><div class="line"></div><div class="line">        thunk=(fun)tk;</div><div class="line"></div><div class="line">        <span class="built_in">return</span> ;</div><div class="line">    &#125;</div><div class="line">    static void funx(void *pFun,int i)</div><div class="line">    &#123;</div><div class="line">        CFun *pf=(CFun*)pFun;</div><div class="line">        pf-&gt;<span class="built_in">print</span>(i);</div><div class="line">    &#125;</div><div class="line">    void <span class="built_in">print</span>(int i )</div><div class="line">    &#123;</div><div class="line">        cout&lt;&lt;<span class="string">"Recevie="</span>&lt;&lt;i&lt;&lt;endl;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    fun <span class="function"><span class="title">GetThunk</span></span>()</div><div class="line">    &#123;</div><div class="line">        <span class="built_in">return</span> thunk;</div><div class="line">    &#125;</div><div class="line">private:</div><div class="line">    fun thunk;</div><div class="line">&#125;;</div><div class="line"></div><div class="line">int <span class="function"><span class="title">main</span></span>()</div><div class="line">&#123;</div><div class="line">    CFun cf;</div><div class="line">    fun pf=cf.GetThunk();</div><div class="line">    pf(<span class="string">"Hello"</span>,123);</div><div class="line">    <span class="built_in">return</span> 0;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 
 	
     </div>
@@ -112,13 +108,13 @@ var _hmt = _hmt || [];
         
   
   <div class="categories">
-    <a href="/categories/snippet/">snippet</a>
+    <a href="/categories/Asm-Cpp/">Asm/Cpp</a>
   </div>
 
         
   
   <div class="tags">
-    <a href="/tags/snippet/">snippet</a>
+    <a href="/tags/Asm/">Asm</a>, <a href="/tags/MFC/">MFC</a>, <a href="/tags/thunk/">thunk</a>
   </div>
 
 	
