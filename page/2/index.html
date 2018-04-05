@@ -87,11 +87,11 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2017/12/02/redis4-skiplist/">redis4.0_skiplist源码剖析</a></h1>
+    <h1 class="title"><a href="/2017/12/02/redis4-adlist/">redis4.0_adlist源码剖析</a></h1>
 
  
 	
-	<time  datetime="2017-12-01T16:00:00.000Z"><p>发表于 2017-12-02 | 字数 <span class="post-count">1,228</span>
+	<time  datetime="2017-12-01T16:00:00.000Z"><p>发表于 2017-12-02 | 字数 <span class="post-count">1,586</span>
 
 </p></time>
       
@@ -99,18 +99,8 @@ var _hmt = _hmt || [];
     <div class="entry">
       
 		
-			<h4 id="1-skiplist概述"><a href="#1-skiplist概述" class="headerlink" title="1.skiplist概述"></a>1.skiplist概述</h4><ul>
-<li>skiplist(跳跃表)是一种有序数据结构，它通过在每个节点中维持多个指向其他节点指针，从而达到快速访问节点的目的。</li>
-<li>skiplist支持平均O(logN),最坏O(N)复杂度的节点查找，还可以通过顺序性操作来批量处理节点。</li>
-<li>This skiplist implementation is almost a C translation of the original algorithm described by William Pugh in “Skip Lists: A Probabilistic Alternative to Balanced Trees”, modified in three ways:<ul>
-<li>a) this implementation allows for repeated scores.</li>
-<li>b) the comparison is not just by key (our ‘score’) but by satellite data.</li>
-<li>c) there is a back pointer, so it’s a doubly linked list with the back  pointers being only at “level 1”. This allows to traverse the list from tail to head, useful for ZREVRANGE. */</li>
-</ul>
-</li>
-</ul>
-<h4 id="2-skiplist结构体"><a href="#2-skiplist结构体" class="headerlink" title="2.skiplist结构体"></a>2.skiplist结构体</h4><p><img src="/img/skiplist0.png" alt="单击图片进行放大"></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">/* ZSETs use a specialized version of Skiplists */</div><div class="line">typedef struct zskiplistNode &#123;</div><div class="line">    sds ele;</div><div class="line">    double score;</div><div class="line">    struct zskiplistNode *backward;</div><div class="line">    struct zskiplistLevel &#123;</div><div class="line">        struct zskiplistNode *forward;</div><div class="line">        unsigned int span;//跨度：用于记录与forward指向节点的距离</div><div class="line">    &#125; level[]; //0长度数组的妙用</div><div class="line">&#125; zskiplistNode;</div><div class="line"></div><div class="line">typedef struct zskiplist &#123;</div><div class="line">    //指向skiplist中表头节点和表尾节点</div><div class="line">    struct zskiplistNode *header, *tail;</div><div class="line">    //skiplist中节点的数量（不包括表头节点）</div><div class="line">    unsigned long length;</div><div class="line">    //skiplist中层数最高的节点的层数</div><div class="line">    int level;</div><div class="line">&#125; zskiplist;</div></pre></td></tr></table></figure>
+			<h4 id="1-adlist介绍"><a href="#1-adlist介绍" class="headerlink" title="1.adlist介绍"></a>1.adlist介绍</h4><p>adlist：双向非循环链表，如图:<br><img src="/img/adlist.png" alt="adlist"></p>
+<h4 id="2-adlist-h源码分析"><a href="#2-adlist-h源码分析" class="headerlink" title="2.adlist.h源码分析"></a>2.adlist.h源码分析</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">/* Node, List, and Iterator are the only data structures used currently. */</div><div class="line">//链表Node,双向非循环链表</div><div class="line">typedef struct listNode &#123;</div><div class="line">    struct listNode *prev;</div><div class="line">    struct listNode *next;</div><div class="line">    void *value;</div><div class="line">&#125; listNode;</div><div class="line"></div><div class="line">//迭代器</div><div class="line">typedef struct listIter &#123;</div><div class="line">    listNode *next;</div><div class="line">    int direction;</div><div class="line">&#125; listIter;</div><div class="line"></div><div class="line">typedef struct list &#123;</div><div class="line">	//指向list中第一个listnode节点</div><div class="line">    listNode *head;</div><div class="line">	//指向list中最后一个listnode节点</div><div class="line">    listNode *tail;</div><div class="line">    void *(*dup)(void *ptr);</div><div class="line">    void (*free)(void *ptr);//用于释放Node中value字段</div><div class="line">    int (*match)(void *ptr, void *key);</div><div class="line">    unsigned long len;//链表的长度</div><div class="line">&#125; list;</div></pre></td></tr></table></figure>
 		
 	
     </div>
@@ -118,7 +108,7 @@ var _hmt = _hmt || [];
       
         
           <div class="alignleft">
-            <a href="/2017/12/02/redis4-skiplist/#more" class="more-link">阅读全文</a>
+            <a href="/2017/12/02/redis4-adlist/#more" class="more-link">阅读全文</a>
           </div>
         
         
@@ -286,47 +276,6 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2017/04/19/mk/">Makefile</a></h1>
-
- 
-	
-	<time  datetime="2017-04-18T16:00:00.000Z"><p>发表于 2017-04-19 | 字数 <span class="post-count">99</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<h4 id="1-makefile的规则"><a href="#1-makefile的规则" class="headerlink" title="1,makefile的规则"></a>1,makefile的规则</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">target ...: prerequisites ...</div><div class="line">	cmd</div><div class="line">	...</div><div class="line">	...</div><div class="line"></div><div class="line">其中，target可以是一个obj file,也可以是一个执行文件，还可以是一个label.</div><div class="line">prerequisites：为生成该target所依赖的文件或target</div><div class="line">cmd(必须以一个Tab键作为开头)：为target要执行的命令</div><div class="line">注：prerequisites中如果有一个以上的文件比target文件要新的话，cmd所定义的命令就会被执行。</div></pre></td></tr></table></figure>
-		
-	
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2017/04/19/mk/#more" class="more-link">阅读全文</a>
-          </div>
-        
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
     <h1 class="title"><a href="/2017/04/19/thread_signal/">线程-信号</a></h1>
 
  
@@ -351,6 +300,47 @@ var _hmt = _hmt || [];
         
           <div class="alignleft">
             <a href="/2017/04/19/thread_signal/#more" class="more-link">阅读全文</a>
+          </div>
+        
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
+    <h1 class="title"><a href="/2017/04/19/makefile/">Makefile</a></h1>
+
+ 
+	
+	<time  datetime="2017-04-18T16:00:00.000Z"><p>发表于 2017-04-19 | 字数 <span class="post-count">99</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<h4 id="1-makefile的规则"><a href="#1-makefile的规则" class="headerlink" title="1,makefile的规则"></a>1,makefile的规则</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">target ...: prerequisites ...</div><div class="line">	cmd</div><div class="line">	...</div><div class="line">	...</div><div class="line"></div><div class="line">其中，target可以是一个obj file,也可以是一个执行文件，还可以是一个label.</div><div class="line">prerequisites：为生成该target所依赖的文件或target</div><div class="line">cmd(必须以一个Tab键作为开头)：为target要执行的命令</div><div class="line">注：prerequisites中如果有一个以上的文件比target文件要新的话，cmd所定义的命令就会被执行。</div></pre></td></tr></table></figure>
+		
+	
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2017/04/19/makefile/#more" class="more-link">阅读全文</a>
           </div>
         
         
