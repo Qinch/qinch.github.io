@@ -254,10 +254,7 @@ var _hmt = _hmt || [];
     <div class="entry">
       
 		
-			<ol>
-<li>以int32类型为例:</li>
-</ol>
-<ul>
+			<h4 id="1-以int32类型为例"><a href="#1-以int32类型为例" class="headerlink" title="1.以int32类型为例:"></a>1.以int32类型为例:</h4><ul>
 <li>方法1:</li>
 </ul>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">void swapInt(int *rhs)</div><div class="line">&#123;</div><div class="line">    unsigned char *p=rhs;</div><div class="line">    unsigned char temp;</div><div class="line">    temp=p[0];</div><div class="line">    p[0]=[1];</div><div class="line">    p[1]=temp;</div><div class="line"></div><div class="line">    temp=p[1];</div><div class="line">    p[1]=[2];</div><div class="line">    p[2]=temp;</div><div class="line">    <span class="built_in">return</span> ;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
@@ -265,10 +262,7 @@ var _hmt = _hmt || [];
 <li>方法2：</li>
 </ul>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">void swapInt(int *rhs)</div><div class="line">&#123;</div><div class="line">    *rhs=(((*rhs)&amp;0xff000000)&gt;&gt;24) | (((*rhs)&amp;0x00ff0000)&gt;&gt;8) | (((*rhs)&amp;0x000000ff)&lt;&lt;24) | (((*rhs)&amp;0x0000ff00)&lt;&lt;8); </div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<ol>
-<li>检测机器字节序：大短法or小端法</li>
-</ol>
-<ul>
+<h4 id="2-检测机器字节序：大短法or小端法"><a href="#2-检测机器字节序：大短法or小端法" class="headerlink" title="2.检测机器字节序：大短法or小端法"></a>2.检测机器字节序：大短法or小端法</h4><ul>
 <li>方法1：</li>
 </ul>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">int checkEndian()//检查主机字节顺序是否是大端法，如果是，返回1，否则返回0.</div><div class="line">&#123;</div><div class="line">        int i=0x12345678;</div><div class="line">        unsigned char *p=&amp;i;</div><div class="line">        <span class="built_in">return</span> (0x12==p[0]);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
