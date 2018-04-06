@@ -4,7 +4,7 @@
 
   <meta charset="utf-8">
   
-  <title>APUE中文第三版勘误 | Just For Fun</title>
+  <title>redis4.0_发布/订阅 | Just For Fun</title>
   <meta name="author" content="qinchao">
   
   <meta name="description" content="qinchao&#39;s blog">
@@ -12,7 +12,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-  <meta property="og:title" content="APUE中文第三版勘误"/>
+  <meta property="og:title" content="redis4.0_发布/订阅"/>
   <meta property="og:site_name" content="Just For Fun"/>
 
   
@@ -86,11 +86,11 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title">APUE中文第三版勘误</h1>
+    <h1 class="title">redis4.0_发布/订阅</h1>
 
  
 	
-	<time  datetime="2017-10-01T16:00:00.000Z"><p>发表于 2017-10-02 | 字数 <span class="post-count">150</span>
+	<time  datetime="2017-12-13T16:00:00.000Z"><p>发表于 2017-12-14 | 字数 <span class="post-count">239</span>
 
 </p></time>
       
@@ -98,9 +98,22 @@ var _hmt = _hmt || [];
     <div class="entry">
       
 		  
-		<p>本博客根据自己对APUE中文第三版的阅读理解，列出其中自己认为翻译错误或者翻译有歧义的部分。</p>
-<h4 id="1-page81"><a href="#1-page81" class="headerlink" title="1,page81"></a>1,page81</h4><p>中文：其中，如果测试文件是否已经存在，mode就为F_OK；否则mode是图4-7中所列常量的按位或。<br>英文(page102)：The mode is either the value F_OK to test if a file exists, or the bitwise OR of any of the flags shown in Figure 4.7.</p>
-<h4 id="2-page89"><a href="#2-page89" class="headerlink" title="2,page89"></a>2,page89</h4><p>中文：对于符号链接，文件长度是在文件名中的实际字节数。<br>英文(page111):For a symbolic link, the file size is the numberof bytes in the filename.<br><a id="more"></a></p>
+		<h4 id="1-channel的订阅与退订"><a href="#1-channel的订阅与退订" class="headerlink" title="1. channel的订阅与退订"></a>1. channel的订阅与退订</h4><ul>
+<li><p>UBSCRIBE, UNSUBSCRIBE and PUBLISH implement the Publish/Subscribe messaging paradigm where  senders (publishers) are not programmed to send their messages to specific receivers (subscribers). Rather, published messages are characterized into channels, without knowledge of what (if any) subscribers there may be. Subscribers express interest in one or more channels, and only receive messages that are of interest, without knowledge of what (if any) publishers there are.</p>
+</li>
+<li><p>Messages sent by other clients to these channels will be pushed by Redis to all the subscribed clients.</p>
+</li>
+<li><p>A client subscribed to one or more channels should not issue commands, although it can subscribe and unsubscribe to and from other channels. The replies to subscription and unsubscription operations are sent in the form of messages, so that the client can just read a coherent stream of messages where the first element indicates the type of message. The commands that are allowed in the context of a subscribed client are SUBSCRIBE, PSUBSCRIBE, UNSUBSCRIBE, PUNSUBSCRIBE, PING and QUIT.</p>
+<ul>
+<li>Please note that redis-cli will not accept any commands once in subscribed mode and can only quit the mode with Ctrl-C.</li>
+</ul>
+</li>
+</ul>
+<h4 id="2-Pattern-matching订阅与退订"><a href="#2-Pattern-matching订阅与退订" class="headerlink" title="2.Pattern-matching订阅与退订"></a>2.Pattern-matching订阅与退订</h4><ul>
+<li>The Redis Pub/Sub implementation supports pattern matching. Clients may subscribe to glob-style patterns in order to receive all the messages sent to channel names matching a given pattern.</li>
+</ul>
+<h4 id="3-参考文献"><a href="#3-参考文献" class="headerlink" title="3.参考文献"></a>3.参考文献</h4><p>《<a href="https://redis.io/topics/pubsub" target="_blank" rel="external">redis.io</a>》</p>
+<p>《<a href="https://github.com/Qinch/redis_reading/tree/read/" target="_blank" rel="external">redis_reading</a>》</p>
 
 	
     </div>
@@ -109,13 +122,13 @@ var _hmt = _hmt || [];
         
   
   <div class="categories">
-    <a href="/categories/C-Linux/">C/Linux</a>
+    <a href="/categories/redis/">redis</a>
   </div>
 
         
   
   <div class="tags">
-    <a href="/tags/apue/">apue</a>, <a href="/tags/勘误/">勘误</a>
+    <a href="/tags/redis4-0/">redis4.0</a>, <a href="/tags/sourcecode/">sourcecode</a>, <a href="/tags/pub-sub/">pub/sub</a>
   </div>
 
 	
@@ -125,28 +138,6 @@ var _hmt = _hmt || [];
     </footer>
   </div>
 </article>
-
-
-<section id="comment">
-<!-- Duoshuo Comment BEGIN -->
-	<div class="ds-thread"></div>
-<script type="text/javascript">
-var duoshuoQuery = {short_name:"qinch"};
-	(function() {
-		var ds = document.createElement('script');
-		ds.type = 'text/javascript';ds.async = true;
-		ds.src = 'http://static.duoshuo.com/embed.js';
-		ds.charset = 'UTF-8';
-		(document.getElementsByTagName('head')[0] 
-		|| document.getElementsByTagName('body')[0]).appendChild(ds);
-	})();
-	</script>
-<!-- Duoshuo Comment END -->  
-
-
-
-</section>
-
 
 
 

@@ -141,6 +141,65 @@ var _hmt = _hmt || [];
     <header>
       
 	
+    <h1 class="title"><a href="/2014/05/10/cpp-model-del/">operator delete异常分析</a></h1>
+
+ 
+	
+	<time  datetime="2014-05-09T16:00:00.000Z"><p>发表于 2014-05-10 | 字数 <span class="post-count">732</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<h5 id="开发环境"><a href="#开发环境" class="headerlink" title="开发环境"></a>开发环境</h5><ul>
+<li>VC6.0     </li>
+<li>编辑器 Cmd Markdown</li>
+</ul>
+<ol>
+<li><p>C++中delete表达式执行的操作是：1，调用析构函数；2，释放对象内存（operator delete(…)）。</p>
+</li>
+<li><p>如果父类的析构函数没有声明为virtual函数，且子类中至少存在一个virtual函数，此时将子类的对象地址赋值给父类指针。当对父类的指针执行delete操作时,会调用父类析构函数，然后在释放内存时（即delete表达式执行的操作的2，释放对象内存）出现崩溃。然而如果子类中不存在一个virtual函数时，执行上面同样的操作就不会出现崩溃。</p>
+</li>
+</ol>
+<ul>
+<li>原因分析如下：</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line">//已知本示例 父类的析构函数应声明为virtual函数。但是由于本程序不需要析构函数执行特殊的操作，所以delete父类指针pB同样可以释放内存，然而引起出乎意料的内//存释放异常。因此对本程序进行如下分析</div><div class="line"><span class="comment">#include&lt;iostream&gt;</span></div><div class="line"><span class="comment">#include stdio&gt;</span></div><div class="line">using namespace std;</div><div class="line"></div><div class="line">class Base</div><div class="line">&#123;</div><div class="line">public:</div><div class="line"> ~<span class="function"><span class="title">Base</span></span>() &#123;<span class="built_in">printf</span>(<span class="string">"\nBase::destructor."</span>);&#125;</div><div class="line">&#125;;</div><div class="line"></div><div class="line">class Derived: public Base</div><div class="line">&#123;</div><div class="line">    virtual void <span class="function"><span class="title">show</span></span>()</div><div class="line">    &#123;</div><div class="line">        cout&lt;&lt;<span class="string">"show"</span>&lt;</div><div class="line">    &#125;</div><div class="line">public:</div><div class="line">    ~<span class="function"><span class="title">Derived</span></span>()&#123;<span class="built_in">printf</span>(<span class="string">"\nDerived::destructor."</span>);&#125;</div><div class="line">&#125;;</div><div class="line"></div><div class="line">int <span class="function"><span class="title">main</span></span>()</div><div class="line">&#123;</div><div class="line">    Base* pB=NULL;</div><div class="line">    Derived *pD= new Derived;</div><div class="line">    pB=pD;//此时pB得到的是(unsigned char*)pD+4的地址，所以执行operator delete时会发生崩溃（因为此时把vptr的内存当成了待释放的内存块的大小）。</div><div class="line">    /*unsigned char *pC=(unsigned char*)pB;</div><div class="line">      pC=pC-4;</div><div class="line">      delete pC;//这样就可以释放new Derived分配的内存,而不会发生崩溃。</div><div class="line">    */</div><div class="line">    delete pB;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li><p>其main函数对应的汇编代码如下(VC6.0)：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">int main()</div><div class="line">23: &#123;</div><div class="line">00401060 push ebp</div><div class="line">00401061 mov ebp,esp</div><div class="line">00401063 push 0FFh</div><div class="line">00401065 push offset __ehhandler<span class="variable">$_main</span> (00416a0b)</div><div class="line">0040106A mov eax,fs:[00000000]</div><div class="line">00401070 push eax</div><div class="line">00401071 mov dword ptr fs:[0],esp</div><div class="line">00401078 sub esp,64h</div><div class="line">0040107B push ebx</div><div class="line">0040107C push esi</div><div class="line">0040107D push edi</div><div class="line">0040107E lea edi,[ebp-70h]</div><div class="line">00401081 mov ecx,19h</div><div class="line">00401086 mov eax,0CCCCCCCCh</div><div class="line">0040108B rep stos dword ptr [edi]</div><div class="line"></div><div class="line">24：Base* pB=NULL;</div><div class="line">0040108D mov dword ptr [ebp-10h],0</div><div class="line">25: Derived *pD= new Derived;</div><div class="line">00401094 push 4</div><div class="line">00401096 call operator new (00403780)</div><div class="line">0040109B add esp,4</div><div class="line">0040109E mov dword ptr [ebp-1Ch],eax  //eax保存的是operator new（...）函数分配的内存的首地址。</div><div class="line">004010A1 mov dword ptr [ebp-4],0</div><div class="line">004010A8 cmp dword ptr [ebp-1Ch],0    //判断operator new(...)函数分配内存是否成功。</div><div class="line">004010AC je main+5Bh (004010bb)</div><div class="line">004010AE mov ecx,dword ptr [ebp-1Ch]   //调用Derived::Derived（）函数，ecx保存的是内存指针。</div><div class="line">004010B1 call @ILT+35(Derived::Derived) (00401028)</div><div class="line">004010B6 mov dword ptr [ebp-28h],eax</div><div class="line">004010B9 jmp main+62h (004010c2)</div><div class="line">004010BB mov dword ptr [ebp-28h],0</div><div class="line">004010C2 mov eax,dword ptr [ebp-28h]</div><div class="line">004010C5 mov dword ptr [ebp-18h],eax</div><div class="line">004010C8 mov dword ptr [ebp-4],0FFFFFFFFh</div><div class="line">004010CF mov ecx,dword ptr [ebp-18h]</div><div class="line">004010D2 mov dword ptr [ebp-14h],ecx</div><div class="line">26: pB=pD;</div><div class="line">004010D5 cmp dword ptr [ebp-14h],0</div><div class="line">004010D9 je main+86h (004010e6)</div><div class="line">004010DB mov edx,dword ptr [ebp-14h]</div><div class="line">004010DE add edx,4</div><div class="line">004010E1 mov dword ptr [ebp-2Ch],edx</div><div class="line">004010E4 jmp main+8Dh (004010ed)</div><div class="line">004010E6 mov dword ptr [ebp-2Ch],0</div><div class="line">004010ED mov eax,dword ptr [ebp-2Ch]</div><div class="line">004010F0 mov dword ptr [ebp-10h],eax   //pB=(unsinged char*)(pD)+4</div><div class="line">27:</div><div class="line">28: delete pB;</div><div class="line">004010F3 mov ecx,dword ptr [ebp-10h]</div><div class="line">004010F6 mov dword ptr [ebp-24h],ecx</div><div class="line">004010F9 mov edx,dword ptr [ebp-24h]</div><div class="line">004010FC mov dword ptr [ebp-20h],edx</div><div class="line">004010FF cmp dword ptr [ebp-20h],0</div><div class="line">00401103 je main+0B4h (00401114)</div><div class="line">00401105 push 1</div><div class="line">00401107 mov ecx,dword ptr [ebp-20h]</div><div class="line">0040110A call @ILT+20(Base::`scalar deleting destructor</div></pre></td></tr></table></figure>
+</li>
+<li><p>图示如下</p>
+</li>
+</ul>
+<p><img src="/img/del.png" alt="cxxmodel"></p>
+
+		
+	
+    </div>
+    <footer>
+      
+        
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
     <h1 class="title"><a href="/2013/10/19/ctoy-1/">奇怪的死循环</a></h1>
 
  
@@ -332,15 +391,15 @@ var _hmt = _hmt || [];
       </li>
     
       <li>
+        <a href="/2017/12/14/redis4-pub/">redis4.0_发布/订阅</a>
+      </li>
+    
+      <li>
         <a href="/2017/12/13/redis4-io/">redis4.0_输入/输出缓冲区处理</a>
       </li>
     
       <li>
         <a href="/2017/12/11/redis4-multi/">redis4.0_Transactions源码剖析</a>
-      </li>
-    
-      <li>
-        <a href="/2017/12/10/redis4-event/">redis4.0_event源码剖析</a>
       </li>
     
   </ul>
@@ -368,7 +427,7 @@ var _hmt = _hmt || [];
   
     <li><a href="/categories/mysql/">mysql</a><small>1</small></li>
   
-    <li><a href="/categories/redis/">redis</a><small>11</small></li>
+    <li><a href="/categories/redis/">redis</a><small>12</small></li>
   
     <li><a href="/categories/shell/">shell</a><small>1</small></li>
   
@@ -386,7 +445,7 @@ var _hmt = _hmt || [];
 <div class="widget tagcloud">
   <h3 class="title">标签云</h3>
   <div class="entry">
-    <a href="/tags/Asm/" style="font-size: 20px;">Asm</a> <a href="/tags/C/" style="font-size: 17.5px;">C</a> <a href="/tags/Cpp/" style="font-size: 15px;">Cpp</a> <a href="/tags/Endian/" style="font-size: 10px;">Endian</a> <a href="/tags/MFC/" style="font-size: 10px;">MFC</a> <a href="/tags/Transations/" style="font-size: 10px;">Transations</a> <a href="/tags/adlist/" style="font-size: 10px;">adlist</a> <a href="/tags/apue/" style="font-size: 12.5px;">apue</a> <a href="/tags/atoi/" style="font-size: 10px;">atoi</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/database/" style="font-size: 10px;">database</a> <a href="/tags/dict/" style="font-size: 10px;">dict</a> <a href="/tags/event/" style="font-size: 12.5px;">event</a> <a href="/tags/heap/" style="font-size: 10px;">heap</a> <a href="/tags/icp/" style="font-size: 10px;">icp</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/intset/" style="font-size: 10px;">intset</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/make/" style="font-size: 10px;">make</a> <a href="/tags/makefile/" style="font-size: 10px;">makefile</a> <a href="/tags/multi/" style="font-size: 10px;">multi</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/network/" style="font-size: 10px;">network</a> <a href="/tags/object/" style="font-size: 10px;">object</a> <a href="/tags/redis4-0/" style="font-size: 17.5px;">redis4.0</a> <a href="/tags/scp/" style="font-size: 10px;">scp</a> <a href="/tags/sds/" style="font-size: 10px;">sds</a> <a href="/tags/signal/" style="font-size: 10px;">signal</a> <a href="/tags/skiplist/" style="font-size: 10px;">skiplist</a> <a href="/tags/snippet/" style="font-size: 12.5px;">snippet</a> <a href="/tags/sort/" style="font-size: 10px;">sort</a> <a href="/tags/sourcecode/" style="font-size: 17.5px;">sourcecode</a> <a href="/tags/stl/" style="font-size: 12.5px;">stl</a> <a href="/tags/string2ll/" style="font-size: 10px;">string2ll</a> <a href="/tags/t-string/" style="font-size: 10px;">t_string</a> <a href="/tags/thread/" style="font-size: 10px;">thread</a> <a href="/tags/thunk/" style="font-size: 10px;">thunk</a> <a href="/tags/tips/" style="font-size: 10px;">tips</a> <a href="/tags/unpv2/" style="font-size: 10px;">unpv2</a> <a href="/tags/ziplist/" style="font-size: 10px;">ziplist</a> <a href="/tags/内存流/" style="font-size: 10px;">内存流</a> <a href="/tags/勘误/" style="font-size: 10px;">勘误</a>
+    <a href="/tags/Asm/" style="font-size: 20px;">Asm</a> <a href="/tags/C/" style="font-size: 17.5px;">C</a> <a href="/tags/Cpp/" style="font-size: 15px;">Cpp</a> <a href="/tags/Endian/" style="font-size: 10px;">Endian</a> <a href="/tags/MFC/" style="font-size: 10px;">MFC</a> <a href="/tags/Transations/" style="font-size: 10px;">Transations</a> <a href="/tags/adlist/" style="font-size: 10px;">adlist</a> <a href="/tags/apue/" style="font-size: 12.5px;">apue</a> <a href="/tags/atoi/" style="font-size: 10px;">atoi</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/database/" style="font-size: 10px;">database</a> <a href="/tags/dict/" style="font-size: 10px;">dict</a> <a href="/tags/event/" style="font-size: 12.5px;">event</a> <a href="/tags/heap/" style="font-size: 10px;">heap</a> <a href="/tags/icp/" style="font-size: 10px;">icp</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/intset/" style="font-size: 10px;">intset</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/make/" style="font-size: 10px;">make</a> <a href="/tags/makefile/" style="font-size: 10px;">makefile</a> <a href="/tags/multi/" style="font-size: 10px;">multi</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/network/" style="font-size: 10px;">network</a> <a href="/tags/object/" style="font-size: 10px;">object</a> <a href="/tags/pub-sub/" style="font-size: 10px;">pub/sub</a> <a href="/tags/redis4-0/" style="font-size: 20px;">redis4.0</a> <a href="/tags/scp/" style="font-size: 10px;">scp</a> <a href="/tags/sds/" style="font-size: 10px;">sds</a> <a href="/tags/signal/" style="font-size: 10px;">signal</a> <a href="/tags/skiplist/" style="font-size: 10px;">skiplist</a> <a href="/tags/snippet/" style="font-size: 12.5px;">snippet</a> <a href="/tags/sort/" style="font-size: 10px;">sort</a> <a href="/tags/sourcecode/" style="font-size: 20px;">sourcecode</a> <a href="/tags/stl/" style="font-size: 12.5px;">stl</a> <a href="/tags/string2ll/" style="font-size: 10px;">string2ll</a> <a href="/tags/t-string/" style="font-size: 10px;">t_string</a> <a href="/tags/thread/" style="font-size: 10px;">thread</a> <a href="/tags/thunk/" style="font-size: 10px;">thunk</a> <a href="/tags/tips/" style="font-size: 10px;">tips</a> <a href="/tags/unpv2/" style="font-size: 10px;">unpv2</a> <a href="/tags/ziplist/" style="font-size: 10px;">ziplist</a> <a href="/tags/内存流/" style="font-size: 10px;">内存流</a> <a href="/tags/勘误/" style="font-size: 10px;">勘误</a>
   </div>
 </div>
 
