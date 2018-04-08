@@ -87,6 +87,129 @@ var _hmt = _hmt || [];
     <header>
       
 	
+    <h1 class="title"><a href="/2015/12/10/stl-sort/">STL IntroSort源码分析</a></h1>
+
+ 
+	
+	<time  datetime="2015-12-09T16:00:00.000Z"><p>发表于 2015-12-10 | 字数 <span class="post-count">675</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<h5 id="1-sort函数源码："><a href="#1-sort函数源码：" class="headerlink" title="1,sort函数源码："></a>1,sort函数源码：</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">template &lt;class _RandomAccessIter&gt;</div><div class="line">inline void sort(_RandomAccessIter __first, _RandomAccessIter __last) &#123;</div><div class="line">  __STL_REQUIRES(_RandomAccessIter, _Mutable_RandomAccessIterator);</div><div class="line">  __STL_REQUIRES(typename iterator_traits&lt;_RandomAccessIter&gt;::value_type,</div><div class="line">                 _LessThanComparable);</div><div class="line">  <span class="keyword">if</span> (__first != __last) &#123; //如果待排序序列非空;</div><div class="line">    //进行introsort排序,其中__lg函数用于控制最大分割层数;</div><div class="line">    __introsort_loop(__first, __last,</div><div class="line">                     __VALUE_TYPE(__first),</div><div class="line">                     __lg(__last - __first) * 2);</div><div class="line">    __final_insertion_sort(__first, __last);//对序列进行插入排序;</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+		
+	
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2015/12/10/stl-sort/#more" class="more-link">阅读全文</a>
+          </div>
+        
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
+    <h1 class="title"><a href="/2015/08/20/mysql/">MYSQL必知必会</a></h1>
+
+ 
+	
+	<time  datetime="2015-08-19T16:00:00.000Z"><p>发表于 2015-08-20 | 字数 <span class="post-count">9</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<h4 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h4><ul>
+<li>《MYSQL必知必会》</li>
+</ul>
+
+		
+	
+    </div>
+    <footer>
+      
+        
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
+    <h1 class="title"><a href="/2015/06/21/scp/">scp.exp脚本:scp命令自动输入密码</a></h1>
+
+ 
+	
+	<time  datetime="2015-06-20T16:00:00.000Z"><p>发表于 2015-06-21 | 字数 <span class="post-count">154</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<h4 id="1-scp-exp用法-以ubuntu为例"><a href="#1-scp-exp用法-以ubuntu为例" class="headerlink" title="1.scp.exp用法(以ubuntu为例):"></a>1.scp.exp用法(以ubuntu为例):</h4><ul>
+<li>sudo apt-get install expect</li>
+<li>expect scp.exp 127.0.0.1 root passwd srcfile destfile 300</li>
+</ul>
+<h4 id="2-scp-exp脚本内容"><a href="#2-scp-exp脚本内容" class="headerlink" title="2.scp.exp脚本内容"></a>2.scp.exp脚本内容</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#!/usr/bin/expect</span></div><div class="line"><span class="comment">#目的机器的ip</span></div><div class="line"><span class="built_in">set</span> host [lindex <span class="variable">$argv</span> 0]</div><div class="line"><span class="comment">#目的机器的用户名</span></div><div class="line"><span class="built_in">set</span> username [lindex <span class="variable">$argv</span> 1]</div><div class="line"><span class="comment">#目的机器的用户密码</span></div><div class="line"><span class="built_in">set</span> password [lindex <span class="variable">$argv</span> 2]</div><div class="line"><span class="comment">#源文件或源目录</span></div><div class="line"><span class="built_in">set</span> src_file [lindex <span class="variable">$argv</span> 3]</div><div class="line"><span class="comment">#目的文件或目的目录</span></div><div class="line"><span class="built_in">set</span> dest_file [lindex <span class="variable">$argv</span> 4]</div><div class="line"><span class="comment">#expect超时时间</span></div><div class="line"><span class="built_in">set</span> time_out [lindex <span class="variable">$argv</span> 5]</div><div class="line"></div><div class="line">spawn scp -r <span class="variable">$src_file</span> <span class="variable">$username</span>@<span class="variable">$host</span>:<span class="variable">$dest_file</span></div><div class="line"><span class="built_in">set</span> timeout <span class="variable">$time_out</span></div><div class="line">expect &#123;</div><div class="line"> <span class="string">"(yes/no)?"</span></div><div class="line">  &#123;</div><div class="line">    send <span class="string">"yes\n"</span></div><div class="line">    exp_continue</div><div class="line">  &#125;</div><div class="line"> <span class="string">"*assword:"</span></div><div class="line">  &#123;</div><div class="line">    send <span class="string">"<span class="variable">$password</span>\n"</span></div><div class="line">    exp_continue</div><div class="line">  &#125;</div><div class="line"> <span class="string">"ermission denied"</span></div><div class="line">  &#123;</div><div class="line">    send_user <span class="string">"Copy <span class="variable">$src_file</span> to <span class="variable">$dest_file</span> failed.\n"</span></div><div class="line">    <span class="built_in">exit</span> 1</div><div class="line">  &#125;</div><div class="line">  eof</div><div class="line">  &#123;</div><div class="line">    send_user <span class="string">"Copy <span class="variable">$src_file</span> to <span class="variable">$dest_file</span> succ.\n"</span></div><div class="line">    <span class="built_in">exit</span> 0</div><div class="line">  &#125;</div><div class="line">&#125;</div><div class="line"><span class="comment">#expect超时</span></div><div class="line"><span class="built_in">exit</span> 2</div></pre></td></tr></table></figure>
+
+		
+	
+    </div>
+    <footer>
+      
+        
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
     <h1 class="title"><a href="/2014/05/10/cpp-model-obj/">函数调用过程:C++对象作为函数参数</a></h1>
 
  
@@ -383,23 +506,23 @@ var _hmt = _hmt || [];
   <ul class="entry">
     
       <li>
+        <a href="/2018/04/08/redis4-clu/"></a>
+      </li>
+    
+      <li>
+        <a href="/2018/04/08/redis4-sen/"></a>
+      </li>
+    
+      <li>
+        <a href="/2018/04/08/redis4-rep/"></a>
+      </li>
+    
+      <li>
         <a href="/2018/03/24/snippet-pow2/">Round up to the next highest power of 2</a>
       </li>
     
       <li>
         <a href="/2018/01/28/snippet-atoi/">Atoi&amp;Itoa函数</a>
-      </li>
-    
-      <li>
-        <a href="/2017/12/13/redis4-io/">redis4.0_输入/输出缓冲区处理</a>
-      </li>
-    
-      <li>
-        <a href="/2017/12/12/redis4-pub/">redis4.0_发布/订阅</a>
-      </li>
-    
-      <li>
-        <a href="/2017/12/11/redis4-multi/">redis4.0_Transactions源码剖析</a>
       </li>
     
   </ul>

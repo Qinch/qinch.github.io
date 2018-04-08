@@ -87,11 +87,11 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2017/12/02/redis4-skiplist/">redis4.0_skiplist源码剖析</a></h1>
+    <h1 class="title"><a href="/2017/12/03/redis4-t_string/">redis4.0_t_string源码剖析</a></h1>
 
  
 	
-	<time  datetime="2017-12-01T16:00:00.000Z"><p>发表于 2017-12-02 | 字数 <span class="post-count">1,228</span>
+	<time  datetime="2017-12-02T16:00:00.000Z"><p>发表于 2017-12-03 | 字数 <span class="post-count">810</span>
 
 </p></time>
       
@@ -99,18 +99,17 @@ var _hmt = _hmt || [];
     <div class="entry">
       
 		
-			<h4 id="1-skiplist概述"><a href="#1-skiplist概述" class="headerlink" title="1.skiplist概述"></a>1.skiplist概述</h4><ul>
-<li>skiplist(跳跃表)是一种有序数据结构，它通过在每个节点中维持多个指向其他节点指针，从而达到快速访问节点的目的。</li>
-<li>skiplist支持平均O(logN),最坏O(N)复杂度的节点查找，还可以通过顺序性操作来批量处理节点。</li>
-<li>This skiplist implementation is almost a C translation of the original algorithm described by William Pugh in “Skip Lists: A Probabilistic Alternative to Balanced Trees”, modified in three ways:<ul>
-<li>a) this implementation allows for repeated scores.</li>
-<li>b) the comparison is not just by key (our ‘score’) but by satellite data.</li>
-<li>c) there is a back pointer, so it’s a doubly linked list with the back  pointers being only at “level 1”. This allows to traverse the list from tail to head, useful for ZREVRANGE. */</li>
+			<h4 id="1-字符串对象介绍"><a href="#1-字符串对象介绍" class="headerlink" title="1.字符串对象介绍"></a>1.字符串对象介绍</h4><ul>
+<li><p>encoding为REDIS_ENCODING_INT</p>
+<ul>
+<li>字符串的内容为“123456”，对应的redisObject内存布局如下：<br><img src="/img/t_string_int.png" alt="encoding_int"></li>
 </ul>
 </li>
+<li><p>encoding为REDIS_ENCODING_EMBSTR内存布局<br><img src="/img/t_string_embstr.png" alt="encoding_embstr"></p>
+</li>
+<li><p>encoding为REDIS_ENCODING_RAW内存布局<br><img src="/img/t_string_raw.png" alt="encoding_raw"></p>
+</li>
 </ul>
-<h4 id="2-skiplist结构体"><a href="#2-skiplist结构体" class="headerlink" title="2.skiplist结构体"></a>2.skiplist结构体</h4><p><img src="/img/skiplist0.png" alt="单击图片进行放大"></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">/* ZSETs use a specialized version of Skiplists */</div><div class="line">typedef struct zskiplistNode &#123;</div><div class="line">    sds ele;</div><div class="line">    double score;</div><div class="line">    struct zskiplistNode *backward;</div><div class="line">    struct zskiplistLevel &#123;</div><div class="line">        struct zskiplistNode *forward;</div><div class="line">        unsigned int span;//跨度：用于记录与forward指向节点的距离</div><div class="line">    &#125; level[]; //0长度数组的妙用</div><div class="line">&#125; zskiplistNode;</div><div class="line"></div><div class="line">typedef struct zskiplist &#123;</div><div class="line">    //指向skiplist中表头节点和表尾节点</div><div class="line">    struct zskiplistNode *header, *tail;</div><div class="line">    //skiplist中节点的数量（不包括表头节点）</div><div class="line">    unsigned long length;</div><div class="line">    //skiplist中层数最高的节点的层数</div><div class="line">    int level;</div><div class="line">&#125; zskiplist;</div></pre></td></tr></table></figure>
 		
 	
     </div>
@@ -118,8 +117,147 @@ var _hmt = _hmt || [];
       
         
           <div class="alignleft">
-            <a href="/2017/12/02/redis4-skiplist/#more" class="more-link">阅读全文</a>
+            <a href="/2017/12/03/redis4-t_string/#more" class="more-link">阅读全文</a>
           </div>
+        
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
+    <h1 class="title"><a href="/2017/12/03/redis4-ziplist/">redis4.0_ziplist源码剖析</a></h1>
+
+ 
+	
+	<time  datetime="2017-12-02T16:00:00.000Z"><p>发表于 2017-12-03 | 字数 <span class="post-count">10,112</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<h3 id="1-ziplist"><a href="#1-ziplist" class="headerlink" title="1.ziplist"></a>1.ziplist</h3><h4 id="1-1-ziplist概述"><a href="#1-1-ziplist概述" class="headerlink" title="1.1.ziplist概述"></a>1.1.ziplist概述</h4><p> The ziplist is a specially encoded dually linked list that is designed to be very memory efficient. It stores both strings and integer values, where integers are encoded as actual integers(integer内存表示) instead of a series of characters（ASCII码）. It allows push and pop operations on either side of the list in O(1) time. However, because every operation requires a reallocation of the memory used by the ziplist, the actual complexity is related to the amount of memory used by the ziplist.</p>
+<h4 id="1-2-ziplist整体内存布局"><a href="#1-2-ziplist整体内存布局" class="headerlink" title="1.2.ziplist整体内存布局"></a>1.2.ziplist整体内存布局</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"> |-----------|----------|---------|---------|---------|----|----------|---------|</div><div class="line"> | &lt;zlbytes&gt; | &lt;zltail&gt; | &lt;zllen&gt; | &lt;entry0&gt;| &lt;entry1&gt;| ...| &lt;entryn&gt; | &lt;zlend&gt; |</div><div class="line"> |-----------|----------|---------|---------|---------|----|----------|---------|</div><div class="line"> |低地址            &lt;----------------------------                       高地址  |</div><div class="line"></div><div class="line">NOTE: all fields are stored <span class="keyword">in</span> little endian(即：低位在地地址，高位在高地址), <span class="keyword">if</span> not specified otherwise.</div></pre></td></tr></table></figure>
+<ul>
+<li>The general layout of the ziplist is as follows:<ul>
+<li><uint32_t zlbytes>用于记录整个ziplist占用的内存字节数；</li>
+<li><uint32_t zltail>用于记录最后一个节点(the last entry)的首地址距离ziplist首地址的偏移量;</li>
+<li><uint16_t zllen>用于记录ziplist中节点(entry)数量;</li>
+<li><uint8_t  zlend>用于表示ziplist的结尾,为定制 0xFF;</li>
+</ul>
+</li>
+</ul>
+<h5 id="1-2-ziplist中entry内存布局"><a href="#1-2-ziplist中entry内存布局" class="headerlink" title="1.2.ziplist中entry内存布局"></a>1.2.ziplist中entry内存布局</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">           </div><div class="line"> |--------|----------|---------|</div><div class="line"> | prelen | encoding | content |</div><div class="line"> |--------|----------|---------|</div><div class="line"> |低地址  &lt;----------   高地址 |</div><div class="line"></div><div class="line">NOTE：a complete entry is stored like above(content长度可能为0,即一个entry可能只有prelen和encoding字段，没有content字段).</div></pre></td></tr></table></figure>
+<h5 id="1-2-1-entry每个字段的含义"><a href="#1-2-1-entry每个字段的含义" class="headerlink" title="1.2.1 entry每个字段的含义:"></a>1.2.1 entry每个字段的含义:</h5><ul>
+<li>prevlen字段用于记录前一个ziplist节点(entry)的长度，该字段以字节为单位。<ul>
+<li>如果前一个节点的长度小于255个字节，则prelen属性的长度为1bytes，该字节用于保存前一个节点的长度；</li>
+<li>如果前一个节点的长度大于或等于255个字节，则prelen字段的长度为5bytes,其中第一个bytes为定制0xFF,之后的四个bytes用于保存前一个节点的长度；</li>
+</ul>
+</li>
+</ul>
+<h5 id="1-2-2-encoding字段的含义："><a href="#1-2-2-encoding字段的含义：" class="headerlink" title="1.2.2 encoding字段的含义："></a>1.2.2 encoding字段的含义：</h5><ul>
+<li>encoding字段用于表示content字段所保存的数据的类型(string or int)以及content的长度。</li>
+<li>encoding表示string类型及长度：<ul>
+<li>当encoding表示string类型时，encoding长度可能为1bytes,2bytes,5bytes,其中最低地址的头两个bits为非11（即(?? &amp; 11) &lt; 11）</li>
+<li>当encoding编码为 00bb bbbb（二进制） 时，encoding字段的长度为1bytes,content的长度小于等于0x3F的字节数组;</li>
+<li>当encoding编码为 01bb bbbb bbbb bbbb（二进制） 时，encoding字段的长度为2bytes（其中encoding中bb bbbb bbbb bbbb表示string的长度，即content的长度，采用big endian表示）,content的长度为小于等于0x3FFF的字节数组;</li>
+<li>当encoding编码为10<strong> __</strong> aaaa aaaa bbbb bbbb cccc cccc dddd dddd （二进制）时,encoding字段的长度为5bytes(其中encoding中aaaaaaaa bbbbbbbb cccccccc dddddddd表示string的长度,采用big endian表示),content的长度为小于等于0xFFFFFFFF的字节数组;</li>
+</ul>
+</li>
+<li>encoding表示int*_t类型及长度：<ul>
+<li>当encoding表示integer类型时,encoding字段的长度为1bytes，最低地址的头两个bits为11(即encoding为(11?? ????));</li>
+<li>当encoding的编码为 1100 0000(二进制)时,content的长度与2bytes,即表示int16_t类型</li>
+<li>当encoding的编码为 1101 0000(二进制)时,content的长度与4bytes,即表示int32_t类型</li>
+<li>当encoding的编码为 1110 0000(二进制)时,content的长度与8bytes,即表示int64_t类型</li>
+<li>当encoding的编码为 1110 0000(二进制)时,content的长度与3bytes,即表示int24_t类型</li>
+<li>当encoding的编码为 1111 1110(二进制)时,content的长度与1bytes,即表示int8_t类型</li>
+<li>当encoding的编码为 1100 xxxx(二进制)时,content的长度与0bytes,即表示immediate 4 bit integer,其中xxxx 4bits表示<a href="encoding的编码范围为1111 0001~1111 1101">0,12</a>;</li>
+<li>|11111111| - End of ziplist special entry.</li>
+</ul>
+</li>
+</ul>
+		
+	
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2017/12/03/redis4-ziplist/#more" class="more-link">阅读全文</a>
+          </div>
+        
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
+    <h1 class="title"><a href="/2017/12/03/redis4-object/">redis4.0_object源码剖析</a></h1>
+
+ 
+	
+	<time  datetime="2017-12-02T16:00:00.000Z"><p>发表于 2017-12-03 | 字数 <span class="post-count">530</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<h4 id="1-redisObject介绍"><a href="#1-redisObject介绍" class="headerlink" title="1.redisObject介绍"></a>1.redisObject介绍</h4><ul>
+<li>Redis使用对象来表示数据库中的key和value,每次在redis中创建一个新的键值对时，至少需要创建两个对象对象:键对象和值对象。</li>
+<li><p>Redis中的每个对象都由一个redisObject结构体表示。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">typedef struct redisObject &#123;                                          </div><div class="line">     //对象的类型</div><div class="line">     unsigned <span class="built_in">type</span>:4;</div><div class="line">     //对象采用的编码方式                                             </div><div class="line">     unsigned encoding:4;</div><div class="line">     //对象最后一次被命令程序访问的时间                             </div><div class="line">     unsigned lru:LRU_BITS; /* LRU time (relative to global lru_clock) or</div><div class="line">                             * LFU data (least significant 8 bits frequency</div><div class="line">                             * and most significant 16 bits decreas time). */</div><div class="line">     //对象引用计数</div><div class="line">     int refcount; </div><div class="line">     //指向底层数据结构的指针</div><div class="line">     void *ptr;                                                                                                                                                        </div><div class="line">&#125; robj;</div></pre></td></tr></table></figure>
+</li>
+<li><p>redisObject结构体中type表示对象的类型，type的取值如下：</p>
+</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">/* A redis object, that is a <span class="built_in">type</span> able to hold a string / list / <span class="built_in">set</span> */</div><div class="line"></div><div class="line">/* The actual Redis Object */</div><div class="line"><span class="comment">#define OBJ_STRING 0</span></div><div class="line"><span class="comment">#define OBJ_LIST 1</span></div><div class="line"><span class="comment">#define OBJ_SET 2</span></div><div class="line"><span class="comment">#define OBJ_ZSET 3</span></div><div class="line"><span class="comment">#define OBJ_HASH 4</span></div></pre></td></tr></table></figure>
+<ul>
+<li>redisObject结构体中encoding表示type类型的对象采用哪种数据结构作为底层实现，encoding的取值如下:</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">/* Objects encoding. Some kind of objects like Strings and Hashes can be</div><div class="line"> * internally represented <span class="keyword">in</span> multiple ways. The <span class="string">'encoding'</span> field of the object</div><div class="line"> * is <span class="built_in">set</span> to one of this fields <span class="keyword">for</span> this object. */</div><div class="line">//sds</div><div class="line"><span class="comment">#define OBJ_ENCODING_RAW 0     /* Raw representation */</span></div><div class="line">//<span class="string">"1234"</span>存储为数字1234，即ptr=(void*)1234;</div><div class="line"><span class="comment">#define OBJ_ENCODING_INT 1     /* Encoded as integer */</span></div><div class="line"><span class="comment">#define OBJ_ENCODING_HT 2      /* Encoded as hash table */</span></div><div class="line"><span class="comment">#define OBJ_ENCODING_ZIPMAP 3  /* Encoded as zipmap */</span></div><div class="line"><span class="comment">#define OBJ_ENCODING_LINKEDLIST 4 /* No longer used: old list encoding. */</span></div><div class="line"><span class="comment">#define OBJ_ENCODING_ZIPLIST 5 /* Encoded as ziplist */</span></div><div class="line"><span class="comment">#define OBJ_ENCODING_INTSET 6  /* Encoded as intset */</span></div><div class="line"><span class="comment">#define OBJ_ENCODING_SKIPLIST 7  /* Encoded as skiplist */</span></div><div class="line"><span class="comment">#define OBJ_ENCODING_EMBSTR 8  /* Embedded sds string encoding */</span></div><div class="line"><span class="comment">#define OBJ_ENCODING_QUICKLIST 9 /* Encoded as linked list of ziplists */</span></div></pre></td></tr></table></figure>
+<h4 id="2-object-c源码分析"><a href="#2-object-c源码分析" class="headerlink" title="2.object.c源码分析"></a>2.object.c源码分析</h4><ul>
+<li><p>创建一个redisObject对象</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">//创建一个redisObject对象</div><div class="line">robj *createObject(int <span class="built_in">type</span>, void *ptr) &#123;</div><div class="line">    robj *o = zmalloc(sizeof(*o));</div><div class="line">    o-&gt;<span class="built_in">type</span> = <span class="built_in">type</span>;</div><div class="line">	//sds</div><div class="line">    o-&gt;encoding = OBJ_ENCODING_RAW;</div><div class="line">    o-&gt;ptr = ptr;</div><div class="line">	//引用计数</div><div class="line">    o-&gt;refcount = 1;</div><div class="line"></div><div class="line">    /* Set the LRU to the current lruclock (minutes resolution), or</div><div class="line">     * alternatively the LFU counter. */</div><div class="line">	//lru字段用于记录对象最后一次被命令程序访问的时间</div><div class="line">    <span class="keyword">if</span> (server.maxmemory_policy &amp; MAXMEMORY_FLAG_LFU) &#123;</div><div class="line">        o-&gt;lru = (LFUGetTimeInMinutes()&lt;&lt;8) | LFU_INIT_VAL;</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        o-&gt;lru = LRU_CLOCK();</div><div class="line">    &#125;</div><div class="line">    <span class="built_in">return</span> o;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>redisObject对象refcount字段减1.</p>
+</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">void decrRefCount(robj *o) &#123;</div><div class="line">    <span class="keyword">if</span> (o-&gt;refcount == 1) &#123;</div><div class="line">        switch(o-&gt;<span class="built_in">type</span>) &#123;</div><div class="line">        <span class="keyword">case</span> OBJ_STRING: freeStringObject(o); <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> OBJ_LIST: freeListObject(o); <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> OBJ_SET: freeSetObject(o); <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> OBJ_ZSET: freeZ<span class="built_in">set</span>Object(o); <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> OBJ_HASH: freeHashObject(o); <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> OBJ_MODULE: freeModuleObject(o); <span class="built_in">break</span>;</div><div class="line">        default: serverPanic(<span class="string">"Unknown object type"</span>); <span class="built_in">break</span>;</div><div class="line">        &#125;</div><div class="line">        zfree(o);</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="keyword">if</span> (o-&gt;refcount &lt;= 0) serverPanic(<span class="string">"decrRefCount against refcount &lt;= 0"</span>);</div><div class="line">        <span class="keyword">if</span> (o-&gt;refcount != OBJ_SHARED_REFCOUNT) o-&gt;refcount--;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="4-参考文献"><a href="#4-参考文献" class="headerlink" title="4.参考文献"></a>4.参考文献</h4><p>《<a href="https://github.com/Qinch/redis_reading/tree/read/" target="_blank" rel="external">redis_reading</a>》</p>
+
+		
+	
+    </div>
+    <footer>
+      
         
         
       
@@ -181,11 +319,11 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2017/12/01/redis4-dict/">redis4.0_dict源码剖析</a></h1>
+    <h1 class="title"><a href="/2017/12/02/redis4-skiplist/">redis4.0_skiplist源码剖析</a></h1>
 
  
 	
-	<time  datetime="2017-11-30T16:00:00.000Z"><p>发表于 2017-12-01 | 字数 <span class="post-count">6,381</span>
+	<time  datetime="2017-12-01T16:00:00.000Z"><p>发表于 2017-12-02 | 字数 <span class="post-count">1,228</span>
 
 </p></time>
       
@@ -193,18 +331,18 @@ var _hmt = _hmt || [];
     <div class="entry">
       
 		
-			<h4 id="1-dict概述"><a href="#1-dict概述" class="headerlink" title="1.dict概述"></a>1.dict概述</h4><ul>
-<li>dict(字典)：又称为符号表（symbol table）,关联数组（associative array）或者映射（map）,是一种用于保存键值对（key-value pair）的抽象数据结构。字典中每个键都是独一无二的，程序可以在字典中根据键查找与之关联的值，或者根据键来删除整个键值对。</li>
+			<h4 id="1-skiplist概述"><a href="#1-skiplist概述" class="headerlink" title="1.skiplist概述"></a>1.skiplist概述</h4><ul>
+<li>skiplist(跳跃表)是一种有序数据结构，它通过在每个节点中维持多个指向其他节点指针，从而达到快速访问节点的目的。</li>
+<li>skiplist支持平均O(logN),最坏O(N)复杂度的节点查找，还可以通过顺序性操作来批量处理节点。</li>
+<li>This skiplist implementation is almost a C translation of the original algorithm described by William Pugh in “Skip Lists: A Probabilistic Alternative to Balanced Trees”, modified in three ways:<ul>
+<li>a) this implementation allows for repeated scores.</li>
+<li>b) the comparison is not just by key (our ‘score’) but by satellite data.</li>
+<li>c) there is a back pointer, so it’s a doubly linked list with the back  pointers being only at “level 1”. This allows to traverse the list from tail to head, useful for ZREVRANGE. */</li>
 </ul>
-<h4 id="2-dict结构体"><a href="#2-dict结构体" class="headerlink" title="2.dict结构体"></a>2.dict结构体</h4><ul>
-<li><p>hash table结构体<br><img src="/img/dict0.png" alt="ht"></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">/* Unused arguments generate annoying warnings... */</div><div class="line"><span class="comment">#define DICT_NOTUSED(V) ((void) V)</span></div><div class="line">//<span class="built_in">hash</span> table节点</div><div class="line">typedef struct dictEntry &#123;</div><div class="line">    //键</div><div class="line">    void *key;</div><div class="line">    //值</div><div class="line">    union &#123;</div><div class="line">        void *val;</div><div class="line">        uint64_t u64;</div><div class="line">        int64_t s64;</div><div class="line">        double d;</div><div class="line">    &#125; v;</div><div class="line">    //指向下一个<span class="built_in">hash</span> table节点</div><div class="line">    struct dictEntry *next;</div><div class="line">&#125; dictEntry;</div><div class="line"></div><div class="line">/* This is our <span class="built_in">hash</span> table structure. Every dictionary has two of this as we</div><div class="line"> * implement incremental rehashing, <span class="keyword">for</span> the old to the new table. */</div><div class="line">//<span class="built_in">hash</span> table</div><div class="line">typedef struct dictht &#123;</div><div class="line">    //<span class="built_in">hash</span> table数组[动态二维数组内存布局](http://chinchao.xyz/2016/04/07/cpp-model-2/)</div><div class="line">    dictEntry **table;</div><div class="line">    //<span class="built_in">hash</span> table数组的大小,size=2^n</div><div class="line">    unsigned long size;</div><div class="line">    //sizemash=size-1,<span class="built_in">hash</span> table掩码，用于计算索引值</div><div class="line">    unsigned long sizemask;</div><div class="line">    //<span class="built_in">hash</span> table中节点(dictEntry)的数量</div><div class="line">    unsigned long used;</div><div class="line">&#125; dictht;</div></pre></td></tr></table></figure>
-</li>
-<li><p>dict结构体</p>
 </li>
 </ul>
-<p><img src="/img/dict1.png" alt="ht"></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">//字典</div><div class="line">typedef struct dict &#123;</div><div class="line">    dictType *<span class="built_in">type</span>;</div><div class="line">    void *privdata;</div><div class="line">    dictht ht[2];</div><div class="line">    //rehashidx=-1表示没有进行<span class="built_in">rehash</span>，否则rehashidx表示<span class="built_in">hash</span> table数组中当前待<span class="built_in">rehash</span>的元素的索引</div><div class="line">    long rehashidx; /* rehashing not <span class="keyword">in</span> progress <span class="keyword">if</span> rehashidx == -1 */</div><div class="line">    //安全迭代器的数量</div><div class="line">    unsigned long iterators; /* number of iterators currently running */</div><div class="line">&#125; dict;</div><div class="line"></div><div class="line">//类型特定函数</div><div class="line">typedef struct dictType &#123;</div><div class="line">    uint64_t (*<span class="built_in">hash</span>Function)(const void *key);</div><div class="line">    void *(*keyDup)(void *privdata, const void *key);</div><div class="line">    void *(*valDup)(void *privdata, const void *obj);</div><div class="line">    int (*keyCompare)(void *privdata, const void *key1, const void *key2);</div><div class="line">    void (*keyDestructor)(void *privdata, void *key);</div><div class="line">    void (*valDestructor)(void *privdata, void *obj);</div><div class="line">&#125; dictType;</div></pre></td></tr></table></figure>
+<h4 id="2-skiplist结构体"><a href="#2-skiplist结构体" class="headerlink" title="2.skiplist结构体"></a>2.skiplist结构体</h4><p><img src="/img/skiplist0.png" alt="单击图片进行放大"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">/* ZSETs use a specialized version of Skiplists */</div><div class="line">typedef struct zskiplistNode &#123;</div><div class="line">    sds ele;</div><div class="line">    double score;</div><div class="line">    struct zskiplistNode *backward;</div><div class="line">    struct zskiplistLevel &#123;</div><div class="line">        struct zskiplistNode *forward;</div><div class="line">        unsigned int span;//跨度：用于记录与forward指向节点的距离</div><div class="line">    &#125; level[]; //0长度数组的妙用</div><div class="line">&#125; zskiplistNode;</div><div class="line"></div><div class="line">typedef struct zskiplist &#123;</div><div class="line">    //指向skiplist中表头节点和表尾节点</div><div class="line">    struct zskiplistNode *header, *tail;</div><div class="line">    //skiplist中节点的数量（不包括表头节点）</div><div class="line">    unsigned long length;</div><div class="line">    //skiplist中层数最高的节点的层数</div><div class="line">    int level;</div><div class="line">&#125; zskiplist;</div></pre></td></tr></table></figure>
 		
 	
     </div>
@@ -212,7 +350,7 @@ var _hmt = _hmt || [];
       
         
           <div class="alignleft">
-            <a href="/2017/12/01/redis4-dict/#more" class="more-link">阅读全文</a>
+            <a href="/2017/12/02/redis4-skiplist/#more" class="more-link">阅读全文</a>
           </div>
         
         
@@ -285,6 +423,58 @@ var _hmt = _hmt || [];
     <header>
       
 	
+    <h1 class="title"><a href="/2017/12/01/redis4-dict/">redis4.0_dict源码剖析</a></h1>
+
+ 
+	
+	<time  datetime="2017-11-30T16:00:00.000Z"><p>发表于 2017-12-01 | 字数 <span class="post-count">6,381</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<h4 id="1-dict概述"><a href="#1-dict概述" class="headerlink" title="1.dict概述"></a>1.dict概述</h4><ul>
+<li>dict(字典)：又称为符号表（symbol table）,关联数组（associative array）或者映射（map）,是一种用于保存键值对（key-value pair）的抽象数据结构。字典中每个键都是独一无二的，程序可以在字典中根据键查找与之关联的值，或者根据键来删除整个键值对。</li>
+</ul>
+<h4 id="2-dict结构体"><a href="#2-dict结构体" class="headerlink" title="2.dict结构体"></a>2.dict结构体</h4><ul>
+<li><p>hash table结构体<br><img src="/img/dict0.png" alt="ht"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">/* Unused arguments generate annoying warnings... */</div><div class="line"><span class="comment">#define DICT_NOTUSED(V) ((void) V)</span></div><div class="line">//<span class="built_in">hash</span> table节点</div><div class="line">typedef struct dictEntry &#123;</div><div class="line">    //键</div><div class="line">    void *key;</div><div class="line">    //值</div><div class="line">    union &#123;</div><div class="line">        void *val;</div><div class="line">        uint64_t u64;</div><div class="line">        int64_t s64;</div><div class="line">        double d;</div><div class="line">    &#125; v;</div><div class="line">    //指向下一个<span class="built_in">hash</span> table节点</div><div class="line">    struct dictEntry *next;</div><div class="line">&#125; dictEntry;</div><div class="line"></div><div class="line">/* This is our <span class="built_in">hash</span> table structure. Every dictionary has two of this as we</div><div class="line"> * implement incremental rehashing, <span class="keyword">for</span> the old to the new table. */</div><div class="line">//<span class="built_in">hash</span> table</div><div class="line">typedef struct dictht &#123;</div><div class="line">    //<span class="built_in">hash</span> table数组[动态二维数组内存布局](http://chinchao.xyz/2016/04/07/cpp-model-2/)</div><div class="line">    dictEntry **table;</div><div class="line">    //<span class="built_in">hash</span> table数组的大小,size=2^n</div><div class="line">    unsigned long size;</div><div class="line">    //sizemash=size-1,<span class="built_in">hash</span> table掩码，用于计算索引值</div><div class="line">    unsigned long sizemask;</div><div class="line">    //<span class="built_in">hash</span> table中节点(dictEntry)的数量</div><div class="line">    unsigned long used;</div><div class="line">&#125; dictht;</div></pre></td></tr></table></figure>
+</li>
+<li><p>dict结构体</p>
+</li>
+</ul>
+<p><img src="/img/dict1.png" alt="ht"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">//字典</div><div class="line">typedef struct dict &#123;</div><div class="line">    dictType *<span class="built_in">type</span>;</div><div class="line">    void *privdata;</div><div class="line">    dictht ht[2];</div><div class="line">    //rehashidx=-1表示没有进行<span class="built_in">rehash</span>，否则rehashidx表示<span class="built_in">hash</span> table数组中当前待<span class="built_in">rehash</span>的元素的索引</div><div class="line">    long rehashidx; /* rehashing not <span class="keyword">in</span> progress <span class="keyword">if</span> rehashidx == -1 */</div><div class="line">    //安全迭代器的数量</div><div class="line">    unsigned long iterators; /* number of iterators currently running */</div><div class="line">&#125; dict;</div><div class="line"></div><div class="line">//类型特定函数</div><div class="line">typedef struct dictType &#123;</div><div class="line">    uint64_t (*<span class="built_in">hash</span>Function)(const void *key);</div><div class="line">    void *(*keyDup)(void *privdata, const void *key);</div><div class="line">    void *(*valDup)(void *privdata, const void *obj);</div><div class="line">    int (*keyCompare)(void *privdata, const void *key1, const void *key2);</div><div class="line">    void (*keyDestructor)(void *privdata, void *key);</div><div class="line">    void (*valDestructor)(void *privdata, void *obj);</div><div class="line">&#125; dictType;</div></pre></td></tr></table></figure>
+		
+	
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2017/12/01/redis4-dict/#more" class="more-link">阅读全文</a>
+          </div>
+        
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
     <h1 class="title"><a href="/2017/10/02/apue-erros/">APUE中文第三版勘误</a></h1>
 
  
@@ -308,47 +498,6 @@ var _hmt = _hmt || [];
         
           <div class="alignleft">
             <a href="/2017/10/02/apue-erros/#more" class="more-link">阅读全文</a>
-          </div>
-        
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
-    <h1 class="title"><a href="/2017/04/19/makefile/">Makefile</a></h1>
-
- 
-	
-	<time  datetime="2017-04-18T16:00:00.000Z"><p>发表于 2017-04-19 | 字数 <span class="post-count">99</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<h4 id="1-makefile的规则"><a href="#1-makefile的规则" class="headerlink" title="1,makefile的规则"></a>1,makefile的规则</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">target ...: prerequisites ...</div><div class="line">	cmd</div><div class="line">	...</div><div class="line">	...</div><div class="line"></div><div class="line">其中，target可以是一个obj file,也可以是一个执行文件，还可以是一个label.</div><div class="line">prerequisites：为生成该target所依赖的文件或target</div><div class="line">cmd(必须以一个Tab键作为开头)：为target要执行的命令</div><div class="line">注：prerequisites中如果有一个以上的文件比target文件要新的话，cmd所定义的命令就会被执行。</div></pre></td></tr></table></figure>
-		
-	
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2017/04/19/makefile/#more" class="more-link">阅读全文</a>
           </div>
         
         
@@ -413,11 +562,11 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2017/04/07/unpv2-p25/">IPC-标识符重用</a></h1>
+    <h1 class="title"><a href="/2017/04/19/makefile/">Makefile</a></h1>
 
  
 	
-	<time  datetime="2017-04-06T16:00:00.000Z"><p>发表于 2017-04-07 | 字数 <span class="post-count">664</span>
+	<time  datetime="2017-04-18T16:00:00.000Z"><p>发表于 2017-04-19 | 字数 <span class="post-count">99</span>
 
 </p></time>
       
@@ -425,13 +574,7 @@ var _hmt = _hmt || [];
     <div class="entry">
       
 		
-			<h5 id="1-槽位使用情况序列号"><a href="#1-槽位使用情况序列号" class="headerlink" title="1,槽位使用情况序列号"></a>1,槽位使用情况序列号</h5><p>ipc_perm结构中含有一个名为seq的变量，是一个槽位使用情况序列号。该变量是一个由内核为系统中每个潜在的IPC对象维持的计数器。每当删除一个IPC对象时，内核就递增相应槽位的使用情况序列号，若溢出则循环回0.</p>
-<p>简单理解就是: 存在ipc_perm[max]，当创建ipc对象时，在ipc_perm数组中查找第一个ipc_perm元素为空，记为ipc_perm[i].当删除ipc_perm[i]对应的ipc时，ipc_perm[i].seq++,下次再次创建ipc对象时，假设ipc_perm[i]元素为空，则返回ipc id为i+ipc_perm[i].seq*max.<br>注：槽位使用情况序列号是一个跨进程保持的内核变量。</p>
-<h4 id="2，示例代码"><a href="#2，示例代码" class="headerlink" title="2，示例代码"></a>2，示例代码</h4><h5 id="2-1-创建ipc，然后立即删除该ipc"><a href="#2-1-创建ipc，然后立即删除该ipc" class="headerlink" title="2.1 创建ipc，然后立即删除该ipc"></a>2.1 创建ipc，然后立即删除该ipc</h5><p>对应的源码：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">/*************************************************************************</div><div class="line"> &gt; File Name: p26_1.c</div><div class="line"> &gt; Author: qinchao</div><div class="line"> &gt; Mail: 1187620726@qq.com</div><div class="line"> &gt; Created Date:2017-04-07 Time:11:02:25.</div><div class="line"> ************************************************************************/</div><div class="line"><span class="comment">#include&lt;stdio.h&gt;</span></div><div class="line"><span class="comment">#include&lt;sys/msg.h&gt;</span></div><div class="line"><span class="comment">#include&lt;sys/types.h&gt;</span></div><div class="line"></div><div class="line">int <span class="function"><span class="title">main</span></span>()</div><div class="line">&#123;</div><div class="line">        int i,msgid;</div><div class="line">        <span class="keyword">for</span>(i=0;i&lt;10;i++)</div><div class="line">        &#123;</div><div class="line">                msgid=msgget(IPC_PRIVATE,0666|IPC_CREAT);</div><div class="line">                <span class="built_in">printf</span>(<span class="string">"msgid=%d\n"</span>,msgid);</div><div class="line">                msgctl(msgid,IPC_RMID,NULL);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="built_in">return</span> 0;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>对应的结果：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">bogon:unp qinchao$ gcc p26_1.c  -o p26_1</div><div class="line">bogon:unp qinchao$ ./p26_1 </div><div class="line">msgid=196608</div><div class="line">msgid=262144</div><div class="line">msgid=327680</div><div class="line">msgid=393216</div><div class="line">msgid=458752</div><div class="line">msgid=524288</div><div class="line">msgid=589824</div><div class="line">msgid=655360</div><div class="line">msgid=720896</div><div class="line">msgid=786432</div><div class="line">bogon:unp qinchao$</div></pre></td></tr></table></figure>
-<p>即：创建ipc1之后，ipc_perm[0]维护该ipc对象的相关信息，然后删除ipc1，ipc_perm[0].seq++;当创建ipc2时，仍然是ipc_perm[0]维护ipc2相关信息。<br>
+			<h4 id="1-makefile的规则"><a href="#1-makefile的规则" class="headerlink" title="1,makefile的规则"></a>1,makefile的规则</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">target ...: prerequisites ...</div><div class="line">	cmd</div><div class="line">	...</div><div class="line">	...</div><div class="line"></div><div class="line">其中，target可以是一个obj file,也可以是一个执行文件，还可以是一个label.</div><div class="line">prerequisites：为生成该target所依赖的文件或target</div><div class="line">cmd(必须以一个Tab键作为开头)：为target要执行的命令</div><div class="line">注：prerequisites中如果有一个以上的文件比target文件要新的话，cmd所定义的命令就会被执行。</div></pre></td></tr></table></figure>
 		
 	
     </div>
@@ -439,105 +582,7 @@ var _hmt = _hmt || [];
       
         
           <div class="alignleft">
-            <a href="/2017/04/07/unpv2-p25/#more" class="more-link">阅读全文</a>
-          </div>
-        
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
-    <h1 class="title"><a href="/2016/04/09/cpp-model-5/">C++对象模型-关于对象</a></h1>
-
- 
-	
-	<time  datetime="2016-04-08T16:00:00.000Z"><p>发表于 2016-04-09 | 字数 <span class="post-count">1,396</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<h5 id="开发环境"><a href="#开发环境" class="headerlink" title="开发环境"></a>开发环境</h5><ul>
-<li>Ubuntu 14.04(32bits)</li>
-<li>GCC      </li>
-<li>编辑器 Cmd Markdown</li>
-<li>画图工具 Processon    </li>
-</ul>
-<h5 id="1-关于对象"><a href="#1-关于对象" class="headerlink" title="1,关于对象"></a>1,关于对象</h5><p>从这篇博客开始真正介绍C++对象模型，前边BB了那么多没用的，终于开始了C++对模型的分析。关于C++对象模型的介绍，我将根据《深度探索C++对象模型》这本书，其书中的每一章，对应一篇博客，博客内容为自己对这本书的理解和补充吧。</p>
-<h6 id="1-1C语言中的struct"><a href="#1-1C语言中的struct" class="headerlink" title="1.1C语言中的struct"></a>1.1C语言中的struct</h6><p>我们知道，C语言是面向过程的，即数据和处理数据的函数时分开的，也就是说，struct中不能包含函数（当然也不能包含static变量）。但是我们可以在struct中声明指向函数的指针来模拟数据和处理数据的函数指针。其中，需要指出的是，c语言中struct变量的数据成员的访问方式都是基于该结构体变量的首地址的偏移量来访问的（同样适用于C++中的class/struct）。<br>即，见如下代码:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#include&lt;stdio.h&gt;</span></div><div class="line"></div><div class="line">struct point3d;</div><div class="line">typedef void (*initfun)(struct point3d*);</div><div class="line"></div><div class="line">struct point3d&#123;</div><div class="line">        <span class="built_in">float</span> x;</div><div class="line">        <span class="built_in">float</span> y;</div><div class="line">        <span class="built_in">float</span> z;</div><div class="line">        initfun init;//指向初始化数据函数的指针</div><div class="line">&#125;;</div><div class="line">void initp(struct point3d* p3d) //struct point3d变量初始化函数</div><div class="line">&#123;</div><div class="line">        p3d-&gt;x=1;</div><div class="line">        p3d-&gt;y=2;</div><div class="line">        p3d-&gt;z=3;</div><div class="line">        <span class="built_in">printf</span>(<span class="string">"%f %f %f\n"</span>,p3d-&gt;x,p3d-&gt;y,p3d-&gt;z);</div><div class="line">        <span class="built_in">return</span>;</div><div class="line">&#125;</div><div class="line"></div><div class="line">int <span class="function"><span class="title">main</span></span>()</div><div class="line">&#123;</div><div class="line">        struct point3d pd;</div><div class="line">        pd.init=initp;//将initp函数地址赋给结构体中指向函数的指针pd.init。</div><div class="line">        pd.init(&amp;pd);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-		
-	
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2016/04/09/cpp-model-5/#more" class="more-link">阅读全文</a>
-          </div>
-        
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
-    <h1 class="title"><a href="/2016/04/08/cpp-model-4/">基础类型的内存表示</a></h1>
-
- 
-	
-	<time  datetime="2016-04-07T16:00:00.000Z"><p>发表于 2016-04-08 | 字数 <span class="post-count">532</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<h5 id="开发环境"><a href="#开发环境" class="headerlink" title="开发环境"></a>开发环境</h5><ul>
-<li>Ubuntu 14.04(32bits)</li>
-<li>GCC      </li>
-<li>编辑器 Cmd Markdown</li>
-<li>画图工具 Processon    </li>
-</ul>
-<h5 id="1-基础类型内存表示"><a href="#1-基础类型内存表示" class="headerlink" title="1,基础类型内存表示"></a>1,基础类型内存表示</h5><p><a href="http://chinchao.xyz/2016/04/07/cpp-model-2/">上一节</a> 介绍了swich/if-else的实现机制。本文准备介绍一下基础类型的内存表示。</p>
-<h6 id="1-1大端法和小端法"><a href="#1-1大端法和小端法" class="headerlink" title="1.1大端法和小端法"></a>1.1大端法和小端法</h6><p>小端法，即数字的低位在低地址。大端法，即数字高位在低地址。大小端法的最小单位为byte,而不是bit.<br>举例：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">int i=-16;</div><div class="line">对应的小端法表示为（从低地址到高地址（从左到右为地址增长方向）对应的每个byte）：</div><div class="line">0xf0 ff ff ff </div><div class="line">大端法表示为（从低地址到高地址（从左到右为地址增长方向）对应的每个byte）：</div><div class="line">0x FF FF FF F0</div></pre></td></tr></table></figure></p>
-<p>在实际开发中，可以需要做大小端法互换，其代码如下：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">void swap1(int *rhs)</div><div class="line">&#123;</div><div class="line">    unsigned char *p=rhs;</div><div class="line">    unsigned char tmp;</div><div class="line">    tmp=p[0];</div><div class="line">    p[0]=[3];</div><div class="line">    p[3]=tmp;</div><div class="line"></div><div class="line">    tmp=p[1];</div><div class="line">    p[1]=[2];</div><div class="line">    p[2]=tmp;</div><div class="line">    <span class="built_in">return</span> ;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>在小端机上，如下程序的输出结果为-16.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">int <span class="function"><span class="title">main</span></span>()</div><div class="line">&#123;</div><div class="line">        int i;</div><div class="line">        unsigned char *p=(unsigned char*)&amp;i;</div><div class="line">        p[0]=0xF0;</div><div class="line">        p[1]=0XFF;</div><div class="line">        p[2]=0XFF;</div><div class="line">        p[3]=0Xff;</div><div class="line">        <span class="built_in">printf</span>(<span class="string">"%d\n"</span>,i);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-		
-	
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2016/04/08/cpp-model-4/#more" class="more-link">阅读全文</a>
+            <a href="/2017/04/19/makefile/#more" class="more-link">阅读全文</a>
           </div>
         
         
@@ -565,23 +610,23 @@ var _hmt = _hmt || [];
   <ul class="entry">
     
       <li>
+        <a href="/2018/04/08/redis4-clu/"></a>
+      </li>
+    
+      <li>
+        <a href="/2018/04/08/redis4-sen/"></a>
+      </li>
+    
+      <li>
+        <a href="/2018/04/08/redis4-rep/"></a>
+      </li>
+    
+      <li>
         <a href="/2018/03/24/snippet-pow2/">Round up to the next highest power of 2</a>
       </li>
     
       <li>
         <a href="/2018/01/28/snippet-atoi/">Atoi&amp;Itoa函数</a>
-      </li>
-    
-      <li>
-        <a href="/2017/12/13/redis4-io/">redis4.0_输入/输出缓冲区处理</a>
-      </li>
-    
-      <li>
-        <a href="/2017/12/12/redis4-pub/">redis4.0_发布/订阅</a>
-      </li>
-    
-      <li>
-        <a href="/2017/12/11/redis4-multi/">redis4.0_Transactions源码剖析</a>
       </li>
     
   </ul>
