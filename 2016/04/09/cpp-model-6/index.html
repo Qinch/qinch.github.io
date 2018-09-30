@@ -1,0 +1,260 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+
+  <meta charset="utf-8">
+  
+  <title>C++对象模型-Non-Staitc成员函数 | Just For Fun</title>
+  <meta name="author" content="qinchao">
+  
+  <meta name="description" content="qinchao&#39;s blog">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="C++对象模型-Non-Staitc成员函数"/>
+  <meta property="og:site_name" content="Just For Fun"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon" type="image/x-ico">
+  <link rel="alternate" href="/atom.xml" title="Just For Fun" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?a296c886e0b03b87da36df65dff53cba";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+</head>
+
+
+
+ <body>
+  <header id="header" class="inner"><div class= "header-content">
+		<div class="header-div">
+		    <h1><a href="/">Just For Fun</a></h1>
+		    <h2><a>&nbsp;If no fun Why do it</a></h2>
+		</div>
+	<div class="clearfix"></div>
+</div>
+
+<div class= "header-nav">
+	<div id="main-nav" class="alignleft">
+	    
+	      <a href="/">首页</a>
+	    
+	      <a href="/archives">归档</a>
+	    
+	      <a href="/about">关于</a>
+	    
+	</div>
+	<div id="sub-nav" class="alignright">
+
+
+	
+		<form class="search" action="/search/index.html" method="get" accept-charset="utf-8" >
+		<input type="text" id="search" style="width: 100px; height: 9px;" " class="st-default-search-input" maxlength="20" placeholder="Search" />
+		</form>
+	
+　
+	</div>
+	<div class="clearfix"></div>
+<script type="text/javascript">
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+  (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+  e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','//s.swiftypecdn.com/install/v2/st.js','_st');
+
+  _st('install','F9-FFdkxc43TCEzy_894','2.0.0');
+</script>
+</div>
+
+
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  <div class="post-content">
+    <header>
+      
+	
+    <h1 class="title">C++对象模型-Non-Staitc成员函数</h1>
+
+ 
+	
+	<time  datetime="2016-04-08T16:00:00.000Z"><p>发表于 2016-04-09 | 字数 <span class="post-count">803</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		  
+		<h5 id="开发环境"><a href="#开发环境" class="headerlink" title="开发环境"></a>开发环境</h5><p>gcc version 5.4.0 20160609 (Ubuntu 5.4.0-6ubuntu1~16.04.10)  </p>
+<h5 id="1-non-static成员函数调用过程"><a href="#1-non-static成员函数调用过程" class="headerlink" title="1, non-static成员函数调用过程"></a>1, non-static成员函数调用过程</h5><p>class X定义了一个virtual function foo:函数调用过程(栈帧)class X定义了一个virtual function foo:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#include&lt;iostream&gt;</span></div><div class="line">using namespace std;</div><div class="line"></div><div class="line">//不分析virtual dctor</div><div class="line">class X&#123;</div><div class="line">        public:</div><div class="line">                virtual void foo();</div><div class="line"></div><div class="line">        private:</div><div class="line">                int _x;</div><div class="line">&#125;;</div><div class="line"></div><div class="line">void X::<span class="function"><span class="title">foo</span></span>()</div><div class="line">&#123;</div><div class="line">        cout&lt;&lt;_x&lt;&lt;endl;</div><div class="line">&#125;</div><div class="line"></div><div class="line">X <span class="function"><span class="title">foobar</span></span>()</div><div class="line">&#123;</div><div class="line">        X xx;</div><div class="line">        X *px = new X;</div><div class="line"></div><div class="line">        xx.foo();</div><div class="line">        px-&gt;foo();</div><div class="line"></div><div class="line">        delete px;</div><div class="line">        <span class="built_in">return</span> xx;</div><div class="line">&#125;</div><div class="line"></div><div class="line">int <span class="function"><span class="title">main</span></span>()</div><div class="line">&#123;</div><div class="line">        foobar();</div><div class="line">        <span class="built_in">return</span> 0;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>该程序对应的汇编代码如下（g++ -S -m32 <a href="http://p13.cc）：" target="_blank" rel="external">http://p13.cc）：</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line">_ZN1X3fooEv:  //X::foo()</div><div class="line">.LFB1021:</div><div class="line">        .cfi_startproc</div><div class="line">        pushl   %ebp  //ebp压栈([esp]=ebp, esp=esp-4)</div><div class="line">        .cfi_def_cfa_offset 8</div><div class="line">        .cfi_offset 5, -8</div><div class="line">        movl    %esp, %ebp  //ebp=esp</div><div class="line">        .cfi_def_cfa_register 5</div><div class="line">        subl    <span class="variable">$8</span>, %esp  //esp=esp-8</div><div class="line">        movl    8(%ebp), %eax  //eax=[ebp+8],即eax=this</div><div class="line">        movl    4(%eax), %eax  //eax=[eax+4], 即eax=this-&gt;_x</div><div class="line">        subl    <span class="variable">$8</span>, %esp  //esp=esp-8</div><div class="line">        pushl   %eax  //[esp]=eax, esp=esp-4, 即this-&gt;_x压栈</div><div class="line">        pushl   <span class="variable">$_ZSt4cout</span> //std::cout压栈</div><div class="line">        call    _ZNSolsEi  //operator&lt;&lt; 对应两步操作：1，retAddr压栈 2，IP=operator&lt;&lt; func</div><div class="line">        addl    <span class="variable">$16</span>, %esp</div><div class="line">        subl    <span class="variable">$8</span>, %esp</div><div class="line">        pushl   <span class="variable">$_ZSt4endlIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_</span></div><div class="line">        pushl   %eax</div><div class="line">        call    _ZNSolsEPFRSoS_E</div><div class="line">        addl    <span class="variable">$16</span>, %esp</div><div class="line">        nop</div><div class="line">        leave  //ebp=esp, pop ebp</div><div class="line">        .cfi_restore 5</div><div class="line">        .cfi_def_cfa 4, 4</div><div class="line">        ret //pop IP</div><div class="line">        .cfi_endproc</div><div class="line">.LFE1021:</div><div class="line">        .size   _ZN1X3fooEv, .-_ZN1X3fooEv</div><div class="line">        .section        .text._ZN1XC2Ev,<span class="string">"axG"</span>,@progbits,_ZN1XC5Ev,comdat</div><div class="line">        .align 2</div><div class="line">        .weak   _ZN1XC2Ev</div><div class="line">        .type   _ZN1XC2Ev, @<span class="keyword">function</span></div></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">_ZN1XC2Ev: //X::X() 默认构造函数</div><div class="line">.LFB1024:</div><div class="line">        .cfi_startproc</div><div class="line">        pushl   %ebp //ebp压栈</div><div class="line">        .cfi_def_cfa_offset 8</div><div class="line">        .cfi_offset 5, -8</div><div class="line">        movl    %esp, %ebp //ebp = esp</div><div class="line">        .cfi_def_cfa_register 5</div><div class="line">        movl    <span class="variable">$_ZTV1X</span>+8, %edx  //edx=vptr</div><div class="line">        movl    8(%ebp), %eax  //eax=[ebp+8],即eax=this</div><div class="line">        movl    %edx, (%eax) //[eax]=edx, 即[this]=vptr</div><div class="line">        nop</div><div class="line">        popl    %ebp  //ebp=old ebp</div><div class="line">        .cfi_restore 5</div><div class="line">        .cfi_def_cfa 4, 4</div><div class="line">        ret</div><div class="line">        .cfi_endproc</div><div class="line">.LFE1024:</div><div class="line">        .size   _ZN1XC2Ev, .-_ZN1XC2Ev</div><div class="line">        .weak   _ZN1XC1Ev</div><div class="line">        .set    _ZN1XC1Ev,_ZN1XC2Ev</div><div class="line">        .text</div><div class="line">        .globl  _Z6foobarv</div><div class="line">        .type   _Z6foobarv, @<span class="keyword">function</span></div></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div></pre></td><td class="code"><pre><div class="line">_Z6foobarv: //foobar</div><div class="line">.LFB1022:</div><div class="line">        .cfi_startproc</div><div class="line">        pushl   %ebp  //ebp压栈</div><div class="line">        .cfi_def_cfa_offset 8</div><div class="line">        .cfi_offset 5, -8</div><div class="line">        movl    %esp, %ebp //ebp=esp</div><div class="line">        .cfi_def_cfa_register 5</div><div class="line">        pushl   %ebx  //ebx压栈</div><div class="line">        subl    <span class="variable">$36</span>, %esp //esp=esp-36</div><div class="line">        .cfi_offset 3, -12</div><div class="line">        movl    8(%ebp), %eax //eax=tmp.this (返回值的首地址，即this指针)</div><div class="line">        movl    %eax, -28(%ebp) //[ebp-28]=tmp.this</div><div class="line">        movl    %gs:20, %eax</div><div class="line">        movl    %eax, -12(%ebp)</div><div class="line">        xorl    %eax, %eax //eax=0</div><div class="line">        subl    <span class="variable">$12</span>, %esp  //esp=esp-12</div><div class="line">        pushl   -28(%ebp) //push xx.this, 即xx对象首地址压栈</div><div class="line">        call    _ZN1XC1Ev //X::X(), 即默认构造函数</div><div class="line">        addl    <span class="variable">$16</span>, %esp</div><div class="line">        subl    <span class="variable">$12</span>, %esp</div><div class="line">        pushl   <span class="variable">$8</span>  //分配内存operator new size=8,</div><div class="line">        call    _Znwj //operator new</div><div class="line">        addl    <span class="variable">$16</span>, %esp</div><div class="line">        movl    %eax, %ebx  //eax为new函数返回值(px.this指针)， ebx=eax,</div><div class="line">        subl    <span class="variable">$12</span>, %esp</div><div class="line">        pushl   %ebx  //push px.this</div><div class="line">        call    _ZN1XC1Ev   //X::X(),构造px指针指向的对象</div><div class="line">        addl    <span class="variable">$16</span>, %esp</div><div class="line">        movl    %ebx, -16(%ebp)  //[ebp-16]=px.this</div><div class="line">        subl    <span class="variable">$12</span>, %esp</div><div class="line">        pushl   -28(%ebp) //xx对象this指针压栈</div><div class="line">        call    _ZN1X3fooEv  //xx.foo()</div><div class="line">        addl    <span class="variable">$16</span>, %esp</div><div class="line">        movl    -16(%ebp), %eax //eax=px.this</div><div class="line">        movl    (%eax), %eax //eax=vptr</div><div class="line">        movl    (%eax), %eax  //eax=[vptr],即eax=virtual foo()</div><div class="line">        subl    <span class="variable">$12</span>, %esp</div><div class="line">        pushl   -16(%ebp) //px.this压栈</div><div class="line">        call    *%eax  //call virtual foo</div><div class="line">        addl    <span class="variable">$16</span>, %esp</div><div class="line">        subl    <span class="variable">$12</span>, %esp</div><div class="line">        pushl   -16(%ebp)</div><div class="line">        call    _ZdlPv  //delete px</div><div class="line">        addl    <span class="variable">$16</span>, %esp</div><div class="line">        nop</div><div class="line">        movl    -28(%ebp), %eax</div><div class="line">        movl    -12(%ebp), %edx</div><div class="line">        xorl    %gs:20, %edx</div><div class="line">        je      .L5</div><div class="line">        call    __stack_chk_fail</div><div class="line">.L5:</div><div class="line">        movl    -4(%ebp), %ebx</div><div class="line">        leave</div><div class="line">        .cfi_restore 5</div><div class="line">        .cfi_restore 3</div><div class="line">        .cfi_def_cfa 4, 4</div><div class="line">        ret     <span class="variable">$4</span></div><div class="line">        .cfi_endproc</div></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line">main:</div><div class="line">.LFB1029:</div><div class="line">        .cfi_startproc</div><div class="line">        leal    4(%esp), %ecx</div><div class="line">        .cfi_def_cfa 1, 0</div><div class="line">        andl    $-16, %esp</div><div class="line">        pushl   -4(%ecx)</div><div class="line">        pushl   %ebp</div><div class="line">        .cfi_escape 0x10,0x5,0x2,0x75,0</div><div class="line">        movl    %esp, %ebp</div><div class="line">        pushl   %ecx</div><div class="line">        .cfi_escape 0xf,0x3,0x75,0x7c,0x6</div><div class="line">        subl    <span class="variable">$36</span>, %esp</div><div class="line">        movl    %gs:20, %eax</div><div class="line">        movl    %eax, -12(%ebp)</div><div class="line">        xorl    %eax, %eax</div><div class="line">        leal    -40(%ebp), %eax</div><div class="line">        subl    <span class="variable">$12</span>, %esp</div><div class="line">        pushl   %eax  //tmp.this压栈</div><div class="line">        call    _Z6foobarv //foobar</div><div class="line">        addl    <span class="variable">$12</span>, %esp</div><div class="line">        movl    <span class="variable">$0</span>, %eax</div><div class="line">        movl    -12(%ebp), %edx</div><div class="line">        xorl    %gs:20, %edx</div><div class="line">        je      .L8</div><div class="line">        call    __stack_chk_fail</div><div class="line">.L8:</div><div class="line">        movl    -4(%ebp), %ecx</div><div class="line">        .cfi_def_cfa 1, 0</div><div class="line">        leave</div><div class="line">        .cfi_restore 5</div><div class="line">        leal    -4(%ecx), %esp</div><div class="line">        .cfi_def_cfa 4, 4</div><div class="line">        ret</div><div class="line">        .cfi_endproc</div></pre></td></tr></table></figure>
+<h4 id="2-通过分析cpp代码对应的汇编，发现foobar函数在内部被转化为："><a href="#2-通过分析cpp代码对应的汇编，发现foobar函数在内部被转化为：" class="headerlink" title="2,通过分析cpp代码对应的汇编，发现foobar函数在内部被转化为："></a>2,通过分析cpp代码对应的汇编，发现foobar函数在内部被转化为：</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">void foobar(X *result)</div><div class="line">&#123;</div><div class="line">    //构造result指向的对象</div><div class="line">    X::X(result);</div><div class="line">    </div><div class="line">    </div><div class="line">    px = malloc(sizeof(X));</div><div class="line">    X::X(px);</div><div class="line"></div><div class="line">   </div><div class="line">    //xx.foo()不采用virtual机制</div><div class="line">    X::foo(result);</div><div class="line">    </div><div class="line">    //px-&gt;foo()采用virtual机制</div><div class="line">    (px-&gt;vptr[0])(px);</div><div class="line">  </div><div class="line">    //略</div><div class="line">    </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+
+	
+    </div>
+    <footer>
+      
+        
+  
+  <div class="categories">
+    <a href="/categories/Asm-Cpp/">Asm/Cpp</a>
+  </div>
+
+        
+  
+  <div class="tags">
+    <a href="/tags/Asm/">Asm</a>, <a href="/tags/C/">C</a>, <a href="/tags/Cpp/">Cpp</a>
+  </div>
+
+	
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  
+<div class="widget tag">
+  <h3 class="title">最新文章</h3>
+  <ul class="entry">
+    
+      <li>
+        <a href="/2018/04/08/redis4-clu/"></a>
+      </li>
+    
+      <li>
+        <a href="/2018/04/08/redis4-sen/"></a>
+      </li>
+    
+      <li>
+        <a href="/2018/03/24/snippet-pow2/">Round up to the next highest power of 2</a>
+      </li>
+    
+      <li>
+        <a href="/2018/01/28/snippet-atoi/">Atoi&amp;Itoa函数</a>
+      </li>
+    
+      <li>
+        <a href="/2017/12/14/redis4-rep/">redis4.0_复制</a>
+      </li>
+    
+  </ul>
+</div>
+
+
+  
+<div class="widget tag">
+  <h3 class="title">分类</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/Asm-C/">Asm/C</a><small>2</small></li>
+  
+    <li><a href="/categories/Asm-Cpp/">Asm/Cpp</a><small>11</small></li>
+  
+    <li><a href="/categories/C-C/">C/C++</a><small>1</small></li>
+  
+    <li><a href="/categories/C-Linux/">C/Linux</a><small>1</small></li>
+  
+    <li><a href="/categories/Linux/">Linux</a><small>1</small></li>
+  
+    <li><a href="/categories/STL源码剖析/">STL源码剖析</a><small>14</small></li>
+  
+    <li><a href="/categories/makefile/">makefile</a><small>1</small></li>
+  
+    <li><a href="/categories/mysql/">mysql</a><small>1</small></li>
+  
+    <li><a href="/categories/redis/">redis</a><small>13</small></li>
+  
+    <li><a href="/categories/shell/">shell</a><small>1</small></li>
+  
+    <li><a href="/categories/snippet/">snippet</a><small>2</small></li>
+  
+    <li><a href="/categories/unpv2/">unpv2</a><small>1</small></li>
+  
+    <li><a href="/categories/线程/">线程</a><small>1</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tagcloud">
+  <h3 class="title">标签云</h3>
+  <div class="entry">
+    <a href="/tags/Asm/" style="font-size: 18px;">Asm</a> <a href="/tags/C/" style="font-size: 16px;">C</a> <a href="/tags/Cpp/" style="font-size: 14px;">Cpp</a> <a href="/tags/Endian/" style="font-size: 10px;">Endian</a> <a href="/tags/MFC/" style="font-size: 10px;">MFC</a> <a href="/tags/Transations/" style="font-size: 10px;">Transations</a> <a href="/tags/adlist/" style="font-size: 10px;">adlist</a> <a href="/tags/apue/" style="font-size: 12px;">apue</a> <a href="/tags/atoi/" style="font-size: 10px;">atoi</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/database/" style="font-size: 10px;">database</a> <a href="/tags/dict/" style="font-size: 10px;">dict</a> <a href="/tags/event/" style="font-size: 12px;">event</a> <a href="/tags/heap/" style="font-size: 16px;">heap</a> <a href="/tags/icp/" style="font-size: 10px;">icp</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/intset/" style="font-size: 10px;">intset</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/make/" style="font-size: 10px;">make</a> <a href="/tags/makefile/" style="font-size: 10px;">makefile</a> <a href="/tags/multi/" style="font-size: 10px;">multi</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/network/" style="font-size: 12px;">network</a> <a href="/tags/object/" style="font-size: 10px;">object</a> <a href="/tags/pub-sub/" style="font-size: 10px;">pub/sub</a> <a href="/tags/rb/" style="font-size: 10px;">rb</a> <a href="/tags/redis4-0/" style="font-size: 18px;">redis4.0</a> <a href="/tags/replication/" style="font-size: 10px;">replication</a> <a href="/tags/scp/" style="font-size: 10px;">scp</a> <a href="/tags/sds/" style="font-size: 10px;">sds</a> <a href="/tags/signal/" style="font-size: 10px;">signal</a> <a href="/tags/skiplist/" style="font-size: 10px;">skiplist</a> <a href="/tags/snippet/" style="font-size: 12px;">snippet</a> <a href="/tags/sort/" style="font-size: 10px;">sort</a> <a href="/tags/sourcecode/" style="font-size: 18px;">sourcecode</a> <a href="/tags/stl/" style="font-size: 20px;">stl</a> <a href="/tags/string2ll/" style="font-size: 10px;">string2ll</a> <a href="/tags/t-string/" style="font-size: 10px;">t_string</a> <a href="/tags/thread/" style="font-size: 10px;">thread</a> <a href="/tags/thunk/" style="font-size: 10px;">thunk</a> <a href="/tags/tips/" style="font-size: 10px;">tips</a> <a href="/tags/tree/" style="font-size: 10px;">tree</a> <a href="/tags/unpv2/" style="font-size: 10px;">unpv2</a> <a href="/tags/ziplist/" style="font-size: 10px;">ziplist</a> <a href="/tags/内存流/" style="font-size: 10px;">内存流</a> <a href="/tags/勘误/" style="font-size: 10px;">勘误</a>
+  </div>
+</div>
+
+
+  
+<div class="widget blogroll">
+  <h3 class="title">链接</h3>
+  <ul class="entry">
+    
+	<li><a href="http://zhangwenli.com" title="http://zhangwenli.com" target="_blank"]);">Ovilia</a></li>
+    
+	<li><a href="http://zcheng.ren" title="" target="_blank"]);">Zee-张程</a></li>
+    
+	<li><a href="http://preshing.com/about/" title="" target="_blank"]);">Preshing on Programming</a></li>
+    
+	<li><a href="https://www.xilidou.com" title="" target="_blank"]);">xilidou</a></li>
+    
+	<li><a href="https://redis.io/documentation" title="" target="_blank"]);">redis.io</a></li>
+    
+	<li><a href="https://rocksdb.org.cn/doc/Home.html" title="" target="_blank"]);">rocksdb</a></li>
+    
+  </ul>
+</div>
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div class="copyright">
+  
+  &copy; 2015-2018 qinchao
+  
+  | Powered by hexo and Theme by <a href=https://github.com/Qinch/hexo-theme-light_mod target="_blank">light </a>
+  <a href="/atom.xml" target="_blank">| RSS</a>
+</div>
+<div class="clearfix"></div>
+
+</footer>
+  <script src="//libs.baidu.com/jquery/2.0.3/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+</body>
+</html>
