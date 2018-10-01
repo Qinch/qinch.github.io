@@ -87,7 +87,52 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2015/12/11/stl-iter/">STL heap源码分析</a></h1>
+    <h1 class="title"><a href="/2015/12/23/Linux-io/">Linux内存流</a></h1>
+
+ 
+	
+	<time  datetime="2015-12-23T07:25:29.000Z"><p>发表于 2015-12-23 | 字数 <span class="post-count">659</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<h4 id="1-内存流"><a href="#1-内存流" class="headerlink" title="1, 内存流"></a>1, 内存流</h4><p>As we’ve seen, the standard I/O library buffers data in memory, so operations such as character-at-a-time I/O and line-at-a-time I/O are more efficient. We’ve also seen that we can provide our own buffer for the library to use by calling setbuf or setvbuf. In Version 4, the Single UNIX Specification added support for memory streams. These are standard I/O streams for which there are no underlying files, although they are still accessed with FILE pointers. All I/O is done by transferring bytes to and from buffers in main memory.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#include &lt;stdio.h&gt;     </span></div><div class="line">FILE * fopen(const char * path,const char * mode);</div><div class="line">FILE *fmemopen(void *restrict mem, size_t size, const char *restrict <span class="built_in">type</span>);</div><div class="line">Returns: stream pointer <span class="keyword">if</span> OK, NULL on error</div></pre></td></tr></table></figure></p>
+<p>其中mem相当于fopen函数中的文件(即参数path)；如果mem参数为空，则fmemopen函数分配size字节数的内存（我们称作“anonmem”，当流关闭时anonmem会被释放)。<br>其中type参数取值的含义：   </p>
+<ol>
+<li>whenever a memory stream is opened for append, the current file position is set to the first null byte in the buffer. If the buffer contains no null bytes, then the current position is set to one byte past the end of the buffer. When a stream is not opened for append, the current position is set to the beginning of the buffer. Because the append mode determines the end of the data by the first null byte, memory streams aren’t well suited for storing binary data (which might contain null bytes before the end of the data).      </li>
+<li>a null byte is written at the current position in the stream whenever we increase the amount of data in the stream’s buffer and call fclose, fflush, fseek,fseeko, or fsetpos.(只有mem中的数据量增加（条件1）并且调用fclose,fflush,fseek,fseeko,fsetpos函数时（条件2），当前位置才会被写入一个null字节.如果条件1和条件2只有一个成立，则不会插入null)。
+		
+	
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2015/12/23/Linux-io/#more" class="more-link">阅读全文</a>
+          </div>
+        
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
+    <h1 class="title"><a href="/2015/12/11/stl-map/">STL heap源码分析</a></h1>
 
  
 	
@@ -124,7 +169,7 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2015/12/11/stl-func/">STL heap源码分析</a></h1>
+    <h1 class="title"><a href="/2015/12/11/stl-alloc/">STL heap源码分析</a></h1>
 
  
 	
@@ -137,6 +182,44 @@ var _hmt = _hmt || [];
       
 		
 			
+		
+	
+    </div>
+    <footer>
+      
+        
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
+    <h1 class="title"><a href="/2015/12/11/stl-vec/">STL heap源码分析</a></h1>
+
+ 
+	
+	<time  datetime="2015-12-10T16:00:00.000Z"><p>发表于 2015-12-11 | 字数 <span class="post-count">6</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<p>1, sort_heap函数源码:</p>
+
 		
 	
     </div>
@@ -284,48 +367,11 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2015/12/11/stl-map/">STL heap源码分析</a></h1>
+    <h1 class="title"><a href="/2015/12/11/stl-heap/">STL heap源码分析</a></h1>
 
  
 	
-	<time  datetime="2015-12-10T16:00:00.000Z"><p>发表于 2015-12-11 | 字数 <span class="post-count">0</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			
-		
-	
-    </div>
-    <footer>
-      
-        
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
-    <h1 class="title"><a href="/2015/12/11/stl-vec/">STL heap源码分析</a></h1>
-
- 
-	
-	<time  datetime="2015-12-10T16:00:00.000Z"><p>发表于 2015-12-11 | 字数 <span class="post-count">6</span>
+	<time  datetime="2015-12-10T16:00:00.000Z"><p>发表于 2015-12-11 | 字数 <span class="post-count">479</span>
 
 </p></time>
       
@@ -334,49 +380,16 @@ var _hmt = _hmt || [];
       
 		
 			<p>1, sort_heap函数源码:</p>
-
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">template &lt;class _RandomAccessIterator&gt;</div><div class="line">void sort_heap(_RandomAccessIterator __first, _RandomAccessIterator __last)</div><div class="line">&#123;</div><div class="line">  __STL_REQUIRES(_RandomAccessIterator, _Mutable_RandomAccessIterator);</div><div class="line">  __STL_REQUIRES(typename iterator_traits&lt;_RandomAccessIterator&gt;::value_type,</div><div class="line">                 _LessThanComparable);</div><div class="line">  <span class="keyword">while</span> (__last - __first &gt; 1)//待排序元素个数大于1;</div><div class="line">    pop_heap(__first, __last--);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 		
 	
     </div>
     <footer>
       
         
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
-    <h1 class="title"><a href="/2015/12/11/stl-deque/">STL heap源码分析</a></h1>
-
- 
-	
-	<time  datetime="2015-12-10T16:00:00.000Z"><p>发表于 2015-12-11 | 字数 <span class="post-count">0</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			
-		
-	
-    </div>
-    <footer>
-      
+          <div class="alignleft">
+            <a href="/2015/12/11/stl-heap/#more" class="more-link">阅读全文</a>
+          </div>
         
         
       
@@ -509,7 +522,7 @@ var _hmt = _hmt || [];
   
     <li><a href="/categories/Asm-C/">Asm/C</a><small>2</small></li>
   
-    <li><a href="/categories/Asm-Cpp/">Asm/Cpp</a><small>11</small></li>
+    <li><a href="/categories/Asm-Cpp/">Asm/Cpp</a><small>12</small></li>
   
     <li><a href="/categories/C-C/">C/C++</a><small>1</small></li>
   
@@ -541,7 +554,7 @@ var _hmt = _hmt || [];
 <div class="widget tagcloud">
   <h3 class="title">标签云</h3>
   <div class="entry">
-    <a href="/tags/Asm/" style="font-size: 18px;">Asm</a> <a href="/tags/C/" style="font-size: 16px;">C</a> <a href="/tags/Cpp/" style="font-size: 14px;">Cpp</a> <a href="/tags/Endian/" style="font-size: 10px;">Endian</a> <a href="/tags/MFC/" style="font-size: 10px;">MFC</a> <a href="/tags/Transations/" style="font-size: 10px;">Transations</a> <a href="/tags/adlist/" style="font-size: 10px;">adlist</a> <a href="/tags/apue/" style="font-size: 12px;">apue</a> <a href="/tags/atoi/" style="font-size: 10px;">atoi</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/database/" style="font-size: 10px;">database</a> <a href="/tags/dict/" style="font-size: 10px;">dict</a> <a href="/tags/event/" style="font-size: 12px;">event</a> <a href="/tags/heap/" style="font-size: 16px;">heap</a> <a href="/tags/icp/" style="font-size: 10px;">icp</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/intset/" style="font-size: 10px;">intset</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/make/" style="font-size: 10px;">make</a> <a href="/tags/makefile/" style="font-size: 10px;">makefile</a> <a href="/tags/multi/" style="font-size: 10px;">multi</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/network/" style="font-size: 12px;">network</a> <a href="/tags/object/" style="font-size: 10px;">object</a> <a href="/tags/pub-sub/" style="font-size: 10px;">pub/sub</a> <a href="/tags/rb/" style="font-size: 10px;">rb</a> <a href="/tags/redis4-0/" style="font-size: 18px;">redis4.0</a> <a href="/tags/replication/" style="font-size: 10px;">replication</a> <a href="/tags/scp/" style="font-size: 10px;">scp</a> <a href="/tags/sds/" style="font-size: 10px;">sds</a> <a href="/tags/signal/" style="font-size: 10px;">signal</a> <a href="/tags/skiplist/" style="font-size: 10px;">skiplist</a> <a href="/tags/snippet/" style="font-size: 12px;">snippet</a> <a href="/tags/sort/" style="font-size: 10px;">sort</a> <a href="/tags/sourcecode/" style="font-size: 18px;">sourcecode</a> <a href="/tags/stl/" style="font-size: 20px;">stl</a> <a href="/tags/string2ll/" style="font-size: 10px;">string2ll</a> <a href="/tags/t-string/" style="font-size: 10px;">t_string</a> <a href="/tags/thread/" style="font-size: 10px;">thread</a> <a href="/tags/thunk/" style="font-size: 10px;">thunk</a> <a href="/tags/tips/" style="font-size: 10px;">tips</a> <a href="/tags/tree/" style="font-size: 10px;">tree</a> <a href="/tags/unpv2/" style="font-size: 10px;">unpv2</a> <a href="/tags/ziplist/" style="font-size: 10px;">ziplist</a> <a href="/tags/内存流/" style="font-size: 10px;">内存流</a> <a href="/tags/勘误/" style="font-size: 10px;">勘误</a>
+    <a href="/tags/Asm/" style="font-size: 20px;">Asm</a> <a href="/tags/C/" style="font-size: 18px;">C</a> <a href="/tags/Cpp/" style="font-size: 14px;">Cpp</a> <a href="/tags/Endian/" style="font-size: 10px;">Endian</a> <a href="/tags/MFC/" style="font-size: 10px;">MFC</a> <a href="/tags/Transations/" style="font-size: 10px;">Transations</a> <a href="/tags/adlist/" style="font-size: 10px;">adlist</a> <a href="/tags/apue/" style="font-size: 12px;">apue</a> <a href="/tags/atoi/" style="font-size: 10px;">atoi</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/database/" style="font-size: 10px;">database</a> <a href="/tags/dict/" style="font-size: 10px;">dict</a> <a href="/tags/event/" style="font-size: 12px;">event</a> <a href="/tags/heap/" style="font-size: 16px;">heap</a> <a href="/tags/icp/" style="font-size: 10px;">icp</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/intset/" style="font-size: 10px;">intset</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/make/" style="font-size: 10px;">make</a> <a href="/tags/makefile/" style="font-size: 10px;">makefile</a> <a href="/tags/multi/" style="font-size: 10px;">multi</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/network/" style="font-size: 12px;">network</a> <a href="/tags/object/" style="font-size: 10px;">object</a> <a href="/tags/pub-sub/" style="font-size: 10px;">pub/sub</a> <a href="/tags/rb/" style="font-size: 10px;">rb</a> <a href="/tags/redis4-0/" style="font-size: 18px;">redis4.0</a> <a href="/tags/replication/" style="font-size: 10px;">replication</a> <a href="/tags/scp/" style="font-size: 10px;">scp</a> <a href="/tags/sds/" style="font-size: 10px;">sds</a> <a href="/tags/signal/" style="font-size: 10px;">signal</a> <a href="/tags/skiplist/" style="font-size: 10px;">skiplist</a> <a href="/tags/snippet/" style="font-size: 12px;">snippet</a> <a href="/tags/sort/" style="font-size: 10px;">sort</a> <a href="/tags/sourcecode/" style="font-size: 18px;">sourcecode</a> <a href="/tags/stl/" style="font-size: 20px;">stl</a> <a href="/tags/string2ll/" style="font-size: 10px;">string2ll</a> <a href="/tags/t-string/" style="font-size: 10px;">t_string</a> <a href="/tags/thread/" style="font-size: 10px;">thread</a> <a href="/tags/thunk/" style="font-size: 10px;">thunk</a> <a href="/tags/tips/" style="font-size: 10px;">tips</a> <a href="/tags/tree/" style="font-size: 10px;">tree</a> <a href="/tags/unpv2/" style="font-size: 10px;">unpv2</a> <a href="/tags/ziplist/" style="font-size: 10px;">ziplist</a> <a href="/tags/内存流/" style="font-size: 10px;">内存流</a> <a href="/tags/勘误/" style="font-size: 10px;">勘误</a>
   </div>
 </div>
 
