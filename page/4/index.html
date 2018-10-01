@@ -87,6 +87,53 @@ var _hmt = _hmt || [];
     <header>
       
 	
+    <h1 class="title"><a href="/2016/04/05/cpp-model-list/">C++对象模型-目录</a></h1>
+
+ 
+	
+	<time  datetime="2016-04-04T16:00:00.000Z"><p>发表于 2016-04-05 | 字数 <span class="post-count">358</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<p>研究生马上要毕业了，至今感觉一事无成。在毕业之前，希望写一些真正留在自己心里的东西。接下来准备每天写一篇用汇编分析一下C语言和C++对象模型的博客，也算是给自己的大学生涯画上一个句号。      </p>
+<h4 id="TODO"><a href="#TODO" class="headerlink" title="TODO:"></a>TODO:</h4><p>准备开始几天先介绍下C语言的东西(自己也努力回忆下汇编语言，参看《CSAPP》第3章)，如栈帧，基础类型的内存布局/结构体变量的内存布局，结构体变量作为函数参数/作为函数返回值，switch/if-else实现机制，变长参数实现机制，二维数组内存布局等，然后再对C++进行深入分析，如C++对象内存布局，引用/指针，构造/析构函数的执行过程，多继承类对象的内存布局，虚继承类对象的内存布局，C++对象作为函数参数/作为函数返回值等。</p>
+<h4 id="1-目录"><a href="#1-目录" class="headerlink" title="1,目录"></a>1,目录</h4><ol>
+<li><a href="http://chinchao.xyz/2016/04/05/cpp-model-0/">C++对象模型-0</a> stack frame    </li>
+<li><a href="http://chinchao.xyz/2016/04/06/cpp-model-1/">C++对象模型-1</a> struct</li>
+<li><a href="http://chinchao.xyz/2016/04/07/cpp-model-2/">C++对象模型-2</a> array</li>
+<li><a href="http://chinchao.xyz/2016/04/07/cpp-model-4/">C++对象模型-4</a> int/float/Big-Endian/Little-Endian</li>
+<li><a href="http://chinchao.xyz/2016/04/07/cpp-model-5/">C++对象模型-5</a> Object Lessons</li>
+</ol>
+<h4 id="2-参考文献"><a href="#2-参考文献" class="headerlink" title="2,参考文献"></a>2,参考文献</h4><p>《深度探索C++对象模型》<br>《CSAPP中文第二版》<br>《程序员的自我修养》<br>《C++反汇编与逆向分析技术揭秘》<br>《老码识途》<br>《Computer Systems A Programmer’s Perspective THIRD EDITION》</p>
+
+		
+	
+    </div>
+    <footer>
+      
+        
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
     <h1 class="title"><a href="/2015/12/23/Linux-io/">Linux内存流</a></h1>
 
  
@@ -113,6 +160,92 @@ var _hmt = _hmt || [];
           <div class="alignleft">
             <a href="/2015/12/23/Linux-io/#more" class="more-link">阅读全文</a>
           </div>
+        
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
+    <h1 class="title"><a href="/2015/12/11/stl-rb/">STL/RB-TREE</a></h1>
+
+ 
+	
+	<time  datetime="2015-12-10T16:00:00.000Z"><p>发表于 2015-12-11 | 字数 <span class="post-count">94</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<p>1,RB-TREE</p>
+<ul>
+<li>红黑树不仅是二叉搜索树，而且必须满足以下规则：<ul>
+<li>1.每个节点不是红色就是黑色</li>
+<li>2.根节点为黑色</li>
+<li>3.如果节点为红，其子节点必须为黑</li>
+<li>4.任一个节点至NULL的任何路径，所含之黑色节点数必须相同。</li>
+</ul>
+</li>
+</ul>
+<p>4,参考文献《STL源码剖析》</p>
+
+		
+	
+    </div>
+    <footer>
+      
+        
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
+    <h1 class="title"><a href="/2015/12/11/stl-adapter/">STL heap源码分析</a></h1>
+
+ 
+	
+	<time  datetime="2015-12-10T16:00:00.000Z"><p>发表于 2015-12-11 | 字数 <span class="post-count">10</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<p>4,参考文献《STL源码剖析》</p>
+
+		
+	
+    </div>
+    <footer>
+      
         
         
       
@@ -169,11 +302,11 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2015/12/11/stl-alloc/">STL heap源码分析</a></h1>
+    <h1 class="title"><a href="/2015/12/11/stl-vec/">STL heap源码分析</a></h1>
 
  
 	
-	<time  datetime="2015-12-10T16:00:00.000Z"><p>发表于 2015-12-11 | 字数 <span class="post-count">0</span>
+	<time  datetime="2015-12-10T16:00:00.000Z"><p>发表于 2015-12-11 | 字数 <span class="post-count">6</span>
 
 </p></time>
       
@@ -181,7 +314,8 @@ var _hmt = _hmt || [];
     <div class="entry">
       
 		
-			
+			<p>1, sort_heap函数源码:</p>
+
 		
 	
     </div>
@@ -206,11 +340,11 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2015/12/11/stl-vec/">STL heap源码分析</a></h1>
+    <h1 class="title"><a href="/2015/12/11/stl-heap/">STL heap源码分析</a></h1>
 
  
 	
-	<time  datetime="2015-12-10T16:00:00.000Z"><p>发表于 2015-12-11 | 字数 <span class="post-count">6</span>
+	<time  datetime="2015-12-10T16:00:00.000Z"><p>发表于 2015-12-11 | 字数 <span class="post-count">479</span>
 
 </p></time>
       
@@ -219,12 +353,16 @@ var _hmt = _hmt || [];
       
 		
 			<p>1, sort_heap函数源码:</p>
-
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">template &lt;class _RandomAccessIterator&gt;</div><div class="line">void sort_heap(_RandomAccessIterator __first, _RandomAccessIterator __last)</div><div class="line">&#123;</div><div class="line">  __STL_REQUIRES(_RandomAccessIterator, _Mutable_RandomAccessIterator);</div><div class="line">  __STL_REQUIRES(typename iterator_traits&lt;_RandomAccessIterator&gt;::value_type,</div><div class="line">                 _LessThanComparable);</div><div class="line">  <span class="keyword">while</span> (__last - __first &gt; 1)//待排序元素个数大于1;</div><div class="line">    pop_heap(__first, __last--);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 		
 	
     </div>
     <footer>
       
+        
+          <div class="alignleft">
+            <a href="/2015/12/11/stl-heap/#more" class="more-link">阅读全文</a>
+          </div>
         
         
       
@@ -319,11 +457,11 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2015/12/11/stl-rb/">STL/RB-TREE</a></h1>
+    <h1 class="title"><a href="/2015/12/11/stl-iter/">STL heap源码分析</a></h1>
 
  
 	
-	<time  datetime="2015-12-10T16:00:00.000Z"><p>发表于 2015-12-11 | 字数 <span class="post-count">94</span>
+	<time  datetime="2015-12-10T16:00:00.000Z"><p>发表于 2015-12-11 | 字数 <span class="post-count">0</span>
 
 </p></time>
       
@@ -331,136 +469,7 @@ var _hmt = _hmt || [];
     <div class="entry">
       
 		
-			<p>1,RB-TREE</p>
-<ul>
-<li>红黑树不仅是二叉搜索树，而且必须满足以下规则：<ul>
-<li>1.每个节点不是红色就是黑色</li>
-<li>2.根节点为黑色</li>
-<li>3.如果节点为红，其子节点必须为黑</li>
-<li>4.任一个节点至NULL的任何路径，所含之黑色节点数必须相同。</li>
-</ul>
-</li>
-</ul>
-<p>4,参考文献《STL源码剖析》</p>
-
-		
-	
-    </div>
-    <footer>
-      
-        
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
-    <h1 class="title"><a href="/2015/12/11/stl-heap/">STL heap源码分析</a></h1>
-
- 
-	
-	<time  datetime="2015-12-10T16:00:00.000Z"><p>发表于 2015-12-11 | 字数 <span class="post-count">479</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<p>1, sort_heap函数源码:</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">template &lt;class _RandomAccessIterator&gt;</div><div class="line">void sort_heap(_RandomAccessIterator __first, _RandomAccessIterator __last)</div><div class="line">&#123;</div><div class="line">  __STL_REQUIRES(_RandomAccessIterator, _Mutable_RandomAccessIterator);</div><div class="line">  __STL_REQUIRES(typename iterator_traits&lt;_RandomAccessIterator&gt;::value_type,</div><div class="line">                 _LessThanComparable);</div><div class="line">  <span class="keyword">while</span> (__last - __first &gt; 1)//待排序元素个数大于1;</div><div class="line">    pop_heap(__first, __last--);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-		
-	
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2015/12/11/stl-heap/#more" class="more-link">阅读全文</a>
-          </div>
-        
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
-    <h1 class="title"><a href="/2015/12/11/stl-adapter/">STL heap源码分析</a></h1>
-
- 
-	
-	<time  datetime="2015-12-10T16:00:00.000Z"><p>发表于 2015-12-11 | 字数 <span class="post-count">10</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<p>4,参考文献《STL源码剖析》</p>
-
-		
-	
-    </div>
-    <footer>
-      
-        
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
-    <h1 class="title"><a href="/2015/12/11/stl-alg/">STL heap源码分析</a></h1>
-
- 
-	
-	<time  datetime="2015-12-10T16:00:00.000Z"><p>发表于 2015-12-11 | 字数 <span class="post-count">6</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<p>1, sort_heap函数源码:</p>
-
+			
 		
 	
     </div>
@@ -522,7 +531,7 @@ var _hmt = _hmt || [];
   
     <li><a href="/categories/Asm-C/">Asm/C</a><small>2</small></li>
   
-    <li><a href="/categories/Asm-Cpp/">Asm/Cpp</a><small>12</small></li>
+    <li><a href="/categories/Asm-Cpp/">Asm/Cpp</a><small>13</small></li>
   
     <li><a href="/categories/C-C/">C/C++</a><small>1</small></li>
   
@@ -554,7 +563,7 @@ var _hmt = _hmt || [];
 <div class="widget tagcloud">
   <h3 class="title">标签云</h3>
   <div class="entry">
-    <a href="/tags/Asm/" style="font-size: 20px;">Asm</a> <a href="/tags/C/" style="font-size: 18px;">C</a> <a href="/tags/Cpp/" style="font-size: 14px;">Cpp</a> <a href="/tags/Endian/" style="font-size: 10px;">Endian</a> <a href="/tags/MFC/" style="font-size: 10px;">MFC</a> <a href="/tags/Transations/" style="font-size: 10px;">Transations</a> <a href="/tags/adlist/" style="font-size: 10px;">adlist</a> <a href="/tags/apue/" style="font-size: 12px;">apue</a> <a href="/tags/atoi/" style="font-size: 10px;">atoi</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/database/" style="font-size: 10px;">database</a> <a href="/tags/dict/" style="font-size: 10px;">dict</a> <a href="/tags/event/" style="font-size: 12px;">event</a> <a href="/tags/heap/" style="font-size: 16px;">heap</a> <a href="/tags/icp/" style="font-size: 10px;">icp</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/intset/" style="font-size: 10px;">intset</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/make/" style="font-size: 10px;">make</a> <a href="/tags/makefile/" style="font-size: 10px;">makefile</a> <a href="/tags/multi/" style="font-size: 10px;">multi</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/network/" style="font-size: 12px;">network</a> <a href="/tags/object/" style="font-size: 10px;">object</a> <a href="/tags/pub-sub/" style="font-size: 10px;">pub/sub</a> <a href="/tags/rb/" style="font-size: 10px;">rb</a> <a href="/tags/redis4-0/" style="font-size: 18px;">redis4.0</a> <a href="/tags/replication/" style="font-size: 10px;">replication</a> <a href="/tags/scp/" style="font-size: 10px;">scp</a> <a href="/tags/sds/" style="font-size: 10px;">sds</a> <a href="/tags/signal/" style="font-size: 10px;">signal</a> <a href="/tags/skiplist/" style="font-size: 10px;">skiplist</a> <a href="/tags/snippet/" style="font-size: 12px;">snippet</a> <a href="/tags/sort/" style="font-size: 10px;">sort</a> <a href="/tags/sourcecode/" style="font-size: 18px;">sourcecode</a> <a href="/tags/stl/" style="font-size: 20px;">stl</a> <a href="/tags/string2ll/" style="font-size: 10px;">string2ll</a> <a href="/tags/t-string/" style="font-size: 10px;">t_string</a> <a href="/tags/thread/" style="font-size: 10px;">thread</a> <a href="/tags/thunk/" style="font-size: 10px;">thunk</a> <a href="/tags/tips/" style="font-size: 10px;">tips</a> <a href="/tags/tree/" style="font-size: 10px;">tree</a> <a href="/tags/unpv2/" style="font-size: 10px;">unpv2</a> <a href="/tags/ziplist/" style="font-size: 10px;">ziplist</a> <a href="/tags/内存流/" style="font-size: 10px;">内存流</a> <a href="/tags/勘误/" style="font-size: 10px;">勘误</a>
+    <a href="/tags/Asm/" style="font-size: 20px;">Asm</a> <a href="/tags/C/" style="font-size: 18px;">C</a> <a href="/tags/Cpp/" style="font-size: 14px;">Cpp</a> <a href="/tags/Endian/" style="font-size: 10px;">Endian</a> <a href="/tags/MFC/" style="font-size: 10px;">MFC</a> <a href="/tags/Transations/" style="font-size: 10px;">Transations</a> <a href="/tags/adlist/" style="font-size: 10px;">adlist</a> <a href="/tags/apue/" style="font-size: 12px;">apue</a> <a href="/tags/atoi/" style="font-size: 10px;">atoi</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/database/" style="font-size: 10px;">database</a> <a href="/tags/dict/" style="font-size: 10px;">dict</a> <a href="/tags/event/" style="font-size: 12px;">event</a> <a href="/tags/heap/" style="font-size: 14px;">heap</a> <a href="/tags/icp/" style="font-size: 10px;">icp</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/intset/" style="font-size: 10px;">intset</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/make/" style="font-size: 10px;">make</a> <a href="/tags/makefile/" style="font-size: 10px;">makefile</a> <a href="/tags/multi/" style="font-size: 10px;">multi</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/network/" style="font-size: 12px;">network</a> <a href="/tags/object/" style="font-size: 10px;">object</a> <a href="/tags/pub-sub/" style="font-size: 10px;">pub/sub</a> <a href="/tags/rb/" style="font-size: 10px;">rb</a> <a href="/tags/redis4-0/" style="font-size: 16px;">redis4.0</a> <a href="/tags/replication/" style="font-size: 10px;">replication</a> <a href="/tags/scp/" style="font-size: 10px;">scp</a> <a href="/tags/sds/" style="font-size: 10px;">sds</a> <a href="/tags/signal/" style="font-size: 10px;">signal</a> <a href="/tags/skiplist/" style="font-size: 10px;">skiplist</a> <a href="/tags/snippet/" style="font-size: 12px;">snippet</a> <a href="/tags/sort/" style="font-size: 10px;">sort</a> <a href="/tags/sourcecode/" style="font-size: 16px;">sourcecode</a> <a href="/tags/stl/" style="font-size: 18px;">stl</a> <a href="/tags/string2ll/" style="font-size: 10px;">string2ll</a> <a href="/tags/t-string/" style="font-size: 10px;">t_string</a> <a href="/tags/thread/" style="font-size: 10px;">thread</a> <a href="/tags/thunk/" style="font-size: 10px;">thunk</a> <a href="/tags/tips/" style="font-size: 10px;">tips</a> <a href="/tags/tree/" style="font-size: 10px;">tree</a> <a href="/tags/unpv2/" style="font-size: 10px;">unpv2</a> <a href="/tags/ziplist/" style="font-size: 10px;">ziplist</a> <a href="/tags/内存流/" style="font-size: 10px;">内存流</a> <a href="/tags/勘误/" style="font-size: 10px;">勘误</a>
   </div>
 </div>
 
