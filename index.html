@@ -137,80 +137,6 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2018/04/08/redis4-clu/"></a></h1>
-
- 
-	
-	<time  datetime="2018-04-08T15:39:46.000Z"><p>发表于 2018-04-08 | 字数 <span class="post-count">0</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			
-		
-	
-    </div>
-    <footer>
-      
-        
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
-    <h1 class="title"><a href="/2018/04/08/redis4-sen/"></a></h1>
-
- 
-	
-	<time  datetime="2018-04-08T15:39:39.000Z"><p>发表于 2018-04-08 | 字数 <span class="post-count">0</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			
-		
-	
-    </div>
-    <footer>
-      
-        
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
     <h1 class="title"><a href="/2018/03/24/snippet-pow2/">Round up to the next highest power of 2</a></h1>
 
  
@@ -547,6 +473,145 @@ var _hmt = _hmt || [];
 
 
 
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
+    <h1 class="title"><a href="/2017/12/03/redis4-object/">redis4.0_object源码剖析</a></h1>
+
+ 
+	
+	<time  datetime="2017-12-02T16:00:00.000Z"><p>发表于 2017-12-03 | 字数 <span class="post-count">530</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<h4 id="1-redisObject介绍"><a href="#1-redisObject介绍" class="headerlink" title="1.redisObject介绍"></a>1.redisObject介绍</h4><ul>
+<li>Redis使用对象来表示数据库中的key和value,每次在redis中创建一个新的键值对时，至少需要创建两个对象对象:键对象和值对象。</li>
+<li><p>Redis中的每个对象都由一个redisObject结构体表示。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">typedef struct redisObject &#123;                                          </div><div class="line">     //对象的类型</div><div class="line">     unsigned <span class="built_in">type</span>:4;</div><div class="line">     //对象采用的编码方式                                             </div><div class="line">     unsigned encoding:4;</div><div class="line">     //对象最后一次被命令程序访问的时间                             </div><div class="line">     unsigned lru:LRU_BITS; /* LRU time (relative to global lru_clock) or</div><div class="line">                             * LFU data (least significant 8 bits frequency</div><div class="line">                             * and most significant 16 bits decreas time). */</div><div class="line">     //对象引用计数</div><div class="line">     int refcount; </div><div class="line">     //指向底层数据结构的指针</div><div class="line">     void *ptr;                                                                                                                                                        </div><div class="line">&#125; robj;</div></pre></td></tr></table></figure>
+</li>
+<li><p>redisObject结构体中type表示对象的类型，type的取值如下：</p>
+</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">/* A redis object, that is a <span class="built_in">type</span> able to hold a string / list / <span class="built_in">set</span> */</div><div class="line"></div><div class="line">/* The actual Redis Object */</div><div class="line"><span class="comment">#define OBJ_STRING 0</span></div><div class="line"><span class="comment">#define OBJ_LIST 1</span></div><div class="line"><span class="comment">#define OBJ_SET 2</span></div><div class="line"><span class="comment">#define OBJ_ZSET 3</span></div><div class="line"><span class="comment">#define OBJ_HASH 4</span></div></pre></td></tr></table></figure>
+<ul>
+<li>redisObject结构体中encoding表示type类型的对象采用哪种数据结构作为底层实现，encoding的取值如下:</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">/* Objects encoding. Some kind of objects like Strings and Hashes can be</div><div class="line"> * internally represented <span class="keyword">in</span> multiple ways. The <span class="string">'encoding'</span> field of the object</div><div class="line"> * is <span class="built_in">set</span> to one of this fields <span class="keyword">for</span> this object. */</div><div class="line">//sds</div><div class="line"><span class="comment">#define OBJ_ENCODING_RAW 0     /* Raw representation */</span></div><div class="line">//<span class="string">"1234"</span>存储为数字1234，即ptr=(void*)1234;</div><div class="line"><span class="comment">#define OBJ_ENCODING_INT 1     /* Encoded as integer */</span></div><div class="line"><span class="comment">#define OBJ_ENCODING_HT 2      /* Encoded as hash table */</span></div><div class="line"><span class="comment">#define OBJ_ENCODING_ZIPMAP 3  /* Encoded as zipmap */</span></div><div class="line"><span class="comment">#define OBJ_ENCODING_LINKEDLIST 4 /* No longer used: old list encoding. */</span></div><div class="line"><span class="comment">#define OBJ_ENCODING_ZIPLIST 5 /* Encoded as ziplist */</span></div><div class="line"><span class="comment">#define OBJ_ENCODING_INTSET 6  /* Encoded as intset */</span></div><div class="line"><span class="comment">#define OBJ_ENCODING_SKIPLIST 7  /* Encoded as skiplist */</span></div><div class="line"><span class="comment">#define OBJ_ENCODING_EMBSTR 8  /* Embedded sds string encoding */</span></div><div class="line"><span class="comment">#define OBJ_ENCODING_QUICKLIST 9 /* Encoded as linked list of ziplists */</span></div></pre></td></tr></table></figure>
+<h4 id="2-object-c源码分析"><a href="#2-object-c源码分析" class="headerlink" title="2.object.c源码分析"></a>2.object.c源码分析</h4><ul>
+<li><p>创建一个redisObject对象</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">//创建一个redisObject对象</div><div class="line">robj *createObject(int <span class="built_in">type</span>, void *ptr) &#123;</div><div class="line">    robj *o = zmalloc(sizeof(*o));</div><div class="line">    o-&gt;<span class="built_in">type</span> = <span class="built_in">type</span>;</div><div class="line">	//sds</div><div class="line">    o-&gt;encoding = OBJ_ENCODING_RAW;</div><div class="line">    o-&gt;ptr = ptr;</div><div class="line">	//引用计数</div><div class="line">    o-&gt;refcount = 1;</div><div class="line"></div><div class="line">    /* Set the LRU to the current lruclock (minutes resolution), or</div><div class="line">     * alternatively the LFU counter. */</div><div class="line">	//lru字段用于记录对象最后一次被命令程序访问的时间</div><div class="line">    <span class="keyword">if</span> (server.maxmemory_policy &amp; MAXMEMORY_FLAG_LFU) &#123;</div><div class="line">        o-&gt;lru = (LFUGetTimeInMinutes()&lt;&lt;8) | LFU_INIT_VAL;</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        o-&gt;lru = LRU_CLOCK();</div><div class="line">    &#125;</div><div class="line">    <span class="built_in">return</span> o;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>redisObject对象refcount字段减1.</p>
+</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">void decrRefCount(robj *o) &#123;</div><div class="line">    <span class="keyword">if</span> (o-&gt;refcount == 1) &#123;</div><div class="line">        switch(o-&gt;<span class="built_in">type</span>) &#123;</div><div class="line">        <span class="keyword">case</span> OBJ_STRING: freeStringObject(o); <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> OBJ_LIST: freeListObject(o); <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> OBJ_SET: freeSetObject(o); <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> OBJ_ZSET: freeZ<span class="built_in">set</span>Object(o); <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> OBJ_HASH: freeHashObject(o); <span class="built_in">break</span>;</div><div class="line">        <span class="keyword">case</span> OBJ_MODULE: freeModuleObject(o); <span class="built_in">break</span>;</div><div class="line">        default: serverPanic(<span class="string">"Unknown object type"</span>); <span class="built_in">break</span>;</div><div class="line">        &#125;</div><div class="line">        zfree(o);</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="keyword">if</span> (o-&gt;refcount &lt;= 0) serverPanic(<span class="string">"decrRefCount against refcount &lt;= 0"</span>);</div><div class="line">        <span class="keyword">if</span> (o-&gt;refcount != OBJ_SHARED_REFCOUNT) o-&gt;refcount--;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="4-参考文献"><a href="#4-参考文献" class="headerlink" title="4.参考文献"></a>4.参考文献</h4><p>《<a href="https://github.com/Qinch/redis_reading/tree/read/" target="_blank" rel="external">redis_reading</a>》</p>
+
+		
+	
+    </div>
+    <footer>
+      
+        
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
+    <h1 class="title"><a href="/2017/12/03/redis4-ziplist/">redis4.0_ziplist源码剖析</a></h1>
+
+ 
+	
+	<time  datetime="2017-12-02T16:00:00.000Z"><p>发表于 2017-12-03 | 字数 <span class="post-count">10,112</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<h3 id="1-ziplist"><a href="#1-ziplist" class="headerlink" title="1.ziplist"></a>1.ziplist</h3><h4 id="1-1-ziplist概述"><a href="#1-1-ziplist概述" class="headerlink" title="1.1.ziplist概述"></a>1.1.ziplist概述</h4><p> The ziplist is a specially encoded dually linked list that is designed to be very memory efficient. It stores both strings and integer values, where integers are encoded as actual integers(integer内存表示) instead of a series of characters（ASCII码）. It allows push and pop operations on either side of the list in O(1) time. However, because every operation requires a reallocation of the memory used by the ziplist, the actual complexity is related to the amount of memory used by the ziplist.</p>
+<h4 id="1-2-ziplist整体内存布局"><a href="#1-2-ziplist整体内存布局" class="headerlink" title="1.2.ziplist整体内存布局"></a>1.2.ziplist整体内存布局</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"> |-----------|----------|---------|---------|---------|----|----------|---------|</div><div class="line"> | &lt;zlbytes&gt; | &lt;zltail&gt; | &lt;zllen&gt; | &lt;entry0&gt;| &lt;entry1&gt;| ...| &lt;entryn&gt; | &lt;zlend&gt; |</div><div class="line"> |-----------|----------|---------|---------|---------|----|----------|---------|</div><div class="line"> |低地址            &lt;----------------------------                       高地址  |</div><div class="line"></div><div class="line">NOTE: all fields are stored <span class="keyword">in</span> little endian(即：低位在地地址，高位在高地址), <span class="keyword">if</span> not specified otherwise.</div></pre></td></tr></table></figure>
+<ul>
+<li>The general layout of the ziplist is as follows:<ul>
+<li><uint32_t zlbytes>用于记录整个ziplist占用的内存字节数；</li>
+<li><uint32_t zltail>用于记录最后一个节点(the last entry)的首地址距离ziplist首地址的偏移量;</li>
+<li><uint16_t zllen>用于记录ziplist中节点(entry)数量;</li>
+<li><uint8_t  zlend>用于表示ziplist的结尾,为定制 0xFF;</li>
+</ul>
+</li>
+</ul>
+<h5 id="1-2-ziplist中entry内存布局"><a href="#1-2-ziplist中entry内存布局" class="headerlink" title="1.2.ziplist中entry内存布局"></a>1.2.ziplist中entry内存布局</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">           </div><div class="line"> |--------|----------|---------|</div><div class="line"> | prelen | encoding | content |</div><div class="line"> |--------|----------|---------|</div><div class="line"> |低地址  &lt;----------   高地址 |</div><div class="line"></div><div class="line">NOTE：a complete entry is stored like above(content长度可能为0,即一个entry可能只有prelen和encoding字段，没有content字段).</div></pre></td></tr></table></figure>
+<h5 id="1-2-1-entry每个字段的含义"><a href="#1-2-1-entry每个字段的含义" class="headerlink" title="1.2.1 entry每个字段的含义:"></a>1.2.1 entry每个字段的含义:</h5><ul>
+<li>prevlen字段用于记录前一个ziplist节点(entry)的长度，该字段以字节为单位。<ul>
+<li>如果前一个节点的长度小于255个字节，则prelen属性的长度为1bytes，该字节用于保存前一个节点的长度；</li>
+<li>如果前一个节点的长度大于或等于255个字节，则prelen字段的长度为5bytes,其中第一个bytes为定制0xFF,之后的四个bytes用于保存前一个节点的长度；</li>
+</ul>
+</li>
+</ul>
+<h5 id="1-2-2-encoding字段的含义："><a href="#1-2-2-encoding字段的含义：" class="headerlink" title="1.2.2 encoding字段的含义："></a>1.2.2 encoding字段的含义：</h5><ul>
+<li>encoding字段用于表示content字段所保存的数据的类型(string or int)以及content的长度。</li>
+<li>encoding表示string类型及长度：<ul>
+<li>当encoding表示string类型时，encoding长度可能为1bytes,2bytes,5bytes,其中最低地址的头两个bits为非11（即(?? &amp; 11) &lt; 11）</li>
+<li>当encoding编码为 00bb bbbb（二进制） 时，encoding字段的长度为1bytes,content的长度小于等于0x3F的字节数组;</li>
+<li>当encoding编码为 01bb bbbb bbbb bbbb（二进制） 时，encoding字段的长度为2bytes（其中encoding中bb bbbb bbbb bbbb表示string的长度，即content的长度，采用big endian表示）,content的长度为小于等于0x3FFF的字节数组;</li>
+<li>当encoding编码为10<strong> __</strong> aaaa aaaa bbbb bbbb cccc cccc dddd dddd （二进制）时,encoding字段的长度为5bytes(其中encoding中aaaaaaaa bbbbbbbb cccccccc dddddddd表示string的长度,采用big endian表示),content的长度为小于等于0xFFFFFFFF的字节数组;</li>
+</ul>
+</li>
+<li>encoding表示int*_t类型及长度：<ul>
+<li>当encoding表示integer类型时,encoding字段的长度为1bytes，最低地址的头两个bits为11(即encoding为(11?? ????));</li>
+<li>当encoding的编码为 1100 0000(二进制)时,content的长度与2bytes,即表示int16_t类型</li>
+<li>当encoding的编码为 1101 0000(二进制)时,content的长度与4bytes,即表示int32_t类型</li>
+<li>当encoding的编码为 1110 0000(二进制)时,content的长度与8bytes,即表示int64_t类型</li>
+<li>当encoding的编码为 1110 0000(二进制)时,content的长度与3bytes,即表示int24_t类型</li>
+<li>当encoding的编码为 1111 1110(二进制)时,content的长度与1bytes,即表示int8_t类型</li>
+<li>当encoding的编码为 1100 xxxx(二进制)时,content的长度与0bytes,即表示immediate 4 bit integer,其中xxxx 4bits表示<a href="encoding的编码范围为1111 0001~1111 1101">0,12</a>;</li>
+<li>|11111111| - End of ziplist special entry.</li>
+</ul>
+</li>
+</ul>
+		
+	
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2017/12/03/redis4-ziplist/#more" class="more-link">阅读全文</a>
+          </div>
+        
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
 
   <nav id="page-nav" class="clearfix">
     <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/2/">下一页 &raquo;</a>
@@ -563,19 +628,19 @@ var _hmt = _hmt || [];
       </li>
     
       <li>
-        <a href="/2018/04/08/redis4-clu/"></a>
-      </li>
-    
-      <li>
-        <a href="/2018/04/08/redis4-sen/"></a>
-      </li>
-    
-      <li>
         <a href="/2018/03/24/snippet-pow2/">Round up to the next highest power of 2</a>
       </li>
     
       <li>
         <a href="/2018/01/28/snippet-atoi/">Atoi&amp;Itoa函数</a>
+      </li>
+    
+      <li>
+        <a href="/2017/12/14/redis4-rep/">redis4.0_复制</a>
+      </li>
+    
+      <li>
+        <a href="/2017/12/13/redis4-io/">redis4.0_输入/输出缓冲区处理</a>
       </li>
     
   </ul>
