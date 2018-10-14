@@ -87,6 +87,86 @@ var _hmt = _hmt || [];
     <header>
       
 	
+    <h1 class="title"><a href="/2017/12/03/redis4-ziplist/">redis4.0_ziplist源码剖析</a></h1>
+
+ 
+	
+	<time  datetime="2017-12-02T16:00:00.000Z"><p>发表于 2017-12-03 | 字数 <span class="post-count">10,112</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<h3 id="1-ziplist"><a href="#1-ziplist" class="headerlink" title="1.ziplist"></a>1.ziplist</h3><h4 id="1-1-ziplist概述"><a href="#1-1-ziplist概述" class="headerlink" title="1.1.ziplist概述"></a>1.1.ziplist概述</h4><p> The ziplist is a specially encoded dually linked list that is designed to be very memory efficient. It stores both strings and integer values, where integers are encoded as actual integers(integer内存表示) instead of a series of characters（ASCII码）. It allows push and pop operations on either side of the list in O(1) time. However, because every operation requires a reallocation of the memory used by the ziplist, the actual complexity is related to the amount of memory used by the ziplist.</p>
+<h4 id="1-2-ziplist整体内存布局"><a href="#1-2-ziplist整体内存布局" class="headerlink" title="1.2.ziplist整体内存布局"></a>1.2.ziplist整体内存布局</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"> |-----------|----------|---------|---------|---------|----|----------|---------|</div><div class="line"> | &lt;zlbytes&gt; | &lt;zltail&gt; | &lt;zllen&gt; | &lt;entry0&gt;| &lt;entry1&gt;| ...| &lt;entryn&gt; | &lt;zlend&gt; |</div><div class="line"> |-----------|----------|---------|---------|---------|----|----------|---------|</div><div class="line"> |低地址            &lt;----------------------------                       高地址  |</div><div class="line"></div><div class="line">NOTE: all fields are stored <span class="keyword">in</span> little endian(即：低位在地地址，高位在高地址), <span class="keyword">if</span> not specified otherwise.</div></pre></td></tr></table></figure>
+<ul>
+<li>The general layout of the ziplist is as follows:<ul>
+<li><uint32_t zlbytes>用于记录整个ziplist占用的内存字节数；</li>
+<li><uint32_t zltail>用于记录最后一个节点(the last entry)的首地址距离ziplist首地址的偏移量;</li>
+<li><uint16_t zllen>用于记录ziplist中节点(entry)数量;</li>
+<li><uint8_t  zlend>用于表示ziplist的结尾,为定制 0xFF;</li>
+</ul>
+</li>
+</ul>
+<h5 id="1-2-ziplist中entry内存布局"><a href="#1-2-ziplist中entry内存布局" class="headerlink" title="1.2.ziplist中entry内存布局"></a>1.2.ziplist中entry内存布局</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">           </div><div class="line"> |--------|----------|---------|</div><div class="line"> | prelen | encoding | content |</div><div class="line"> |--------|----------|---------|</div><div class="line"> |低地址  &lt;----------   高地址 |</div><div class="line"></div><div class="line">NOTE：a complete entry is stored like above(content长度可能为0,即一个entry可能只有prelen和encoding字段，没有content字段).</div></pre></td></tr></table></figure>
+<h5 id="1-2-1-entry每个字段的含义"><a href="#1-2-1-entry每个字段的含义" class="headerlink" title="1.2.1 entry每个字段的含义:"></a>1.2.1 entry每个字段的含义:</h5><ul>
+<li>prevlen字段用于记录前一个ziplist节点(entry)的长度，该字段以字节为单位。<ul>
+<li>如果前一个节点的长度小于255个字节，则prelen属性的长度为1bytes，该字节用于保存前一个节点的长度；</li>
+<li>如果前一个节点的长度大于或等于255个字节，则prelen字段的长度为5bytes,其中第一个bytes为定制0xFF,之后的四个bytes用于保存前一个节点的长度；</li>
+</ul>
+</li>
+</ul>
+<h5 id="1-2-2-encoding字段的含义："><a href="#1-2-2-encoding字段的含义：" class="headerlink" title="1.2.2 encoding字段的含义："></a>1.2.2 encoding字段的含义：</h5><ul>
+<li>encoding字段用于表示content字段所保存的数据的类型(string or int)以及content的长度。</li>
+<li>encoding表示string类型及长度：<ul>
+<li>当encoding表示string类型时，encoding长度可能为1bytes,2bytes,5bytes,其中最低地址的头两个bits为非11（即(?? &amp; 11) &lt; 11）</li>
+<li>当encoding编码为 00bb bbbb（二进制） 时，encoding字段的长度为1bytes,content的长度小于等于0x3F的字节数组;</li>
+<li>当encoding编码为 01bb bbbb bbbb bbbb（二进制） 时，encoding字段的长度为2bytes（其中encoding中bb bbbb bbbb bbbb表示string的长度，即content的长度，采用big endian表示）,content的长度为小于等于0x3FFF的字节数组;</li>
+<li>当encoding编码为10<strong> __</strong> aaaa aaaa bbbb bbbb cccc cccc dddd dddd （二进制）时,encoding字段的长度为5bytes(其中encoding中aaaaaaaa bbbbbbbb cccccccc dddddddd表示string的长度,采用big endian表示),content的长度为小于等于0xFFFFFFFF的字节数组;</li>
+</ul>
+</li>
+<li>encoding表示int*_t类型及长度：<ul>
+<li>当encoding表示integer类型时,encoding字段的长度为1bytes，最低地址的头两个bits为11(即encoding为(11?? ????));</li>
+<li>当encoding的编码为 1100 0000(二进制)时,content的长度与2bytes,即表示int16_t类型</li>
+<li>当encoding的编码为 1101 0000(二进制)时,content的长度与4bytes,即表示int32_t类型</li>
+<li>当encoding的编码为 1110 0000(二进制)时,content的长度与8bytes,即表示int64_t类型</li>
+<li>当encoding的编码为 1110 0000(二进制)时,content的长度与3bytes,即表示int24_t类型</li>
+<li>当encoding的编码为 1111 1110(二进制)时,content的长度与1bytes,即表示int8_t类型</li>
+<li>当encoding的编码为 1100 xxxx(二进制)时,content的长度与0bytes,即表示immediate 4 bit integer,其中xxxx 4bits表示<a href="encoding的编码范围为1111 0001~1111 1101">0,12</a>;</li>
+<li>|11111111| - End of ziplist special entry.</li>
+</ul>
+</li>
+</ul>
+		
+	
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2017/12/03/redis4-ziplist/#more" class="more-link">阅读全文</a>
+          </div>
+        
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
     <h1 class="title"><a href="/2017/12/03/redis4-t_string/">redis4.0_t_string源码剖析</a></h1>
 
  
@@ -291,58 +371,6 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2017/12/01/redis4-sds/">redis4.0_sds源码剖析</a></h1>
-
- 
-	
-	<time  datetime="2017-11-30T16:00:00.000Z"><p>发表于 2017-12-01 | 字数 <span class="post-count">1,333</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<h4 id="1-sds介绍"><a href="#1-sds介绍" class="headerlink" title="1.sds介绍"></a>1.sds介绍</h4><ol>
-<li>sds:Simple Dynamic String即简单动态字符串，为redis的默认字符串表示。</li>
-</ol>
-<h4 id="2-sds-h源码分析"><a href="#2-sds-h源码分析" class="headerlink" title="2.sds.h源码分析"></a>2.sds.h源码分析</h4><ol>
-<li><p>sds结构体的内存布局</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">/*    0长度数组的妙用</div><div class="line"> *    ----------------</div><div class="line"> *    |    len       |</div><div class="line"> *    |——————————————|</div><div class="line"> *    |    alloc     |</div><div class="line"> *    |——————————————|</div><div class="line"> *    |    flags     |</div><div class="line"> *    |——————————————|&lt;----buf</div><div class="line"> *    |    buf[0~n]  |</div><div class="line"> *    |     .        |</div><div class="line"> *    |     .        |</div><div class="line">      |     .        |</div><div class="line"> *    |——————————————|</div><div class="line"> */</div></pre></td></tr></table></figure>
-</li>
-<li><p>sds结构体的定义</p>
-</li>
-<li>sds结构体定义在src/sds.h，其中根据buf[]中字符串的长度来选择不同的sds结构体<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div></pre></td><td class="code"><pre><div class="line">typedef char *sds;</div><div class="line"></div><div class="line">/* Note: sdshdr5 is never used, we just access the flags byte directly.</div><div class="line"> * However is here to document the layout of <span class="built_in">type</span> 5 SDS strings. */</div><div class="line">//sdshdr5与其他sds结构体的区别是：没有alloc字段，即无法获得free=alloc-len</div><div class="line">//sdshdr5中flags字段的低3bits表示sds类型，高5bits位buf的length字段</div><div class="line">struct __attribute__ ((__packed__)) sdshdr5 &#123;</div><div class="line">    unsigned char flags; /* 3 lsb of <span class="built_in">type</span>, and 5 msb of string length */</div><div class="line">    char buf[];//等价于char buf[0];</div><div class="line">&#125;;</div><div class="line">struct __attribute__ ((__packed__)) sdshdr8 &#123;</div><div class="line">    uint8_t len; /* used */</div><div class="line">    uint8_t alloc; /* excluding the header and null terminator */</div><div class="line">    unsigned char flags; /* 3 lsb of <span class="built_in">type</span>, 5 unused bits */</div><div class="line">	//0长度数组 char buf[]等价于char buf[0]</div><div class="line">    char buf[];</div><div class="line">&#125;;</div><div class="line">struct __attribute__ ((__packed__)) sdshdr16 &#123;</div><div class="line">    uint16_t len; /* used */</div><div class="line">    uint16_t alloc; /* excluding the header and null terminator */</div><div class="line">    unsigned char flags; /* 3 lsb of <span class="built_in">type</span>, 5 unused bits */</div><div class="line">    char buf[];</div><div class="line">&#125;;</div><div class="line">struct __attribute__ ((__packed__)) sdshdr32 &#123;</div><div class="line">    uint32_t len; /* used */</div><div class="line">    uint32_t alloc; /* excluding the header and null terminator */</div><div class="line">    unsigned char flags; /* 3 lsb of <span class="built_in">type</span>, 5 unused bits */</div><div class="line">    char buf[];</div><div class="line">&#125;;</div><div class="line">struct __attribute__ ((__packed__)) sdshdr64 &#123;</div><div class="line">    uint64_t len; /* used */</div><div class="line">    uint64_t alloc; /* excluding the header and null terminator */</div><div class="line">	//sdsnhdr的类型</div><div class="line">    unsigned char flags; /* 3 lsb of <span class="built_in">type</span>, 5 unused bits */</div><div class="line">    char buf[];</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
-</li>
-</ol>
-		
-	
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2017/12/01/redis4-sds/#more" class="more-link">阅读全文</a>
-          </div>
-        
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
     <h1 class="title"><a href="/2017/12/01/redis4-dict/">redis4.0_dict源码剖析</a></h1>
 
  
@@ -375,6 +403,58 @@ var _hmt = _hmt || [];
         
           <div class="alignleft">
             <a href="/2017/12/01/redis4-dict/#more" class="more-link">阅读全文</a>
+          </div>
+        
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
+    <h1 class="title"><a href="/2017/12/01/redis4-sds/">redis4.0_sds源码剖析</a></h1>
+
+ 
+	
+	<time  datetime="2017-11-30T16:00:00.000Z"><p>发表于 2017-12-01 | 字数 <span class="post-count">1,333</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<h4 id="1-sds介绍"><a href="#1-sds介绍" class="headerlink" title="1.sds介绍"></a>1.sds介绍</h4><ol>
+<li>sds:Simple Dynamic String即简单动态字符串，为redis的默认字符串表示。</li>
+</ol>
+<h4 id="2-sds-h源码分析"><a href="#2-sds-h源码分析" class="headerlink" title="2.sds.h源码分析"></a>2.sds.h源码分析</h4><ol>
+<li><p>sds结构体的内存布局</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">/*    0长度数组的妙用</div><div class="line"> *    ----------------</div><div class="line"> *    |    len       |</div><div class="line"> *    |——————————————|</div><div class="line"> *    |    alloc     |</div><div class="line"> *    |——————————————|</div><div class="line"> *    |    flags     |</div><div class="line"> *    |——————————————|&lt;----buf</div><div class="line"> *    |    buf[0~n]  |</div><div class="line"> *    |     .        |</div><div class="line"> *    |     .        |</div><div class="line">      |     .        |</div><div class="line"> *    |——————————————|</div><div class="line"> */</div></pre></td></tr></table></figure>
+</li>
+<li><p>sds结构体的定义</p>
+</li>
+<li>sds结构体定义在src/sds.h，其中根据buf[]中字符串的长度来选择不同的sds结构体<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div></pre></td><td class="code"><pre><div class="line">typedef char *sds;</div><div class="line"></div><div class="line">/* Note: sdshdr5 is never used, we just access the flags byte directly.</div><div class="line"> * However is here to document the layout of <span class="built_in">type</span> 5 SDS strings. */</div><div class="line">//sdshdr5与其他sds结构体的区别是：没有alloc字段，即无法获得free=alloc-len</div><div class="line">//sdshdr5中flags字段的低3bits表示sds类型，高5bits位buf的length字段</div><div class="line">struct __attribute__ ((__packed__)) sdshdr5 &#123;</div><div class="line">    unsigned char flags; /* 3 lsb of <span class="built_in">type</span>, and 5 msb of string length */</div><div class="line">    char buf[];//等价于char buf[0];</div><div class="line">&#125;;</div><div class="line">struct __attribute__ ((__packed__)) sdshdr8 &#123;</div><div class="line">    uint8_t len; /* used */</div><div class="line">    uint8_t alloc; /* excluding the header and null terminator */</div><div class="line">    unsigned char flags; /* 3 lsb of <span class="built_in">type</span>, 5 unused bits */</div><div class="line">	//0长度数组 char buf[]等价于char buf[0]</div><div class="line">    char buf[];</div><div class="line">&#125;;</div><div class="line">struct __attribute__ ((__packed__)) sdshdr16 &#123;</div><div class="line">    uint16_t len; /* used */</div><div class="line">    uint16_t alloc; /* excluding the header and null terminator */</div><div class="line">    unsigned char flags; /* 3 lsb of <span class="built_in">type</span>, 5 unused bits */</div><div class="line">    char buf[];</div><div class="line">&#125;;</div><div class="line">struct __attribute__ ((__packed__)) sdshdr32 &#123;</div><div class="line">    uint32_t len; /* used */</div><div class="line">    uint32_t alloc; /* excluding the header and null terminator */</div><div class="line">    unsigned char flags; /* 3 lsb of <span class="built_in">type</span>, 5 unused bits */</div><div class="line">    char buf[];</div><div class="line">&#125;;</div><div class="line">struct __attribute__ ((__packed__)) sdshdr64 &#123;</div><div class="line">    uint64_t len; /* used */</div><div class="line">    uint64_t alloc; /* excluding the header and null terminator */</div><div class="line">	//sdsnhdr的类型</div><div class="line">    unsigned char flags; /* 3 lsb of <span class="built_in">type</span>, 5 unused bits */</div><div class="line">    char buf[];</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+		
+	
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2017/12/01/redis4-sds/#more" class="more-link">阅读全文</a>
           </div>
         
         
@@ -523,50 +603,6 @@ var _hmt = _hmt || [];
 
 
 
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
-    <h1 class="title"><a href="/2017/04/19/thread_signal/">线程-信号</a></h1>
-
- 
-	
-	<time  datetime="2017-04-18T16:00:00.000Z"><p>发表于 2017-04-19 | 字数 <span class="post-count">218</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<h4 id="1-线程与信号"><a href="#1-线程与信号" class="headerlink" title="1,线程与信号"></a>1,线程与信号</h4><ol>
-<li>每个线程都有自己的信号屏蔽字，但是信号的处理是先进程中所有线程共享的。这就意味着单个线程可以阻止某些信号，但当某个线程修改了与某个给定信号相关的处理行为以后，所有的线程都必须共享这个处理行为的改变。</li>
-<li>进程中的信号是递送给单个线程的。（Signals are delivered to a single thread in the process. If the signal is related to a hardware fault, the signal is usually sent to the thread whose action caused the event. Other signals, on the other hand, are delivered to an arbitrary thread.)对于该句的理解是：因为进程中所有线程共享信号的处理，所以发送给任意进程（只要该进程没有屏蔽该信号），对该信号的处理都是相同的。</li>
-</ol>
-		
-	
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2017/04/19/thread_signal/#more" class="more-link">阅读全文</a>
-          </div>
-        
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
 
   <nav id="page-nav" class="clearfix">
     <a class="extend prev" rel="prev" href="/">&laquo; 上一页</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/3/">下一页 &raquo;</a>
@@ -577,6 +613,10 @@ var _hmt = _hmt || [];
 <div class="widget tag">
   <h3 class="title">最新文章</h3>
   <ul class="entry">
+    
+      <li>
+        <a href="/2018/10/14/cpp-model-list/">C++对象模型-目录</a>
+      </li>
     
       <li>
         <a href="/2018/04/08/redis4-clu/"></a>
@@ -592,10 +632,6 @@ var _hmt = _hmt || [];
     
       <li>
         <a href="/2018/01/28/snippet-atoi/">Atoi&amp;Itoa函数</a>
-      </li>
-    
-      <li>
-        <a href="/2017/12/14/redis4-rep/">redis4.0_复制</a>
       </li>
     
   </ul>

@@ -87,6 +87,58 @@ var _hmt = _hmt || [];
     <header>
       
 	
+    <h1 class="title"><a href="/2018/10/14/cpp-model-list/">C++对象模型-目录</a></h1>
+
+ 
+	
+	<time  datetime="2018-10-14T01:12:52.000Z"><p>发表于 2018-10-14 | 字数 <span class="post-count">372</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<p>研究生马上要毕业了，至今感觉一事无成。在毕业之前，希望写一些真正留在自己心里的东西。接下来准备每天写一篇用汇编分析一下C语言和C++对象模型的博客，也算是给自己的大学生涯画上一个句号。      </p>
+<h4 id="TODO"><a href="#TODO" class="headerlink" title="TODO:"></a>TODO:</h4><p>准备开始几天先介绍下C语言的东西(自己也努力回忆下汇编语言，参看《CSAPP》第3章)，如栈帧，基础类型的内存布局/结构体变量的内存布局，结构体变量作为函数参数/作为函数返回值，switch/if-else实现机制，变长参数实现机制，二维数组内存布局等，然后再对C++进行深入分析，如C++对象内存布局，引用/指针，构造/析构函数的执行过程，多继承类对象的内存布局，虚继承类对象的内存布局，C++对象作为函数参数/作为函数返回值等。</p>
+<h4 id="1-目录"><a href="#1-目录" class="headerlink" title="1,目录"></a>1,目录</h4><ol>
+<li><a href="http://chinchao.xyz/2013/10/09/endian/">大端法/小端法</a></li>
+<li><a href="http://chinchao.xyz/2016/04/08/cpp-model-4/">基础类型的内存表示</a></li>
+<li><a href="http://chinchao.xyz/2016/04/07/cpp-model-2/">数组内存布局</a></li>
+<li><a href="http://chinchao.xyz/2016/04/05/cpp-model-0/">函数调用过程</a>     </li>
+<li><a href="http://chinchao.xyz/2014/05/10/cpp-model-obj/">函数调用过程:Class Object作为函数参数</a></li>
+<li><a href="http://chinchao.xyz/2016/04/09/cpp-model-5/">Class Objec</a></li>
+<li><a href="http://chinchao.xyz/2016/04/09/cpp-model-10/">Virtual Base Class</a></li>
+<li><a href="http://chinchao.xyz/2016/04/09/cpp-model-9/">引用</a></li>
+<li><a href="http://chinchao.xyz/2016/04/09/cpp-model-7/">ObjectSlice</a></li>
+<li><a href="http://chinchao.xyz/2016/04/09/cpp-model-8/">Default Constructor</a></li>
+</ol>
+<h4 id="2-参考文献"><a href="#2-参考文献" class="headerlink" title="2,参考文献"></a>2,参考文献</h4><p>《深度探索C++对象模型》<br>《CSAPP中文第二版》<br>《程序员的自我修养》<br>《C++反汇编与逆向分析技术揭秘》<br>《老码识途》<br>《Computer Systems A Programmer’s Perspective THIRD EDITION》</p>
+
+		
+	
+    </div>
+    <footer>
+      
+        
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
     <h1 class="title"><a href="/2018/04/08/redis4-clu/"></a></h1>
 
  
@@ -497,86 +549,6 @@ var _hmt = _hmt || [];
 
 
 
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
-    <h1 class="title"><a href="/2017/12/03/redis4-ziplist/">redis4.0_ziplist源码剖析</a></h1>
-
- 
-	
-	<time  datetime="2017-12-02T16:00:00.000Z"><p>发表于 2017-12-03 | 字数 <span class="post-count">10,112</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<h3 id="1-ziplist"><a href="#1-ziplist" class="headerlink" title="1.ziplist"></a>1.ziplist</h3><h4 id="1-1-ziplist概述"><a href="#1-1-ziplist概述" class="headerlink" title="1.1.ziplist概述"></a>1.1.ziplist概述</h4><p> The ziplist is a specially encoded dually linked list that is designed to be very memory efficient. It stores both strings and integer values, where integers are encoded as actual integers(integer内存表示) instead of a series of characters（ASCII码）. It allows push and pop operations on either side of the list in O(1) time. However, because every operation requires a reallocation of the memory used by the ziplist, the actual complexity is related to the amount of memory used by the ziplist.</p>
-<h4 id="1-2-ziplist整体内存布局"><a href="#1-2-ziplist整体内存布局" class="headerlink" title="1.2.ziplist整体内存布局"></a>1.2.ziplist整体内存布局</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"> |-----------|----------|---------|---------|---------|----|----------|---------|</div><div class="line"> | &lt;zlbytes&gt; | &lt;zltail&gt; | &lt;zllen&gt; | &lt;entry0&gt;| &lt;entry1&gt;| ...| &lt;entryn&gt; | &lt;zlend&gt; |</div><div class="line"> |-----------|----------|---------|---------|---------|----|----------|---------|</div><div class="line"> |低地址            &lt;----------------------------                       高地址  |</div><div class="line"></div><div class="line">NOTE: all fields are stored <span class="keyword">in</span> little endian(即：低位在地地址，高位在高地址), <span class="keyword">if</span> not specified otherwise.</div></pre></td></tr></table></figure>
-<ul>
-<li>The general layout of the ziplist is as follows:<ul>
-<li><uint32_t zlbytes>用于记录整个ziplist占用的内存字节数；</li>
-<li><uint32_t zltail>用于记录最后一个节点(the last entry)的首地址距离ziplist首地址的偏移量;</li>
-<li><uint16_t zllen>用于记录ziplist中节点(entry)数量;</li>
-<li><uint8_t  zlend>用于表示ziplist的结尾,为定制 0xFF;</li>
-</ul>
-</li>
-</ul>
-<h5 id="1-2-ziplist中entry内存布局"><a href="#1-2-ziplist中entry内存布局" class="headerlink" title="1.2.ziplist中entry内存布局"></a>1.2.ziplist中entry内存布局</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">           </div><div class="line"> |--------|----------|---------|</div><div class="line"> | prelen | encoding | content |</div><div class="line"> |--------|----------|---------|</div><div class="line"> |低地址  &lt;----------   高地址 |</div><div class="line"></div><div class="line">NOTE：a complete entry is stored like above(content长度可能为0,即一个entry可能只有prelen和encoding字段，没有content字段).</div></pre></td></tr></table></figure>
-<h5 id="1-2-1-entry每个字段的含义"><a href="#1-2-1-entry每个字段的含义" class="headerlink" title="1.2.1 entry每个字段的含义:"></a>1.2.1 entry每个字段的含义:</h5><ul>
-<li>prevlen字段用于记录前一个ziplist节点(entry)的长度，该字段以字节为单位。<ul>
-<li>如果前一个节点的长度小于255个字节，则prelen属性的长度为1bytes，该字节用于保存前一个节点的长度；</li>
-<li>如果前一个节点的长度大于或等于255个字节，则prelen字段的长度为5bytes,其中第一个bytes为定制0xFF,之后的四个bytes用于保存前一个节点的长度；</li>
-</ul>
-</li>
-</ul>
-<h5 id="1-2-2-encoding字段的含义："><a href="#1-2-2-encoding字段的含义：" class="headerlink" title="1.2.2 encoding字段的含义："></a>1.2.2 encoding字段的含义：</h5><ul>
-<li>encoding字段用于表示content字段所保存的数据的类型(string or int)以及content的长度。</li>
-<li>encoding表示string类型及长度：<ul>
-<li>当encoding表示string类型时，encoding长度可能为1bytes,2bytes,5bytes,其中最低地址的头两个bits为非11（即(?? &amp; 11) &lt; 11）</li>
-<li>当encoding编码为 00bb bbbb（二进制） 时，encoding字段的长度为1bytes,content的长度小于等于0x3F的字节数组;</li>
-<li>当encoding编码为 01bb bbbb bbbb bbbb（二进制） 时，encoding字段的长度为2bytes（其中encoding中bb bbbb bbbb bbbb表示string的长度，即content的长度，采用big endian表示）,content的长度为小于等于0x3FFF的字节数组;</li>
-<li>当encoding编码为10<strong> __</strong> aaaa aaaa bbbb bbbb cccc cccc dddd dddd （二进制）时,encoding字段的长度为5bytes(其中encoding中aaaaaaaa bbbbbbbb cccccccc dddddddd表示string的长度,采用big endian表示),content的长度为小于等于0xFFFFFFFF的字节数组;</li>
-</ul>
-</li>
-<li>encoding表示int*_t类型及长度：<ul>
-<li>当encoding表示integer类型时,encoding字段的长度为1bytes，最低地址的头两个bits为11(即encoding为(11?? ????));</li>
-<li>当encoding的编码为 1100 0000(二进制)时,content的长度与2bytes,即表示int16_t类型</li>
-<li>当encoding的编码为 1101 0000(二进制)时,content的长度与4bytes,即表示int32_t类型</li>
-<li>当encoding的编码为 1110 0000(二进制)时,content的长度与8bytes,即表示int64_t类型</li>
-<li>当encoding的编码为 1110 0000(二进制)时,content的长度与3bytes,即表示int24_t类型</li>
-<li>当encoding的编码为 1111 1110(二进制)时,content的长度与1bytes,即表示int8_t类型</li>
-<li>当encoding的编码为 1100 xxxx(二进制)时,content的长度与0bytes,即表示immediate 4 bit integer,其中xxxx 4bits表示<a href="encoding的编码范围为1111 0001~1111 1101">0,12</a>;</li>
-<li>|11111111| - End of ziplist special entry.</li>
-</ul>
-</li>
-</ul>
-		
-	
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2017/12/03/redis4-ziplist/#more" class="more-link">阅读全文</a>
-          </div>
-        
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
 
   <nav id="page-nav" class="clearfix">
     <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/2/">下一页 &raquo;</a>
@@ -587,6 +559,10 @@ var _hmt = _hmt || [];
 <div class="widget tag">
   <h3 class="title">最新文章</h3>
   <ul class="entry">
+    
+      <li>
+        <a href="/2018/10/14/cpp-model-list/">C++对象模型-目录</a>
+      </li>
     
       <li>
         <a href="/2018/04/08/redis4-clu/"></a>
@@ -602,10 +578,6 @@ var _hmt = _hmt || [];
     
       <li>
         <a href="/2018/01/28/snippet-atoi/">Atoi&amp;Itoa函数</a>
-      </li>
-    
-      <li>
-        <a href="/2017/12/14/redis4-rep/">redis4.0_复制</a>
       </li>
     
   </ul>
