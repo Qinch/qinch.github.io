@@ -87,6 +87,52 @@ var _hmt = _hmt || [];
     <header>
       
 	
+    <h1 class="title"><a href="/2018/10/21/c-co/">coroutine</a></h1>
+
+ 
+	
+	<time  datetime="2018-10-20T16:00:00.000Z"><p>发表于 2018-10-21 | 字数 <span class="post-count">14</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<h3 id="1-c-coroutine"><a href="#1-c-coroutine" class="headerlink" title="1.c coroutine"></a>1.c coroutine</h3><p><a href="https://github.com/Qinch/coroutine" target="_blank" rel="external">https://github.com/Qinch/coroutine</a></p>
+<h3 id="2-参考"><a href="#2-参考" class="headerlink" title="2.参考"></a>2.参考</h3><ul>
+<li><p><a href="http://pubs.opengroup.org/onlinepubs/009695399/functions/swapcontext.html" target="_blank" rel="external">swapcontext</a></p>
+</li>
+<li><p><a href="http://pubs.opengroup.org/onlinepubs/009695399/functions/setcontext.html" target="_blank" rel="external">getcontext</a></p>
+</li>
+<li><p><a href="https://github.com/Qinch/coroutine" target="_blank" rel="external">coroutine</a></p>
+</li>
+</ul>
+
+		
+	
+    </div>
+    <footer>
+      
+        
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
     <h1 class="title"><a href="/2018/10/15/stl-list/">STL-目录</a></h1>
 
  
@@ -502,54 +548,6 @@ var _hmt = _hmt || [];
 
 
 
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
-    <h1 class="title"><a href="/2017/12/10/redis4-event/">redis4.0_event源码剖析</a></h1>
-
- 
-	
-	<time  datetime="2017-12-09T16:00:00.000Z"><p>发表于 2017-12-10 | 字数 <span class="post-count">1,234</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<h4 id="1-Event概述"><a href="#1-Event概述" class="headerlink" title="1.Event概述"></a>1.Event概述</h4><p>redis是一个事件驱动程序，服务器处理以下两个事件：</p>
-<ol>
-<li><p>fd事件(IO多路复用)</p>
-</li>
-<li><p>time事件（时间精度秒级）<br>服务器所有的时间事件都放在一个无序链表中，每当时间事件处理器运行时，就遍历整个链表，查找所有已经到达的时间事件，并调用相应的处理函数</p>
-</li>
-</ol>
-<h4 id="2-关键数据结构"><a href="#2-关键数据结构" class="headerlink" title="2.关键数据结构"></a>2.关键数据结构</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div></pre></td><td class="code"><pre><div class="line">/* File event structure */</div><div class="line">typedef struct aeFileEvent &#123;</div><div class="line">    //读或者写</div><div class="line">    int mask; /* one of AE_(READABLE|WRITABLE) */</div><div class="line">    //读处理函数指针</div><div class="line">    aeFileProc *rfileProc;</div><div class="line">    //写函数指针</div><div class="line">    aeFileProc *wfileProc;</div><div class="line">    void *clientData;</div><div class="line">&#125; aeFileEvent;</div><div class="line"></div><div class="line">/* Time event structure */</div><div class="line">typedef struct aeTimeEvent &#123;</div><div class="line">    //时间事件ID</div><div class="line">    long long id; /* time event identifier. */</div><div class="line">    long when_sec; /* seconds */</div><div class="line">    long when_ms; /* milliseconds */</div><div class="line">    aeTimeProc *timeProc;</div><div class="line">    aeEventFinalizerProc *finalizerProc;</div><div class="line">    void *clientData;</div><div class="line">    //无序链表</div><div class="line">    struct aeTimeEvent *next;</div><div class="line">&#125; aeTimeEvent;</div><div class="line"></div><div class="line">/* A fired event */</div><div class="line">//fd有event触发</div><div class="line">typedef struct aeFiredEvent &#123;</div><div class="line">    int fd;</div><div class="line">    int mask;</div><div class="line">&#125; aeFiredEvent;</div><div class="line"></div><div class="line">/* State of an event based program */</div><div class="line">typedef struct aeEventLoop &#123;</div><div class="line">    //当前注册的fd的最大值</div><div class="line">    int maxfd;   /* highest file descriptor currently registered */</div><div class="line">    int setsize; /* max number of file descriptors tracked */</div><div class="line">    long long timeEventNextId;</div><div class="line">    time_t lastTime;     /* Used to detect system clock skew */</div><div class="line">    aeFileEvent *events; /* Registered events */</div><div class="line">    aeFiredEvent *fired; /* Fired events */</div><div class="line">    //时间事件链表</div><div class="line">    aeTimeEvent *timeEventHead;</div><div class="line">    int stop;</div><div class="line">    void *apidata; /* This is used <span class="keyword">for</span> polling API specific data */</div><div class="line">    //select/poll/epoll sleep之前执行的函数指针</div><div class="line">    aeBeforeSleepProc *beforesleep;</div><div class="line">    //select/poll/epoll wakeup之后执行的函数指针</div><div class="line">    aeBeforeSleepProc *aftersleep;</div><div class="line">&#125; aeEventLoop;</div></pre></td></tr></table></figure>
-		
-	
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2017/12/10/redis4-event/#more" class="more-link">阅读全文</a>
-          </div>
-        
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
 
   <nav id="page-nav" class="clearfix">
     <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/2/">下一页 &raquo;</a>
@@ -560,6 +558,10 @@ var _hmt = _hmt || [];
 <div class="widget tag">
   <h3 class="title">最新文章</h3>
   <ul class="entry">
+    
+      <li>
+        <a href="/2018/10/21/c-co/">coroutine</a>
+      </li>
     
       <li>
         <a href="/2018/10/15/stl-list/">STL-目录</a>
@@ -577,10 +579,6 @@ var _hmt = _hmt || [];
         <a href="/2018/03/24/snippet-pow2/">Round up to the next highest power of 2</a>
       </li>
     
-      <li>
-        <a href="/2018/01/28/snippet-atoi/">Atoi&amp;Itoa函数</a>
-      </li>
-    
   </ul>
 </div>
 
@@ -590,7 +588,7 @@ var _hmt = _hmt || [];
   <h3 class="title">分类</h3>
   <ul class="entry">
   
-    <li><a href="/categories/Asm-C/">Asm/C</a><small>2</small></li>
+    <li><a href="/categories/Asm-C/">Asm/C</a><small>3</small></li>
   
     <li><a href="/categories/Asm-Cpp/">Asm/Cpp</a><small>14</small></li>
   
