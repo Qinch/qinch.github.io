@@ -401,50 +401,6 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2016/04/09/cpp-model-8/">C++对象模型-Default Constructor</a></h1>
-
- 
-	
-	<time  datetime="2016-04-08T16:00:00.000Z"><p>发表于 2016-04-09 | 字数 <span class="post-count">1,346</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<h4 id="0-测试环境"><a href="#0-测试环境" class="headerlink" title="0.测试环境"></a>0.测试环境</h4><p>gcc version 5.4.0 20160609 (Ubuntu 5.4.0-6ubuntu1~16.04.10)  </p>
-<h4 id="1-默认构造函数在编译器需要的时产生出来"><a href="#1-默认构造函数在编译器需要的时产生出来" class="headerlink" title="1, 默认构造函数在编译器需要的时产生出来"></a>1, 默认构造函数在编译器需要的时产生出来</h4><p>在如下片段的代码中, 通过分析汇编代码，发现并不会合成出来一个Default Constructor函数，因为如下代码是代码逻辑需要一个默认构造函数来初始化val和pnext数据成员。而不是编译器需要合成一个Default Constructor.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#include&lt;iostream&gt;</span></div><div class="line"></div><div class="line">using namespace std;</div><div class="line"></div><div class="line"></div><div class="line">class Foo&#123;</div><div class="line">        public:</div><div class="line">                int val;</div><div class="line">        Foo *pnext;</div><div class="line">&#125;;</div><div class="line"></div><div class="line">void <span class="function"><span class="title">foobar</span></span>()</div><div class="line">&#123;</div><div class="line">        Foo bar;</div><div class="line">        <span class="keyword">if</span>(bar.val || bar.pnext) //代码逻辑需要一个Default Constructor来初始化val和pnext数据成员</div><div class="line">        &#123;</div><div class="line">                cout&lt;&lt;bar.val&lt;&lt;endl;</div><div class="line">        &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>以上代码对应的汇编代码如下(g++ -S -m32 p39.cc):</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div></pre></td><td class="code"><pre><div class="line">_Z6foobarv: //foobar(), c++filt _Z6foobarv</div><div class="line">.LFB1021:</div><div class="line">        .cfi_startproc</div><div class="line">        pushl   %ebp</div><div class="line">        .cfi_def_cfa_offset 8</div><div class="line">        .cfi_offset 5, -8</div><div class="line">        movl    %esp, %ebp</div><div class="line">        .cfi_def_cfa_register 5</div><div class="line">        subl    <span class="variable">$24</span>, %esp</div><div class="line">        movl    -16(%ebp), %eax  //eax=[ebp-16],即eax = bar.val  ,NOTICE:NO Default Constructor is Called</div><div class="line">        testl   %eax, %eax //eax&amp;eax</div><div class="line">        jne     .L2 // 如果testl的结果非0，jmp .L2 ,jne means jmp <span class="keyword">if</span> not equal</div><div class="line">        movl    -12(%ebp), %eax //eax=[ebp-12], 即eax=bra.pnext</div><div class="line">        testl   %eax, %eax</div><div class="line">        je      .L4  //如果testl的结果为0, jmp .L4</div><div class="line">.L2:</div><div class="line">        movl    -16(%ebp), %eax  //eax=[ebp-16], 即bar.val</div><div class="line">        subl    <span class="variable">$8</span>, %esp</div><div class="line">        pushl   %eax</div><div class="line">        pushl   <span class="variable">$_ZSt4cout</span></div><div class="line">        call    _ZNSolsEi</div><div class="line">        addl    <span class="variable">$16</span>, %esp</div><div class="line">        subl    <span class="variable">$8</span>, %esp</div><div class="line">        pushl   <span class="variable">$_ZSt4endlIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_</span></div><div class="line">        pushl   %eax</div><div class="line">        call    _ZNSolsEPFRSoS_E</div><div class="line">        addl    <span class="variable">$16</span>, %esp</div><div class="line">.L4:</div><div class="line">        nop</div><div class="line">        leave</div><div class="line">        .cfi_restore 5</div><div class="line">        .cfi_def_cfa 4, 4</div><div class="line">        ret</div><div class="line">        .cfi_endproc</div></pre></td></tr></table></figure>
-		
-	
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2016/04/09/cpp-model-8/#more" class="more-link">阅读全文</a>
-          </div>
-        
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
     <h1 class="title"><a href="/2016/04/09/cpp-model-9/">C++对象模型-引用</a></h1>
 
  
@@ -489,11 +445,55 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2016/04/08/cpp-model-4/">基础类型的内存表示</a></h1>
+    <h1 class="title"><a href="/2016/04/09/cpp-model-8/">C++对象模型-Default Constructor</a></h1>
 
  
 	
-	<time  datetime="2016-04-07T16:00:00.000Z"><p>发表于 2016-04-08 | 字数 <span class="post-count">532</span>
+	<time  datetime="2016-04-08T16:00:00.000Z"><p>发表于 2016-04-09 | 字数 <span class="post-count">1,346</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<h4 id="0-测试环境"><a href="#0-测试环境" class="headerlink" title="0.测试环境"></a>0.测试环境</h4><p>gcc version 5.4.0 20160609 (Ubuntu 5.4.0-6ubuntu1~16.04.10)  </p>
+<h4 id="1-默认构造函数在编译器需要的时产生出来"><a href="#1-默认构造函数在编译器需要的时产生出来" class="headerlink" title="1, 默认构造函数在编译器需要的时产生出来"></a>1, 默认构造函数在编译器需要的时产生出来</h4><p>在如下片段的代码中, 通过分析汇编代码，发现并不会合成出来一个Default Constructor函数，因为如下代码是代码逻辑需要一个默认构造函数来初始化val和pnext数据成员。而不是编译器需要合成一个Default Constructor.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#include&lt;iostream&gt;</span></div><div class="line"></div><div class="line">using namespace std;</div><div class="line"></div><div class="line"></div><div class="line">class Foo&#123;</div><div class="line">        public:</div><div class="line">                int val;</div><div class="line">        Foo *pnext;</div><div class="line">&#125;;</div><div class="line"></div><div class="line">void <span class="function"><span class="title">foobar</span></span>()</div><div class="line">&#123;</div><div class="line">        Foo bar;</div><div class="line">        <span class="keyword">if</span>(bar.val || bar.pnext) //代码逻辑需要一个Default Constructor来初始化val和pnext数据成员</div><div class="line">        &#123;</div><div class="line">                cout&lt;&lt;bar.val&lt;&lt;endl;</div><div class="line">        &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>以上代码对应的汇编代码如下(g++ -S -m32 p39.cc):</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div></pre></td><td class="code"><pre><div class="line">_Z6foobarv: //foobar(), c++filt _Z6foobarv</div><div class="line">.LFB1021:</div><div class="line">        .cfi_startproc</div><div class="line">        pushl   %ebp</div><div class="line">        .cfi_def_cfa_offset 8</div><div class="line">        .cfi_offset 5, -8</div><div class="line">        movl    %esp, %ebp</div><div class="line">        .cfi_def_cfa_register 5</div><div class="line">        subl    <span class="variable">$24</span>, %esp</div><div class="line">        movl    -16(%ebp), %eax  //eax=[ebp-16],即eax = bar.val  ,NOTICE:NO Default Constructor is Called</div><div class="line">        testl   %eax, %eax //eax&amp;eax</div><div class="line">        jne     .L2 // 如果testl的结果非0，jmp .L2 ,jne means jmp <span class="keyword">if</span> not equal</div><div class="line">        movl    -12(%ebp), %eax //eax=[ebp-12], 即eax=bra.pnext</div><div class="line">        testl   %eax, %eax</div><div class="line">        je      .L4  //如果testl的结果为0, jmp .L4</div><div class="line">.L2:</div><div class="line">        movl    -16(%ebp), %eax  //eax=[ebp-16], 即bar.val</div><div class="line">        subl    <span class="variable">$8</span>, %esp</div><div class="line">        pushl   %eax</div><div class="line">        pushl   <span class="variable">$_ZSt4cout</span></div><div class="line">        call    _ZNSolsEi</div><div class="line">        addl    <span class="variable">$16</span>, %esp</div><div class="line">        subl    <span class="variable">$8</span>, %esp</div><div class="line">        pushl   <span class="variable">$_ZSt4endlIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_</span></div><div class="line">        pushl   %eax</div><div class="line">        call    _ZNSolsEPFRSoS_E</div><div class="line">        addl    <span class="variable">$16</span>, %esp</div><div class="line">.L4:</div><div class="line">        nop</div><div class="line">        leave</div><div class="line">        .cfi_restore 5</div><div class="line">        .cfi_def_cfa 4, 4</div><div class="line">        ret</div><div class="line">        .cfi_endproc</div></pre></td></tr></table></figure>
+		
+	
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2016/04/09/cpp-model-8/#more" class="more-link">阅读全文</a>
+          </div>
+        
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
+    <h1 class="title"><a href="/2016/04/08/cpp-model-3/">C++对象模型-switch/if-else实现机制</a></h1>
+
+ 
+	
+	<time  datetime="2016-04-07T16:00:00.000Z"><p>发表于 2016-04-08 | 字数 <span class="post-count">65</span>
 
 </p></time>
       
@@ -507,19 +507,16 @@ var _hmt = _hmt || [];
 <li>编辑器 Cmd Markdown</li>
 <li>画图工具 Processon    </li>
 </ul>
-<h5 id="1-基础类型内存表示"><a href="#1-基础类型内存表示" class="headerlink" title="1,基础类型内存表示"></a>1,基础类型内存表示</h5><p><a href="http://chinchao.xyz/2016/04/07/cpp-model-2/">上一节</a> 介绍了swich/if-else的实现机制。本文准备介绍一下基础类型的内存表示。</p>
-<h6 id="1-1大端法和小端法"><a href="#1-1大端法和小端法" class="headerlink" title="1.1大端法和小端法"></a>1.1大端法和小端法</h6><p>小端法，即数字的低位在低地址。大端法，即数字高位在低地址。大小端法的最小单位为byte,而不是bit.<br>举例：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">int i=-16;</div><div class="line">对应的小端法表示为（从低地址到高地址（从左到右为地址增长方向）对应的每个byte）：</div><div class="line">0xf0 ff ff ff </div><div class="line">大端法表示为（从低地址到高地址（从左到右为地址增长方向）对应的每个byte）：</div><div class="line">0x FF FF FF F0</div></pre></td></tr></table></figure></p>
-<p>在实际开发中，可以需要做大小端法互换，其代码如下：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">void swap1(int *rhs)</div><div class="line">&#123;</div><div class="line">    unsigned char *p=rhs;</div><div class="line">    unsigned char tmp;</div><div class="line">    tmp=p[0];</div><div class="line">    p[0]=[3];</div><div class="line">    p[3]=tmp;</div><div class="line"></div><div class="line">    tmp=p[1];</div><div class="line">    p[1]=[2];</div><div class="line">    p[2]=tmp;</div><div class="line">    <span class="built_in">return</span> ;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>在小端机上，如下程序的输出结果为-16.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">int <span class="function"><span class="title">main</span></span>()</div><div class="line">&#123;</div><div class="line">        int i;</div><div class="line">        unsigned char *p=(unsigned char*)&amp;i;</div><div class="line">        p[0]=0xF0;</div><div class="line">        p[1]=0XFF;</div><div class="line">        p[2]=0XFF;</div><div class="line">        p[3]=0Xff;</div><div class="line">        <span class="built_in">printf</span>(<span class="string">"%d\n"</span>,i);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h5 id="1-switch-if-else"><a href="#1-switch-if-else" class="headerlink" title="1,switch/if-else"></a>1,switch/if-else</h5><p><a href="http://chinchao.xyz/2016/04/07/cpp-model-2/">上一节</a> 数组的内存布局。本文准备介绍一下switch/if-else的实现机制。</p>
+<h6 id="1-1swich实现机制"><a href="#1-1swich实现机制" class="headerlink" title="1.1swich实现机制"></a>1.1swich实现机制</h6><h6 id="1-2-if-else实现机制"><a href="#1-2-if-else实现机制" class="headerlink" title="1.2 if-else实现机制"></a>1.2 if-else实现机制</h6><ul>
+<li>待续</li>
+</ul>
+
 		
 	
     </div>
     <footer>
       
-        
-          <div class="alignleft">
-            <a href="/2016/04/08/cpp-model-4/#more" class="more-link">阅读全文</a>
-          </div>
         
         
       
