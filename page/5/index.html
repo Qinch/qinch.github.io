@@ -87,6 +87,43 @@ var _hmt = _hmt || [];
     <header>
       
 	
+    <h1 class="title"><a href="/2015/12/11/stl-deque/">STL heap源码分析</a></h1>
+
+ 
+	
+	<time  datetime="2015-12-10T16:00:00.000Z"><p>发表于 2015-12-11 | 字数 <span class="post-count">0</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			
+		
+	
+    </div>
+    <footer>
+      
+        
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
     <h1 class="title"><a href="/2015/12/11/stl-func/">STL heap源码分析</a></h1>
 
  
@@ -124,11 +161,11 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2015/12/11/stl-hash/">STL heap源码分析</a></h1>
+    <h1 class="title"><a href="/2015/12/11/stl-vec/">STL heap源码分析</a></h1>
 
  
 	
-	<time  datetime="2015-12-10T16:00:00.000Z"><p>发表于 2015-12-11 | 字数 <span class="post-count">0</span>
+	<time  datetime="2015-12-10T16:00:00.000Z"><p>发表于 2015-12-11 | 字数 <span class="post-count">6</span>
 
 </p></time>
       
@@ -136,7 +173,8 @@ var _hmt = _hmt || [];
     <div class="entry">
       
 		
-			
+			<p>1, sort_heap函数源码:</p>
+
 		
 	
     </div>
@@ -161,11 +199,11 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2015/12/11/stl-traits/">STL heap源码分析</a></h1>
+    <h1 class="title"><a href="/2015/12/11/stl-heap/">STL heap源码分析</a></h1>
 
  
 	
-	<time  datetime="2015-12-10T16:00:00.000Z"><p>发表于 2015-12-11 | 字数 <span class="post-count">0</span>
+	<time  datetime="2015-12-10T16:00:00.000Z"><p>发表于 2015-12-11 | 字数 <span class="post-count">479</span>
 
 </p></time>
       
@@ -173,12 +211,17 @@ var _hmt = _hmt || [];
     <div class="entry">
       
 		
-			
+			<p>1, sort_heap函数源码:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">template &lt;class _RandomAccessIterator&gt;</div><div class="line">void sort_heap(_RandomAccessIterator __first, _RandomAccessIterator __last)</div><div class="line">&#123;</div><div class="line">  __STL_REQUIRES(_RandomAccessIterator, _Mutable_RandomAccessIterator);</div><div class="line">  __STL_REQUIRES(typename iterator_traits&lt;_RandomAccessIterator&gt;::value_type,</div><div class="line">                 _LessThanComparable);</div><div class="line">  <span class="keyword">while</span> (__last - __first &gt; 1)//待排序元素个数大于1;</div><div class="line">    pop_heap(__first, __last--);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 		
 	
     </div>
     <footer>
       
+        
+          <div class="alignleft">
+            <a href="/2015/12/11/stl-heap/#more" class="more-link">阅读全文</a>
+          </div>
         
         
       
@@ -199,43 +242,6 @@ var _hmt = _hmt || [];
       
 	
     <h1 class="title"><a href="/2015/12/11/stl-iter/">STL heap源码分析</a></h1>
-
- 
-	
-	<time  datetime="2015-12-10T16:00:00.000Z"><p>发表于 2015-12-11 | 字数 <span class="post-count">0</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			
-		
-	
-    </div>
-    <footer>
-      
-        
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
-    <h1 class="title"><a href="/2015/12/11/stl-map/">STL heap源码分析</a></h1>
 
  
 	
@@ -320,11 +326,11 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2015/12/11/stl-set/">STL heap源码分析</a></h1>
+    <h1 class="title"><a href="/2015/12/11/stl-map/">STL heap源码分析</a></h1>
 
  
 	
-	<time  datetime="2015-12-10T16:00:00.000Z"><p>发表于 2015-12-11 | 字数 <span class="post-count">6</span>
+	<time  datetime="2015-12-10T16:00:00.000Z"><p>发表于 2015-12-11 | 字数 <span class="post-count">0</span>
 
 </p></time>
       
@@ -332,8 +338,7 @@ var _hmt = _hmt || [];
     <div class="entry">
       
 		
-			<p>1, sort_heap函数源码:</p>
-
+			
 		
 	
     </div>
