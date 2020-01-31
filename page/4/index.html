@@ -87,11 +87,11 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2016/04/08/cpp-model-4/">基础类型的内存表示</a></h1>
+    <h1 class="title"><a href="/2016/04/09/cpp-model-10/">C++对象模型-virtual继承</a></h1>
 
  
 	
-	<time  datetime="2016-04-07T16:00:00.000Z"><p>发表于 2016-04-08 | 字数 <span class="post-count">532</span>
+	<time  datetime="2016-04-08T16:00:00.000Z"><p>发表于 2016-04-09 | 字数 <span class="post-count">933</span>
 
 </p></time>
       
@@ -99,16 +99,10 @@ var _hmt = _hmt || [];
     <div class="entry">
       
 		
-			<h5 id="开发环境"><a href="#开发环境" class="headerlink" title="开发环境"></a>开发环境</h5><ul>
-<li>Ubuntu 14.04(32bits)</li>
-<li>GCC      </li>
-<li>编辑器 Cmd Markdown</li>
-<li>画图工具 Processon    </li>
-</ul>
-<h5 id="1-基础类型内存表示"><a href="#1-基础类型内存表示" class="headerlink" title="1,基础类型内存表示"></a>1,基础类型内存表示</h5><p><a href="http://chinchao.xyz/2016/04/07/cpp-model-2/">上一节</a> 介绍了swich/if-else的实现机制。本文准备介绍一下基础类型的内存表示。</p>
-<h6 id="1-1大端法和小端法"><a href="#1-1大端法和小端法" class="headerlink" title="1.1大端法和小端法"></a>1.1大端法和小端法</h6><p>小端法，即数字的低位在低地址。大端法，即数字高位在低地址。大小端法的最小单位为byte,而不是bit.<br>举例：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">int i=-16;</div><div class="line">对应的小端法表示为（从低地址到高地址（从左到右为地址增长方向）对应的每个byte）：</div><div class="line">0xf0 ff ff ff </div><div class="line">大端法表示为（从低地址到高地址（从左到右为地址增长方向）对应的每个byte）：</div><div class="line">0x FF FF FF F0</div></pre></td></tr></table></figure></p>
-<p>在实际开发中，可以需要做大小端法互换，其代码如下：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">void swap1(int *rhs)</div><div class="line">&#123;</div><div class="line">    unsigned char *p=rhs;</div><div class="line">    unsigned char tmp;</div><div class="line">    tmp=p[0];</div><div class="line">    p[0]=[3];</div><div class="line">    p[3]=tmp;</div><div class="line"></div><div class="line">    tmp=p[1];</div><div class="line">    p[1]=[2];</div><div class="line">    p[2]=tmp;</div><div class="line">    <span class="built_in">return</span> ;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>在小端机上，如下程序的输出结果为-16.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">int <span class="function"><span class="title">main</span></span>()</div><div class="line">&#123;</div><div class="line">        int i;</div><div class="line">        unsigned char *p=(unsigned char*)&amp;i;</div><div class="line">        p[0]=0xF0;</div><div class="line">        p[1]=0XFF;</div><div class="line">        p[2]=0XFF;</div><div class="line">        p[3]=0Xff;</div><div class="line">        <span class="built_in">printf</span>(<span class="string">"%d\n"</span>,i);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+			<h4 id="0-测试环境"><a href="#0-测试环境" class="headerlink" title="0.测试环境"></a>0.测试环境</h4><p>gcc version 5.4.0 20160609 (Ubuntu 5.4.0-6ubuntu1~16.04.10)  </p>
+<h4 id="1-虚继承"><a href="#1-虚继承" class="headerlink" title="1.虚继承"></a>1.虚继承</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">        	X</div><div class="line">      	       / \</div><div class="line">      virtual /   \virtual</div><div class="line">             /     \</div><div class="line">	     A	    B	</div><div class="line">             \     /</div><div class="line">              \   /</div><div class="line">               \ /</div><div class="line">                C</div><div class="line"></div><div class="line">`</div></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div></pre></td><td class="code"><pre><div class="line">class X&#123;</div><div class="line">        public:</div><div class="line">                int i;</div><div class="line">        virtual void <span class="function"><span class="title">show</span></span>()</div><div class="line">        &#123;</div><div class="line">                cout&lt;&lt;<span class="string">"X"</span>&lt;&lt;endl;</div><div class="line">        &#125;</div><div class="line">        virtual ~<span class="function"><span class="title">X</span></span>()</div><div class="line">        &#123;</div><div class="line">                cout&lt;&lt;<span class="string">"~X"</span>;</div><div class="line">        &#125;</div><div class="line">&#125;;</div><div class="line"></div><div class="line">class A:public virtual X&#123;</div><div class="line">        public:</div><div class="line">                int j;</div><div class="line"></div><div class="line">        virtual void <span class="function"><span class="title">show</span></span>()</div><div class="line">        &#123;</div><div class="line">                cout&lt;&lt;<span class="string">"A"</span>&lt;&lt;endl;</div><div class="line">        &#125;</div><div class="line">        virtual ~<span class="function"><span class="title">A</span></span>()</div><div class="line">        &#123;</div><div class="line">                cout&lt;&lt;<span class="string">"~A"</span>;</div><div class="line">        &#125;</div><div class="line">&#125;;</div><div class="line"></div><div class="line">class B:public virtual X&#123;</div><div class="line">        public:</div><div class="line">                int d;</div><div class="line">        virtual void <span class="function"><span class="title">show</span></span>()</div><div class="line">        &#123;</div><div class="line">                cout&lt;&lt;<span class="string">"B"</span>&lt;&lt;endl;</div><div class="line">        &#125;</div><div class="line">        virtual ~<span class="function"><span class="title">B</span></span>()</div><div class="line">        &#123;</div><div class="line">                cout&lt;&lt;<span class="string">"~B"</span>;</div><div class="line">        &#125;</div><div class="line">&#125;;</div><div class="line"></div><div class="line">class C:public A, public B&#123;</div><div class="line">        public:</div><div class="line">                int k;</div><div class="line">        virtual void <span class="function"><span class="title">show</span></span>()</div><div class="line">        &#123;</div><div class="line">                cout&lt;&lt;<span class="string">"C"</span>&lt;&lt;endl;</div><div class="line">        &#125;</div><div class="line">        virtual ~<span class="function"><span class="title">C</span></span>()</div><div class="line">        &#123;</div><div class="line">                cout&lt;&lt;<span class="string">"~C"</span>;</div><div class="line">        &#125;</div><div class="line">&#125;;</div><div class="line"></div><div class="line">void <span class="function"><span class="title">test</span></span>()</div><div class="line">&#123;</div><div class="line">        B *b= new C;</div><div class="line">        b-&gt;show();</div><div class="line">        delete b;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="1-1-test-函数对应的汇编代码如下"><a href="#1-1-test-函数对应的汇编代码如下" class="headerlink" title="1.1 test()函数对应的汇编代码如下"></a>1.1 test()函数对应的汇编代码如下</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">_Z4testv:  //<span class="built_in">test</span></div><div class="line">.LFB1041:</div><div class="line">        .cfi_startproc</div><div class="line">        pushl   %ebp  //ebp压栈</div><div class="line">        .cfi_def_cfa_offset 8</div><div class="line">        .cfi_offset 5, -8</div><div class="line">        movl    %esp, %ebp //ebp=esp</div><div class="line">        .cfi_def_cfa_register 5</div><div class="line">        pushl   %ebx //ebx压栈</div><div class="line">        subl    <span class="variable">$20</span>, %esp  //esp=esp-20</div><div class="line">        .cfi_offset 3, -12</div><div class="line">        subl    <span class="variable">$12</span>, %esp</div><div class="line">        pushl   <span class="variable">$28</span>  //malloc的内存大小, Class C  Object的大小为28</div><div class="line">        call    _Znwj //malloc内存</div><div class="line">        addl    <span class="variable">$16</span>, %esp</div><div class="line">        movl    %eax, %ebx  //ebx=eax, eax为malloc的内存的首地址，即C.this</div><div class="line">        subl    <span class="variable">$12</span>, %esp</div><div class="line">        pushl   %ebx  //C的首地址压栈</div><div class="line">        call    _ZN1CC1Ev  //C::C()</div><div class="line">        addl    <span class="variable">$16</span>, %esp</div><div class="line">        testl   %ebx, %ebx  //ebx&amp;ebx</div><div class="line">        je      .L36  //<span class="keyword">if</span> ebx&amp;ebx=0, jmp</div><div class="line">        leal    8(%ebx), %eax //eax=C.this+8</div><div class="line">	/*</div><div class="line">		|-------|&lt;-----C.this</div><div class="line">		|  A    |</div><div class="line">		|-------|&lt;-----b</div><div class="line">		|  B    |</div><div class="line">		|-------|</div><div class="line">		|  C    |</div><div class="line">		|-------|</div><div class="line">		|  X    |</div><div class="line">		|-------|</div><div class="line">	*/</div><div class="line">        jmp     .L37</div><div class="line">.L36:</div><div class="line">        movl    <span class="variable">$0</span>, %eax</div><div class="line">.L37:</div><div class="line">        movl    %eax, -12(%ebp)  //b=C.this+8, 即b=BastTypeB.this, 对应的代码为b=new C;</div><div class="line">        movl    -12(%ebp), %eax //eax=b</div><div class="line">        movl    (%eax), %eax //eax=vptr</div><div class="line">        movl    (%eax), %eax //eax=vptr[0]</div><div class="line">        subl    <span class="variable">$12</span>, %esp</div><div class="line">        pushl   -12(%ebp)  //b的地址压栈</div><div class="line">        call    *%eax  //b-&gt;show()</div><div class="line">        addl    <span class="variable">$16</span>, %esp</div><div class="line">        cmpl    <span class="variable">$0</span>, -12(%ebp)</div><div class="line">        je      .L39</div><div class="line">        movl    -12(%ebp), %eax  //eax=b</div><div class="line">        movl    (%eax), %eax //eax=vptr</div><div class="line">        addl    <span class="variable">$8</span>, %eax //eax=vptr+8</div><div class="line">        movl    (%eax), %eax //eax=vptr[2], virtual机制</div><div class="line">        subl    <span class="variable">$12</span>, %esp</div><div class="line">        pushl   -12(%ebp) //b压栈</div><div class="line">        call    *%eax //call vptr[2], delete b</div><div class="line">        addl    <span class="variable">$16</span>, %esp</div><div class="line">.L39:</div><div class="line">	//略</div></pre></td></tr></table></figure>
 		
 	
     </div>
@@ -116,7 +110,7 @@ var _hmt = _hmt || [];
       
         
           <div class="alignleft">
-            <a href="/2016/04/08/cpp-model-4/#more" class="more-link">阅读全文</a>
+            <a href="/2016/04/09/cpp-model-10/#more" class="more-link">阅读全文</a>
           </div>
         
         
@@ -165,6 +159,56 @@ var _hmt = _hmt || [];
     </div>
     <footer>
       
+        
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
+    <h1 class="title"><a href="/2016/04/08/cpp-model-4/">基础类型的内存表示</a></h1>
+
+ 
+	
+	<time  datetime="2016-04-07T16:00:00.000Z"><p>发表于 2016-04-08 | 字数 <span class="post-count">532</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<h5 id="开发环境"><a href="#开发环境" class="headerlink" title="开发环境"></a>开发环境</h5><ul>
+<li>Ubuntu 14.04(32bits)</li>
+<li>GCC      </li>
+<li>编辑器 Cmd Markdown</li>
+<li>画图工具 Processon    </li>
+</ul>
+<h5 id="1-基础类型内存表示"><a href="#1-基础类型内存表示" class="headerlink" title="1,基础类型内存表示"></a>1,基础类型内存表示</h5><p><a href="http://chinchao.xyz/2016/04/07/cpp-model-2/">上一节</a> 介绍了swich/if-else的实现机制。本文准备介绍一下基础类型的内存表示。</p>
+<h6 id="1-1大端法和小端法"><a href="#1-1大端法和小端法" class="headerlink" title="1.1大端法和小端法"></a>1.1大端法和小端法</h6><p>小端法，即数字的低位在低地址。大端法，即数字高位在低地址。大小端法的最小单位为byte,而不是bit.<br>举例：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">int i=-16;</div><div class="line">对应的小端法表示为（从低地址到高地址（从左到右为地址增长方向）对应的每个byte）：</div><div class="line">0xf0 ff ff ff </div><div class="line">大端法表示为（从低地址到高地址（从左到右为地址增长方向）对应的每个byte）：</div><div class="line">0x FF FF FF F0</div></pre></td></tr></table></figure></p>
+<p>在实际开发中，可以需要做大小端法互换，其代码如下：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">void swap1(int *rhs)</div><div class="line">&#123;</div><div class="line">    unsigned char *p=rhs;</div><div class="line">    unsigned char tmp;</div><div class="line">    tmp=p[0];</div><div class="line">    p[0]=[3];</div><div class="line">    p[3]=tmp;</div><div class="line"></div><div class="line">    tmp=p[1];</div><div class="line">    p[1]=[2];</div><div class="line">    p[2]=tmp;</div><div class="line">    <span class="built_in">return</span> ;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>在小端机上，如下程序的输出结果为-16.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">int <span class="function"><span class="title">main</span></span>()</div><div class="line">&#123;</div><div class="line">        int i;</div><div class="line">        unsigned char *p=(unsigned char*)&amp;i;</div><div class="line">        p[0]=0xF0;</div><div class="line">        p[1]=0XFF;</div><div class="line">        p[2]=0XFF;</div><div class="line">        p[3]=0Xff;</div><div class="line">        <span class="built_in">printf</span>(<span class="string">"%d\n"</span>,i);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+		
+	
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2016/04/08/cpp-model-4/#more" class="more-link">阅读全文</a>
+          </div>
         
         
       
@@ -365,11 +409,11 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2015/12/11/stl-vec/">STL heap源码分析</a></h1>
+    <h1 class="title"><a href="/2015/12/11/stl-rb/">STL/RB-TREE</a></h1>
 
  
 	
-	<time  datetime="2015-12-10T16:00:00.000Z"><p>发表于 2015-12-11 | 字数 <span class="post-count">6</span>
+	<time  datetime="2015-12-10T16:00:00.000Z"><p>发表于 2015-12-11 | 字数 <span class="post-count">94</span>
 
 </p></time>
       
@@ -377,45 +421,17 @@ var _hmt = _hmt || [];
     <div class="entry">
       
 		
-			<p>1, sort_heap函数源码:</p>
-
-		
-	
-    </div>
-    <footer>
-      
-        
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
-    <h1 class="title"><a href="/2015/12/11/stl-alg/">STL heap源码分析</a></h1>
-
- 
-	
-	<time  datetime="2015-12-10T16:00:00.000Z"><p>发表于 2015-12-11 | 字数 <span class="post-count">6</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<p>1, sort_heap函数源码:</p>
+			<p>1,RB-TREE</p>
+<ul>
+<li>红黑树不仅是二叉搜索树，而且必须满足以下规则：<ul>
+<li>1.每个节点不是红色就是黑色</li>
+<li>2.根节点为黑色</li>
+<li>3.如果节点为红，其子节点必须为黑</li>
+<li>4.任一个节点至NULL的任何路径，所含之黑色节点数必须相同。</li>
+</ul>
+</li>
+</ul>
+<p>4,参考文献《STL源码剖析》</p>
 
 		
 	
@@ -522,6 +538,10 @@ var _hmt = _hmt || [];
   <ul class="entry">
     
       <li>
+        <a href="/2019/03/17/civetweb/">civeweb 支持 mebdtls</a>
+      </li>
+    
+      <li>
         <a href="/2019/03/17/xv6/">Xv6源码阅读</a>
       </li>
     
@@ -535,10 +555,6 @@ var _hmt = _hmt || [];
     
       <li>
         <a href="/2018/10/15/redis-list/">Redis-目录</a>
-      </li>
-    
-      <li>
-        <a href="/2018/10/14/cpp-model-list/">C++对象模型-目录</a>
       </li>
     
   </ul>
@@ -564,6 +580,8 @@ var _hmt = _hmt || [];
   
     <li><a href="/categories/STL源码剖析/">STL源码剖析</a><small>14</small></li>
   
+    <li><a href="/categories/civetweb/">civetweb</a><small>1</small></li>
+  
     <li><a href="/categories/makefile/">makefile</a><small>1</small></li>
   
     <li><a href="/categories/mysql/">mysql</a><small>1</small></li>
@@ -588,7 +606,7 @@ var _hmt = _hmt || [];
 <div class="widget tagcloud">
   <h3 class="title">标签云</h3>
   <div class="entry">
-    <a href="/tags/Asm/" style="font-size: 20px;">Asm</a> <a href="/tags/C/" style="font-size: 18.33px;">C</a> <a href="/tags/Cpp/" style="font-size: 15px;">Cpp</a> <a href="/tags/Endian/" style="font-size: 10px;">Endian</a> <a href="/tags/MFC/" style="font-size: 10px;">MFC</a> <a href="/tags/STL/" style="font-size: 10px;">STL</a> <a href="/tags/Transations/" style="font-size: 10px;">Transations</a> <a href="/tags/adlist/" style="font-size: 10px;">adlist</a> <a href="/tags/apue/" style="font-size: 11.67px;">apue</a> <a href="/tags/atoi/" style="font-size: 10px;">atoi</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/database/" style="font-size: 10px;">database</a> <a href="/tags/dict/" style="font-size: 10px;">dict</a> <a href="/tags/event/" style="font-size: 11.67px;">event</a> <a href="/tags/heap/" style="font-size: 13.33px;">heap</a> <a href="/tags/icp/" style="font-size: 10px;">icp</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/intset/" style="font-size: 10px;">intset</a> <a href="/tags/linux/" style="font-size: 11.67px;">linux</a> <a href="/tags/make/" style="font-size: 10px;">make</a> <a href="/tags/makefile/" style="font-size: 10px;">makefile</a> <a href="/tags/multi/" style="font-size: 10px;">multi</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/network/" style="font-size: 11.67px;">network</a> <a href="/tags/object/" style="font-size: 10px;">object</a> <a href="/tags/pqsort/" style="font-size: 10px;">pqsort</a> <a href="/tags/pub-sub/" style="font-size: 10px;">pub/sub</a> <a href="/tags/rb/" style="font-size: 10px;">rb</a> <a href="/tags/redis/" style="font-size: 11.67px;">redis</a> <a href="/tags/redis4-0/" style="font-size: 15px;">redis4.0</a> <a href="/tags/replication/" style="font-size: 10px;">replication</a> <a href="/tags/scp/" style="font-size: 10px;">scp</a> <a href="/tags/sds/" style="font-size: 10px;">sds</a> <a href="/tags/signal/" style="font-size: 10px;">signal</a> <a href="/tags/skiplist/" style="font-size: 10px;">skiplist</a> <a href="/tags/snippet/" style="font-size: 11.67px;">snippet</a> <a href="/tags/sort/" style="font-size: 10px;">sort</a> <a href="/tags/sourcecode/" style="font-size: 15px;">sourcecode</a> <a href="/tags/stl/" style="font-size: 16.67px;">stl</a> <a href="/tags/string2ll/" style="font-size: 10px;">string2ll</a> <a href="/tags/t-string/" style="font-size: 10px;">t_string</a> <a href="/tags/thread/" style="font-size: 10px;">thread</a> <a href="/tags/thunk/" style="font-size: 10px;">thunk</a> <a href="/tags/tips/" style="font-size: 10px;">tips</a> <a href="/tags/tree/" style="font-size: 10px;">tree</a> <a href="/tags/unpv2/" style="font-size: 10px;">unpv2</a> <a href="/tags/xv6/" style="font-size: 10px;">xv6</a> <a href="/tags/ziplist/" style="font-size: 10px;">ziplist</a> <a href="/tags/内存流/" style="font-size: 10px;">内存流</a> <a href="/tags/勘误/" style="font-size: 10px;">勘误</a>
+    <a href="/tags/Asm/" style="font-size: 20px;">Asm</a> <a href="/tags/C/" style="font-size: 18.33px;">C</a> <a href="/tags/Cpp/" style="font-size: 15px;">Cpp</a> <a href="/tags/Endian/" style="font-size: 10px;">Endian</a> <a href="/tags/MFC/" style="font-size: 10px;">MFC</a> <a href="/tags/STL/" style="font-size: 10px;">STL</a> <a href="/tags/Transations/" style="font-size: 10px;">Transations</a> <a href="/tags/adlist/" style="font-size: 10px;">adlist</a> <a href="/tags/apue/" style="font-size: 11.67px;">apue</a> <a href="/tags/atoi/" style="font-size: 10px;">atoi</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/civetweb/" style="font-size: 10px;">civetweb</a> <a href="/tags/database/" style="font-size: 10px;">database</a> <a href="/tags/dict/" style="font-size: 10px;">dict</a> <a href="/tags/event/" style="font-size: 11.67px;">event</a> <a href="/tags/heap/" style="font-size: 13.33px;">heap</a> <a href="/tags/https/" style="font-size: 10px;">https</a> <a href="/tags/icp/" style="font-size: 10px;">icp</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/intset/" style="font-size: 10px;">intset</a> <a href="/tags/linux/" style="font-size: 11.67px;">linux</a> <a href="/tags/make/" style="font-size: 10px;">make</a> <a href="/tags/makefile/" style="font-size: 10px;">makefile</a> <a href="/tags/multi/" style="font-size: 10px;">multi</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/network/" style="font-size: 11.67px;">network</a> <a href="/tags/object/" style="font-size: 10px;">object</a> <a href="/tags/pqsort/" style="font-size: 10px;">pqsort</a> <a href="/tags/pub-sub/" style="font-size: 10px;">pub/sub</a> <a href="/tags/rb/" style="font-size: 10px;">rb</a> <a href="/tags/redis/" style="font-size: 11.67px;">redis</a> <a href="/tags/redis4-0/" style="font-size: 15px;">redis4.0</a> <a href="/tags/replication/" style="font-size: 10px;">replication</a> <a href="/tags/scp/" style="font-size: 10px;">scp</a> <a href="/tags/sds/" style="font-size: 10px;">sds</a> <a href="/tags/signal/" style="font-size: 10px;">signal</a> <a href="/tags/skiplist/" style="font-size: 10px;">skiplist</a> <a href="/tags/snippet/" style="font-size: 11.67px;">snippet</a> <a href="/tags/sort/" style="font-size: 10px;">sort</a> <a href="/tags/sourcecode/" style="font-size: 15px;">sourcecode</a> <a href="/tags/ssl/" style="font-size: 10px;">ssl</a> <a href="/tags/stl/" style="font-size: 16.67px;">stl</a> <a href="/tags/string2ll/" style="font-size: 10px;">string2ll</a> <a href="/tags/t-string/" style="font-size: 10px;">t_string</a> <a href="/tags/thread/" style="font-size: 10px;">thread</a> <a href="/tags/thunk/" style="font-size: 10px;">thunk</a> <a href="/tags/tips/" style="font-size: 10px;">tips</a> <a href="/tags/tree/" style="font-size: 10px;">tree</a> <a href="/tags/unpv2/" style="font-size: 10px;">unpv2</a> <a href="/tags/xv6/" style="font-size: 10px;">xv6</a> <a href="/tags/ziplist/" style="font-size: 10px;">ziplist</a> <a href="/tags/内存流/" style="font-size: 10px;">内存流</a> <a href="/tags/勘误/" style="font-size: 10px;">勘误</a>
   </div>
 </div>
 
@@ -616,7 +634,7 @@ var _hmt = _hmt || [];
   </div>
   <footer id="footer" class="inner"><div class="copyright">
   
-  &copy; 2015-2019 qinchao
+  &copy; 2015-2020 qinchao
   
   | Powered by hexo and Theme by <a href=https://github.com/Qinch/hexo-theme-light_mod target="_blank">light </a>
   <a href="/atom.xml" target="_blank">| RSS</a>
