@@ -90,7 +90,7 @@ var _hmt = _hmt || [];
 
  
 	
-	<time  datetime="2019-03-16T16:00:00.000Z"><p>发表于 2019-03-17 | 字数 <span class="post-count">55</span>
+	<time  datetime="2019-03-16T16:00:00.000Z"><p>发表于 2019-03-17 | 字数 <span class="post-count">58</span>
 
 </p></time>
       
@@ -98,7 +98,8 @@ var _hmt = _hmt || [];
     <div class="entry">
       
 		  
-		<h4 id="1-由于civetweb不支持mbedtls，所以写了个demo，-civetweb-v1-11支持mebedtls-v2-16-2"><a href="#1-由于civetweb不支持mbedtls，所以写了个demo，-civetweb-v1-11支持mebedtls-v2-16-2" class="headerlink" title="1. 由于civetweb不支持mbedtls，所以写了个demo， civetweb v1.11支持mebedtls v2.16.2"></a>1. 由于civetweb不支持mbedtls，所以写了个demo， civetweb v1.11支持mebedtls v2.16.2</h4><p>github: <a href="https://github.com/Qinch/civetweb/tree/v1.11-mbedtls" target="_blank" rel="external">https://github.com/Qinch/civetweb/tree/v1.11-mbedtls</a></p>
+		<h4 id="1-civetweb-support-mbedtls"><a href="#1-civetweb-support-mbedtls" class="headerlink" title="1.civetweb support mbedtls"></a>1.civetweb support mbedtls</h4><p> 由于civetweb不支持mbedtls，所以写了个demo， civetweb v1.11支持mebedtls v2.16.2</p>
+<p>github: <a href="https://github.com/Qinch/civetweb/tree/v1.11-mbedtls" target="_blank" rel="external">https://github.com/Qinch/civetweb/tree/v1.11-mbedtls</a></p>
 <h4 id="2-run-sh"><a href="#2-run-sh" class="headerlink" title="2. run.sh"></a>2. run.sh</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">make build COPT=<span class="string">"-DNO_CGI  -DNO_SSL  -DMG_MBEDTLS -I./"</span> LDFLAGS=<span class="string">"-L./mbedlib"</span></div><div class="line"><span class="built_in">export</span> LD_LIBRARY_PATH=./mbedlib:<span class="variable">$LD_LIBRARY_PATH</span></div><div class="line">./civetweb -listening_ports 2222,2221s -document_root ./webs</div></pre></td></tr></table></figure>
 
 	
