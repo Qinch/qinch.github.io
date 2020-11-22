@@ -131,7 +131,7 @@ var _hmt = _hmt || [];
 
  
 	
-	<time  datetime="2019-03-16T16:00:00.000Z"><p>发表于 2019-03-17 | 字数 <span class="post-count">247</span>
+	<time  datetime="2019-03-16T16:00:00.000Z"><p>发表于 2019-03-17 | 字数 <span class="post-count">278</span>
 
 </p></time>
       
@@ -144,6 +144,7 @@ var _hmt = _hmt || [];
 <p>2, The <code>unlink</code> system call removes a name from the file system. The file’s inode and the disk space holding its content are only freed when the file’s link count is zero and no file descrptors refer to it.</p>
 <h4 id="2-os-organization"><a href="#2-os-organization" class="headerlink" title="2 os organization"></a>2 os organization</h4><p>0, Similarly, Unix transparently switches hardware CPUs among processes, saving and restoring register state as necessary, so that applications don’t have to be aware of time sharing. This transparency allows the operating system to share CPUs even if some applications are in infinite loops. </p>
 <p>1, If an application in user mode attempts to execute a priviliged instruction, then the CPU doesn’t execute the instruction, but switches to supervisor mode so that supervisort-mode code can terminate the application.</p>
+<p>2, Each process has two stacks: a user stack and a kernel stack. While a process in the kernel, its user stack still contains saved data, but isn’t actively used.</p>
 
 		
 	
