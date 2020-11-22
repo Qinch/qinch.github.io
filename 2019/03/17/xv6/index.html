@@ -90,7 +90,7 @@ var _hmt = _hmt || [];
 
  
 	
-	<time  datetime="2019-03-16T16:00:00.000Z"><p>发表于 2019-03-17 | 字数 <span class="post-count">212</span>
+	<time  datetime="2019-03-16T16:00:00.000Z"><p>发表于 2019-03-17 | 字数 <span class="post-count">247</span>
 
 </p></time>
       
@@ -102,6 +102,7 @@ var _hmt = _hmt || [];
 <p>1, It should be clear why it is a good idea that fork and exec are separate calls. Beacuse if they are separate, the shell can fork a child, use open, close, dup in the child to change the standard input and output file descriptors and then exec.<br>  Two file descriptors share an offset if they were derived from the same original file descriptor by a sequence of fork and dup calls. Otherwise file descriptors do not share offsets, even if they resulted from open calls for the same file. （其实结合APUE看效果更好^-^）</p>
 <p>2, The <code>unlink</code> system call removes a name from the file system. The file’s inode and the disk space holding its content are only freed when the file’s link count is zero and no file descrptors refer to it.</p>
 <h4 id="2-os-organization"><a href="#2-os-organization" class="headerlink" title="2 os organization"></a>2 os organization</h4><p>0, Similarly, Unix transparently switches hardware CPUs among processes, saving and restoring register state as necessary, so that applications don’t have to be aware of time sharing. This transparency allows the operating system to share CPUs even if some applications are in infinite loops. </p>
+<p>1, If an application in user mode attempts to execute a priviliged instruction, then the CPU doesn’t execute the instruction, but switches to supervisor mode so that supervisort-mode code can terminate the application.</p>
 
 	
     </div>
