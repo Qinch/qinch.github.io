@@ -87,73 +87,6 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2017/12/12/redis4-pub/">redis4.0_发布/订阅</a></h1>
-
- 
-	
-	<time  datetime="2017-12-11T16:00:00.000Z"><p>发表于 2017-12-12 | 字数 <span class="post-count">705</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<h4 id="1-channel的订阅与退订"><a href="#1-channel的订阅与退订" class="headerlink" title="1. channel的订阅与退订"></a>1. channel的订阅与退订</h4><ul>
-<li><p>UBSCRIBE, UNSUBSCRIBE and PUBLISH implement the Publish/Subscribe messaging paradigm where  senders (publishers) are not programmed to send their messages to specific receivers (subscribers). Rather, published messages are characterized into channels, without knowledge of what (if any) subscribers there may be. Subscribers express interest in one or more channels, and only receive messages that are of interest, without knowledge of what (if any) publishers there are.</p>
-</li>
-<li><p>Messages sent by other clients to these channels will be pushed by Redis to all the subscribed clients.</p>
-</li>
-<li><p>A client subscribed to one or more channels should not issue commands, although it can subscribe and unsubscribe to and from other channels. The replies to subscription and unsubscription operations are sent in the form of messages, so that the client can just read a coherent stream of messages where the first element indicates the type of message. The commands that are allowed in the context of a subscribed client are SUBSCRIBE, PSUBSCRIBE, UNSUBSCRIBE, PUNSUBSCRIBE, PING and QUIT.</p>
-<ul>
-<li>Please note that redis-cli will not accept any commands once in subscribed mode and can only quit the mode with Ctrl-C.</li>
-</ul>
-</li>
-<li><p>channel订阅实现:在客户端结构体的pubsub_channels(为dict)添加key为订阅的channel的entry,在server结构体的pubsub_chanels（dict）添加key为channel的entry，该entry为所有订阅该channel的list</p>
-</li>
-</ul>
-<h4 id="2-Pattern-matching订阅与退订"><a href="#2-Pattern-matching订阅与退订" class="headerlink" title="2.Pattern-matching订阅与退订"></a>2.Pattern-matching订阅与退订</h4><ul>
-<li><p>The Redis Pub/Sub implementation supports pattern matching. Clients may subscribe to glob-style patterns in order to receive all the messages sent to channel names matching a given pattern.</p>
-</li>
-<li><p>pattern订阅实现：在客户端结构体的pubsub_patterns(为list)添加node,该node的value为订阅的pattern(robj)，在server结构体的pubsub_patterns（为list）添加pubsubPattern Node,该node的client为订阅该pattern的客户端指针,该pattern为订阅pattern的robj.</p>
-</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">//src/server.h</div><div class="line">typedef struct pubsubPattern &#123;</div><div class="line">     client *client;                                                </div><div class="line">     robj *pattern;                                                   </div><div class="line">&#125; pubsubPattern;</div></pre></td></tr></table></figure>
-<h4 id="3-源码分析"><a href="#3-源码分析" class="headerlink" title="3.源码分析"></a>3.源码分析</h4><ul>
-<li><p>订阅channel代码:</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line">/* Subscribe a client to a channel. Returns 1 <span class="keyword">if</span> the operation succeeded, or</div><div class="line"> * 0 <span class="keyword">if</span> the client was already subscribed to that channel. */</div><div class="line">int pubsubSubscribeChannel(client *c, robj *channel) &#123;</div><div class="line">    dictEntry *de;</div><div class="line">    list *clients = NULL;</div><div class="line">    int retval = 0;</div><div class="line"></div><div class="line">    /* Add the channel to the client -&gt; channels <span class="built_in">hash</span> table */</div><div class="line">	//将订阅的channel添加到client结构体的pubsub_channels字典</div><div class="line">	//key为channel</div><div class="line">    <span class="keyword">if</span> (dictAdd(c-&gt;pubsub_channels,channel,NULL) == DICT_OK) &#123;</div><div class="line">        retval = 1;</div><div class="line">        incrRefCount(channel);</div><div class="line">        /* Add the client to the channel -&gt; list of clients <span class="built_in">hash</span> table */</div><div class="line">		//将channel添加到server的pubsub_channels字典</div><div class="line">		//首先在dict中查找是否该channel存在，如果存在，将c添加到entry的value链表中</div><div class="line">		//如果不存在，在字典中添加entry,该entry的key为robj，value为client的链表</div><div class="line">        de = dictFind(server.pubsub_channels,channel);</div><div class="line">        <span class="keyword">if</span> (de == NULL) &#123;</div><div class="line">			//den=NULL表示该channel在dict不存在</div><div class="line">            clients = listCreate();</div><div class="line">            dictAdd(server.pubsub_channels,channel,clients);</div><div class="line">			//robj引用+1</div><div class="line">            incrRefCount(channel);</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">			//该channel在dict中已经存在</div><div class="line">            clients = dictGetVal(de);</div><div class="line">        &#125;</div><div class="line">        listAddNodeTail(clients,c);</div><div class="line">    &#125;</div><div class="line">    /* Notify the client */</div><div class="line">    addReply(c,shared.mbulkhdr[3]);</div><div class="line">    addReply(c,shared.subscribebulk);</div><div class="line">    addReplyBulk(c,channel);</div><div class="line">    addReplyLongLong(c,clientSubscriptionsCount(c));</div><div class="line">    <span class="built_in">return</span> retval;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>订阅pattern代码:</p>
-</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line">/* Subscribe a client to a pattern. Returns 1 <span class="keyword">if</span> the operation succeeded, or 0 <span class="keyword">if</span> the client was already subscribed to that pattern. */</div><div class="line">//订阅一个pattern</div><div class="line">int pubsubSubscribePattern(client *c, robj *pattern) &#123;</div><div class="line">    int retval = 0;</div><div class="line"></div><div class="line">	//首先查找链表中是否存在该pattern</div><div class="line">    <span class="keyword">if</span> (listSearchKey(c-&gt;pubsub_patterns,pattern) == NULL) &#123;</div><div class="line">        retval = 1;</div><div class="line">        pubsubPattern *pat;</div><div class="line">		//如果不存在，则添加到client的pubsub_patterns链表结尾</div><div class="line">        listAddNodeTail(c-&gt;pubsub_patterns,pattern);</div><div class="line">		//增加引用计数</div><div class="line">        incrRefCount(pattern);</div><div class="line"></div><div class="line">		//将该pattern添加到server的pubsub_patterns链表 </div><div class="line">        pat = zmalloc(sizeof(*pat));</div><div class="line">        pat-&gt;pattern = getDecodedObject(pattern);</div><div class="line">        pat-&gt;client = c;</div><div class="line">        listAddNodeTail(server.pubsub_patterns,pat);</div><div class="line">    &#125;</div><div class="line">    /* Notify the client */</div><div class="line">    addReply(c,shared.mbulkhdr[3]);</div><div class="line">    addReply(c,shared.psubscribebulk);</div><div class="line">    addReplyBulk(c,pattern);</div><div class="line">    addReplyLongLong(c,clientSubscriptionsCount(c));</div><div class="line">    <span class="built_in">return</span> retval;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h4 id="4-参考文献"><a href="#4-参考文献" class="headerlink" title="4.参考文献"></a>4.参考文献</h4><p>《<a href="https://redis.io/topics/pubsub" target="_blank" rel="external">redis.io</a>》</p>
-<p>《<a href="https://github.com/Qinch/redis_reading/tree/read/" target="_blank" rel="external">redis_reading</a>》</p>
-
-		
-	
-    </div>
-    <footer>
-      
-        
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
     <h1 class="title"><a href="/2017/12/11/redis4-multi/">redis4.0_Transactions源码剖析</a></h1>
 
  
@@ -240,6 +173,86 @@ var _hmt = _hmt || [];
         
           <div class="alignleft">
             <a href="/2017/12/10/redis4-event/#more" class="more-link">阅读全文</a>
+          </div>
+        
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
+    <h1 class="title"><a href="/2017/12/03/redis4-ziplist/">redis4.0_ziplist源码剖析</a></h1>
+
+ 
+	
+	<time  datetime="2017-12-02T16:00:00.000Z"><p>发表于 2017-12-03 | 字数 <span class="post-count">10,112</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<h3 id="1-ziplist"><a href="#1-ziplist" class="headerlink" title="1.ziplist"></a>1.ziplist</h3><h4 id="1-1-ziplist概述"><a href="#1-1-ziplist概述" class="headerlink" title="1.1.ziplist概述"></a>1.1.ziplist概述</h4><p> The ziplist is a specially encoded dually linked list that is designed to be very memory efficient. It stores both strings and integer values, where integers are encoded as actual integers(integer内存表示) instead of a series of characters（ASCII码）. It allows push and pop operations on either side of the list in O(1) time. However, because every operation requires a reallocation of the memory used by the ziplist, the actual complexity is related to the amount of memory used by the ziplist.</p>
+<h4 id="1-2-ziplist整体内存布局"><a href="#1-2-ziplist整体内存布局" class="headerlink" title="1.2.ziplist整体内存布局"></a>1.2.ziplist整体内存布局</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"> |-----------|----------|---------|---------|---------|----|----------|---------|</div><div class="line"> | &lt;zlbytes&gt; | &lt;zltail&gt; | &lt;zllen&gt; | &lt;entry0&gt;| &lt;entry1&gt;| ...| &lt;entryn&gt; | &lt;zlend&gt; |</div><div class="line"> |-----------|----------|---------|---------|---------|----|----------|---------|</div><div class="line"> |低地址            &lt;----------------------------                       高地址  |</div><div class="line"></div><div class="line">NOTE: all fields are stored <span class="keyword">in</span> little endian(即：低位在地地址，高位在高地址), <span class="keyword">if</span> not specified otherwise.</div></pre></td></tr></table></figure>
+<ul>
+<li>The general layout of the ziplist is as follows:<ul>
+<li><uint32_t zlbytes>用于记录整个ziplist占用的内存字节数；</li>
+<li><uint32_t zltail>用于记录最后一个节点(the last entry)的首地址距离ziplist首地址的偏移量;</li>
+<li><uint16_t zllen>用于记录ziplist中节点(entry)数量;</li>
+<li><uint8_t  zlend>用于表示ziplist的结尾,为定制 0xFF;</li>
+</ul>
+</li>
+</ul>
+<h5 id="1-2-ziplist中entry内存布局"><a href="#1-2-ziplist中entry内存布局" class="headerlink" title="1.2.ziplist中entry内存布局"></a>1.2.ziplist中entry内存布局</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">           </div><div class="line"> |--------|----------|---------|</div><div class="line"> | prelen | encoding | content |</div><div class="line"> |--------|----------|---------|</div><div class="line"> |低地址  &lt;----------   高地址 |</div><div class="line"></div><div class="line">NOTE：a complete entry is stored like above(content长度可能为0,即一个entry可能只有prelen和encoding字段，没有content字段).</div></pre></td></tr></table></figure>
+<h5 id="1-2-1-entry每个字段的含义"><a href="#1-2-1-entry每个字段的含义" class="headerlink" title="1.2.1 entry每个字段的含义:"></a>1.2.1 entry每个字段的含义:</h5><ul>
+<li>prevlen字段用于记录前一个ziplist节点(entry)的长度，该字段以字节为单位。<ul>
+<li>如果前一个节点的长度小于255个字节，则prelen属性的长度为1bytes，该字节用于保存前一个节点的长度；</li>
+<li>如果前一个节点的长度大于或等于255个字节，则prelen字段的长度为5bytes,其中第一个bytes为定制0xFF,之后的四个bytes用于保存前一个节点的长度；</li>
+</ul>
+</li>
+</ul>
+<h5 id="1-2-2-encoding字段的含义："><a href="#1-2-2-encoding字段的含义：" class="headerlink" title="1.2.2 encoding字段的含义："></a>1.2.2 encoding字段的含义：</h5><ul>
+<li>encoding字段用于表示content字段所保存的数据的类型(string or int)以及content的长度。</li>
+<li>encoding表示string类型及长度：<ul>
+<li>当encoding表示string类型时，encoding长度可能为1bytes,2bytes,5bytes,其中最低地址的头两个bits为非11（即(?? &amp; 11) &lt; 11）</li>
+<li>当encoding编码为 00bb bbbb（二进制） 时，encoding字段的长度为1bytes,content的长度小于等于0x3F的字节数组;</li>
+<li>当encoding编码为 01bb bbbb bbbb bbbb（二进制） 时，encoding字段的长度为2bytes（其中encoding中bb bbbb bbbb bbbb表示string的长度，即content的长度，采用big endian表示）,content的长度为小于等于0x3FFF的字节数组;</li>
+<li>当encoding编码为10<strong> __</strong> aaaa aaaa bbbb bbbb cccc cccc dddd dddd （二进制）时,encoding字段的长度为5bytes(其中encoding中aaaaaaaa bbbbbbbb cccccccc dddddddd表示string的长度,采用big endian表示),content的长度为小于等于0xFFFFFFFF的字节数组;</li>
+</ul>
+</li>
+<li>encoding表示int*_t类型及长度：<ul>
+<li>当encoding表示integer类型时,encoding字段的长度为1bytes，最低地址的头两个bits为11(即encoding为(11?? ????));</li>
+<li>当encoding的编码为 1100 0000(二进制)时,content的长度与2bytes,即表示int16_t类型</li>
+<li>当encoding的编码为 1101 0000(二进制)时,content的长度与4bytes,即表示int32_t类型</li>
+<li>当encoding的编码为 1110 0000(二进制)时,content的长度与8bytes,即表示int64_t类型</li>
+<li>当encoding的编码为 1110 0000(二进制)时,content的长度与3bytes,即表示int24_t类型</li>
+<li>当encoding的编码为 1111 1110(二进制)时,content的长度与1bytes,即表示int8_t类型</li>
+<li>当encoding的编码为 1100 xxxx(二进制)时,content的长度与0bytes,即表示immediate 4 bit integer,其中xxxx 4bits表示<a href="encoding的编码范围为1111 0001~1111 1101">0,12</a>;</li>
+<li>|11111111| - End of ziplist special entry.</li>
+</ul>
+</li>
+</ul>
+		
+	
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2017/12/03/redis4-ziplist/#more" class="more-link">阅读全文</a>
           </div>
         
         
@@ -370,86 +383,6 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2017/12/03/redis4-ziplist/">redis4.0_ziplist源码剖析</a></h1>
-
- 
-	
-	<time  datetime="2017-12-02T16:00:00.000Z"><p>发表于 2017-12-03 | 字数 <span class="post-count">10,112</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<h3 id="1-ziplist"><a href="#1-ziplist" class="headerlink" title="1.ziplist"></a>1.ziplist</h3><h4 id="1-1-ziplist概述"><a href="#1-1-ziplist概述" class="headerlink" title="1.1.ziplist概述"></a>1.1.ziplist概述</h4><p> The ziplist is a specially encoded dually linked list that is designed to be very memory efficient. It stores both strings and integer values, where integers are encoded as actual integers(integer内存表示) instead of a series of characters（ASCII码）. It allows push and pop operations on either side of the list in O(1) time. However, because every operation requires a reallocation of the memory used by the ziplist, the actual complexity is related to the amount of memory used by the ziplist.</p>
-<h4 id="1-2-ziplist整体内存布局"><a href="#1-2-ziplist整体内存布局" class="headerlink" title="1.2.ziplist整体内存布局"></a>1.2.ziplist整体内存布局</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"> |-----------|----------|---------|---------|---------|----|----------|---------|</div><div class="line"> | &lt;zlbytes&gt; | &lt;zltail&gt; | &lt;zllen&gt; | &lt;entry0&gt;| &lt;entry1&gt;| ...| &lt;entryn&gt; | &lt;zlend&gt; |</div><div class="line"> |-----------|----------|---------|---------|---------|----|----------|---------|</div><div class="line"> |低地址            &lt;----------------------------                       高地址  |</div><div class="line"></div><div class="line">NOTE: all fields are stored <span class="keyword">in</span> little endian(即：低位在地地址，高位在高地址), <span class="keyword">if</span> not specified otherwise.</div></pre></td></tr></table></figure>
-<ul>
-<li>The general layout of the ziplist is as follows:<ul>
-<li><uint32_t zlbytes>用于记录整个ziplist占用的内存字节数；</li>
-<li><uint32_t zltail>用于记录最后一个节点(the last entry)的首地址距离ziplist首地址的偏移量;</li>
-<li><uint16_t zllen>用于记录ziplist中节点(entry)数量;</li>
-<li><uint8_t  zlend>用于表示ziplist的结尾,为定制 0xFF;</li>
-</ul>
-</li>
-</ul>
-<h5 id="1-2-ziplist中entry内存布局"><a href="#1-2-ziplist中entry内存布局" class="headerlink" title="1.2.ziplist中entry内存布局"></a>1.2.ziplist中entry内存布局</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">           </div><div class="line"> |--------|----------|---------|</div><div class="line"> | prelen | encoding | content |</div><div class="line"> |--------|----------|---------|</div><div class="line"> |低地址  &lt;----------   高地址 |</div><div class="line"></div><div class="line">NOTE：a complete entry is stored like above(content长度可能为0,即一个entry可能只有prelen和encoding字段，没有content字段).</div></pre></td></tr></table></figure>
-<h5 id="1-2-1-entry每个字段的含义"><a href="#1-2-1-entry每个字段的含义" class="headerlink" title="1.2.1 entry每个字段的含义:"></a>1.2.1 entry每个字段的含义:</h5><ul>
-<li>prevlen字段用于记录前一个ziplist节点(entry)的长度，该字段以字节为单位。<ul>
-<li>如果前一个节点的长度小于255个字节，则prelen属性的长度为1bytes，该字节用于保存前一个节点的长度；</li>
-<li>如果前一个节点的长度大于或等于255个字节，则prelen字段的长度为5bytes,其中第一个bytes为定制0xFF,之后的四个bytes用于保存前一个节点的长度；</li>
-</ul>
-</li>
-</ul>
-<h5 id="1-2-2-encoding字段的含义："><a href="#1-2-2-encoding字段的含义：" class="headerlink" title="1.2.2 encoding字段的含义："></a>1.2.2 encoding字段的含义：</h5><ul>
-<li>encoding字段用于表示content字段所保存的数据的类型(string or int)以及content的长度。</li>
-<li>encoding表示string类型及长度：<ul>
-<li>当encoding表示string类型时，encoding长度可能为1bytes,2bytes,5bytes,其中最低地址的头两个bits为非11（即(?? &amp; 11) &lt; 11）</li>
-<li>当encoding编码为 00bb bbbb（二进制） 时，encoding字段的长度为1bytes,content的长度小于等于0x3F的字节数组;</li>
-<li>当encoding编码为 01bb bbbb bbbb bbbb（二进制） 时，encoding字段的长度为2bytes（其中encoding中bb bbbb bbbb bbbb表示string的长度，即content的长度，采用big endian表示）,content的长度为小于等于0x3FFF的字节数组;</li>
-<li>当encoding编码为10<strong> __</strong> aaaa aaaa bbbb bbbb cccc cccc dddd dddd （二进制）时,encoding字段的长度为5bytes(其中encoding中aaaaaaaa bbbbbbbb cccccccc dddddddd表示string的长度,采用big endian表示),content的长度为小于等于0xFFFFFFFF的字节数组;</li>
-</ul>
-</li>
-<li>encoding表示int*_t类型及长度：<ul>
-<li>当encoding表示integer类型时,encoding字段的长度为1bytes，最低地址的头两个bits为11(即encoding为(11?? ????));</li>
-<li>当encoding的编码为 1100 0000(二进制)时,content的长度与2bytes,即表示int16_t类型</li>
-<li>当encoding的编码为 1101 0000(二进制)时,content的长度与4bytes,即表示int32_t类型</li>
-<li>当encoding的编码为 1110 0000(二进制)时,content的长度与8bytes,即表示int64_t类型</li>
-<li>当encoding的编码为 1110 0000(二进制)时,content的长度与3bytes,即表示int24_t类型</li>
-<li>当encoding的编码为 1111 1110(二进制)时,content的长度与1bytes,即表示int8_t类型</li>
-<li>当encoding的编码为 1100 xxxx(二进制)时,content的长度与0bytes,即表示immediate 4 bit integer,其中xxxx 4bits表示<a href="encoding的编码范围为1111 0001~1111 1101">0,12</a>;</li>
-<li>|11111111| - End of ziplist special entry.</li>
-</ul>
-</li>
-</ul>
-		
-	
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2017/12/03/redis4-ziplist/#more" class="more-link">阅读全文</a>
-          </div>
-        
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
     <h1 class="title"><a href="/2017/12/02/redis4-skiplist/">redis4.0_skiplist源码剖析</a></h1>
 
  
@@ -524,6 +457,55 @@ var _hmt = _hmt || [];
         
           <div class="alignleft">
             <a href="/2017/12/02/redis4-adlist/#more" class="more-link">阅读全文</a>
+          </div>
+        
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
+    <h1 class="title"><a href="/2017/12/01/redis4-intset/">redis4.0_intset源码剖析</a></h1>
+
+ 
+	
+	<time  datetime="2017-11-30T16:00:00.000Z"><p>发表于 2017-12-01 | 字数 <span class="post-count">2,210</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<h4 id="1-intset概述"><a href="#1-intset概述" class="headerlink" title="1.intset概述"></a>1.intset概述</h4><p>intset(整数集合)可以用于保存类型为int16_t, int32_t, int64_t的整数值，并且保证intset中不会出现重复元素。</p>
+<h4 id="2-intst结构体"><a href="#2-intst结构体" class="headerlink" title="2.intst结构体"></a>2.intst结构体</h4><ul>
+<li><p>表示intset的结构体定义如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">typedef struct intset &#123;</div><div class="line">	//intset的编码方式：int*_t</div><div class="line">    uint32_t encoding;</div><div class="line">	//intset中元素的数量</div><div class="line">    uint32_t length;</div><div class="line">	//用于保存元素的数组（0长度数组的妙用）</div><div class="line">    int8_t contents[];</div><div class="line">&#125; intset;</div></pre></td></tr></table></figure>
+</li>
+<li><p>intset对应的图示如下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">|----------|</div><div class="line">| encoding |</div><div class="line">|----------|</div><div class="line">|  length  |</div><div class="line">|----------|</div><div class="line">|int*_t v0 |</div><div class="line">|----------|</div><div class="line">|int*_t v1 |</div><div class="line">|----------|</div><div class="line">|int*_t    |</div><div class="line">|vlength-1 |</div><div class="line">|----------|</div></pre></td></tr></table></figure>
+</li>
+</ul>
+		
+	
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2017/12/01/redis4-intset/#more" class="more-link">阅读全文</a>
           </div>
         
         
@@ -645,7 +627,7 @@ var _hmt = _hmt || [];
 
 
   <nav id="page-nav" class="clearfix">
-    <a class="extend prev" rel="prev" href="/">&laquo; 上一页</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/3/">下一页 &raquo;</a>
+    <a class="extend prev" rel="prev" href="/">&laquo; 上一页</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/3/">下一页 &raquo;</a>
   </nav>
 </div></div>
     <aside id="sidebar" class="alignright">
@@ -667,11 +649,11 @@ var _hmt = _hmt || [];
       </li>
     
       <li>
-        <a href="/2018/10/15/stl-list/">STL-目录</a>
+        <a href="/2018/10/15/redis-list/">Redis-目录</a>
       </li>
     
       <li>
-        <a href="/2018/10/15/redis-list/">Redis-目录</a>
+        <a href="/2018/10/14/cpp-model-list/">C++对象模型-目录</a>
       </li>
     
   </ul>
@@ -693,9 +675,9 @@ var _hmt = _hmt || [];
   
     <li><a href="/categories/Linux/">Linux</a><small>1</small></li>
   
-    <li><a href="/categories/STL/">STL</a><small>1</small></li>
+    <li><a href="/categories/STL/">STL</a><small>0</small></li>
   
-    <li><a href="/categories/STL源码剖析/">STL源码剖析</a><small>14</small></li>
+    <li><a href="/categories/STL源码剖析/">STL源码剖析</a><small>0</small></li>
   
     <li><a href="/categories/civetweb/">civetweb</a><small>1</small></li>
   
@@ -723,7 +705,7 @@ var _hmt = _hmt || [];
 <div class="widget tagcloud">
   <h3 class="title">标签云</h3>
   <div class="entry">
-    <a href="/tags/Asm/" style="font-size: 20px;">Asm</a> <a href="/tags/C/" style="font-size: 18.33px;">C</a> <a href="/tags/Cpp/" style="font-size: 15px;">Cpp</a> <a href="/tags/Endian/" style="font-size: 10px;">Endian</a> <a href="/tags/MFC/" style="font-size: 10px;">MFC</a> <a href="/tags/STL/" style="font-size: 10px;">STL</a> <a href="/tags/Transations/" style="font-size: 10px;">Transations</a> <a href="/tags/adlist/" style="font-size: 10px;">adlist</a> <a href="/tags/apue/" style="font-size: 11.67px;">apue</a> <a href="/tags/atoi/" style="font-size: 10px;">atoi</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/civetweb/" style="font-size: 10px;">civetweb</a> <a href="/tags/database/" style="font-size: 10px;">database</a> <a href="/tags/dict/" style="font-size: 10px;">dict</a> <a href="/tags/event/" style="font-size: 11.67px;">event</a> <a href="/tags/heap/" style="font-size: 13.33px;">heap</a> <a href="/tags/https/" style="font-size: 10px;">https</a> <a href="/tags/icp/" style="font-size: 10px;">icp</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/intset/" style="font-size: 10px;">intset</a> <a href="/tags/linux/" style="font-size: 11.67px;">linux</a> <a href="/tags/make/" style="font-size: 10px;">make</a> <a href="/tags/makefile/" style="font-size: 10px;">makefile</a> <a href="/tags/multi/" style="font-size: 10px;">multi</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/network/" style="font-size: 11.67px;">network</a> <a href="/tags/object/" style="font-size: 10px;">object</a> <a href="/tags/pqsort/" style="font-size: 10px;">pqsort</a> <a href="/tags/pub-sub/" style="font-size: 10px;">pub/sub</a> <a href="/tags/rb/" style="font-size: 10px;">rb</a> <a href="/tags/redis/" style="font-size: 11.67px;">redis</a> <a href="/tags/redis4-0/" style="font-size: 15px;">redis4.0</a> <a href="/tags/replication/" style="font-size: 10px;">replication</a> <a href="/tags/scp/" style="font-size: 10px;">scp</a> <a href="/tags/sds/" style="font-size: 10px;">sds</a> <a href="/tags/signal/" style="font-size: 10px;">signal</a> <a href="/tags/skiplist/" style="font-size: 10px;">skiplist</a> <a href="/tags/snippet/" style="font-size: 11.67px;">snippet</a> <a href="/tags/sort/" style="font-size: 10px;">sort</a> <a href="/tags/sourcecode/" style="font-size: 15px;">sourcecode</a> <a href="/tags/ssl/" style="font-size: 10px;">ssl</a> <a href="/tags/stl/" style="font-size: 16.67px;">stl</a> <a href="/tags/string2ll/" style="font-size: 10px;">string2ll</a> <a href="/tags/t-string/" style="font-size: 10px;">t_string</a> <a href="/tags/thread/" style="font-size: 10px;">thread</a> <a href="/tags/thunk/" style="font-size: 10px;">thunk</a> <a href="/tags/tips/" style="font-size: 10px;">tips</a> <a href="/tags/tree/" style="font-size: 10px;">tree</a> <a href="/tags/unpv2/" style="font-size: 10px;">unpv2</a> <a href="/tags/xv6/" style="font-size: 10px;">xv6</a> <a href="/tags/ziplist/" style="font-size: 10px;">ziplist</a> <a href="/tags/内存流/" style="font-size: 10px;">内存流</a> <a href="/tags/勘误/" style="font-size: 10px;">勘误</a>
+    <a href="/tags/Asm/" style="font-size: 20px;">Asm</a> <a href="/tags/C/" style="font-size: 17.5px;">C</a> <a href="/tags/Cpp/" style="font-size: 15px;">Cpp</a> <a href="/tags/Endian/" style="font-size: 10px;">Endian</a> <a href="/tags/MFC/" style="font-size: 10px;">MFC</a> <a href="/tags/Transations/" style="font-size: 10px;">Transations</a> <a href="/tags/adlist/" style="font-size: 10px;">adlist</a> <a href="/tags/apue/" style="font-size: 12.5px;">apue</a> <a href="/tags/atoi/" style="font-size: 10px;">atoi</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/civetweb/" style="font-size: 10px;">civetweb</a> <a href="/tags/database/" style="font-size: 10px;">database</a> <a href="/tags/dict/" style="font-size: 10px;">dict</a> <a href="/tags/event/" style="font-size: 12.5px;">event</a> <a href="/tags/https/" style="font-size: 10px;">https</a> <a href="/tags/icp/" style="font-size: 10px;">icp</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/intset/" style="font-size: 10px;">intset</a> <a href="/tags/linux/" style="font-size: 12.5px;">linux</a> <a href="/tags/make/" style="font-size: 10px;">make</a> <a href="/tags/makefile/" style="font-size: 10px;">makefile</a> <a href="/tags/multi/" style="font-size: 10px;">multi</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/network/" style="font-size: 12.5px;">network</a> <a href="/tags/object/" style="font-size: 10px;">object</a> <a href="/tags/pqsort/" style="font-size: 10px;">pqsort</a> <a href="/tags/pub-sub/" style="font-size: 10px;">pub/sub</a> <a href="/tags/redis/" style="font-size: 12.5px;">redis</a> <a href="/tags/redis4-0/" style="font-size: 15px;">redis4.0</a> <a href="/tags/replication/" style="font-size: 10px;">replication</a> <a href="/tags/scp/" style="font-size: 10px;">scp</a> <a href="/tags/sds/" style="font-size: 10px;">sds</a> <a href="/tags/signal/" style="font-size: 10px;">signal</a> <a href="/tags/skiplist/" style="font-size: 10px;">skiplist</a> <a href="/tags/snippet/" style="font-size: 12.5px;">snippet</a> <a href="/tags/sourcecode/" style="font-size: 15px;">sourcecode</a> <a href="/tags/ssl/" style="font-size: 10px;">ssl</a> <a href="/tags/string2ll/" style="font-size: 10px;">string2ll</a> <a href="/tags/t-string/" style="font-size: 10px;">t_string</a> <a href="/tags/thread/" style="font-size: 10px;">thread</a> <a href="/tags/thunk/" style="font-size: 10px;">thunk</a> <a href="/tags/tips/" style="font-size: 10px;">tips</a> <a href="/tags/unpv2/" style="font-size: 10px;">unpv2</a> <a href="/tags/xv6/" style="font-size: 10px;">xv6</a> <a href="/tags/ziplist/" style="font-size: 10px;">ziplist</a> <a href="/tags/内存流/" style="font-size: 10px;">内存流</a> <a href="/tags/勘误/" style="font-size: 10px;">勘误</a>
   </div>
 </div>
 
