@@ -90,7 +90,7 @@ var _hmt = _hmt || [];
 
  
 	
-	<time  datetime="2021-03-27T16:00:00.000Z"><p>发表于 2021-03-28 | 字数 <span class="post-count">152</span>
+	<time  datetime="2021-03-27T16:00:00.000Z"><p>发表于 2021-03-28 | 字数 <span class="post-count">236</span>
 
 </p></time>
       
@@ -98,7 +98,12 @@ var _hmt = _hmt || [];
     <div class="entry">
       
 		  
-		<h3 id="1-管道"><a href="#1-管道" class="headerlink" title="1 管道"></a>1 管道</h3><h4 id="1-1-buffered-channel"><a href="#1-1-buffered-channel" class="headerlink" title="1.1 buffered channel"></a>1.1 buffered channel</h4><p>有缓冲的管道是一种在被接收前能存储一个或者多个值得管道，这种类型的管道并不强制要求goroutine之前必须同时完成发送和接受。只有在通道中没有要接受的值时，接收动作才会阻塞。只有在通道没有可以用缓冲区容纳被发送的值时，发送动作才会阻塞（类似于linux下的信号量，P/V操作，如果信号量的值非0， P操作减1，否则阻塞等待信号量的值大于0）</p>
+		<h3 id="1-管道"><a href="#1-管道" class="headerlink" title="1 管道"></a>1 管道</h3><h4 id="1-1-buffered-channel"><a href="#1-1-buffered-channel" class="headerlink" title="1.1 buffered channel"></a>1.1 buffered channel</h4><ul>
+<li><p>有缓冲的管道是一种在被接收前能存储一个或者多个值得管道，这种类型的管道并不强制要求goroutine之前必须同时完成发送和接受。只有在通道中没有要接受的值时，接收动作才会阻塞。只有在通道没有可以用缓冲区容纳被发送的值时，发送动作才会阻塞（类似于linux下的信号量，P/V操作，如果信号量的值非0， P操作减1，否则阻塞等待信号量的值大于0）</p>
+</li>
+<li><p>关闭通道之后，依然可以从通道接收数据，但是不能再向通道里发送数据。从一个已经关闭的并且没有数据的通道里获取数据，总是立刻返回，并且返回一个通道类型的零值。（类似于tcp对端断开连接，read返回0）</p>
+</li>
+</ul>
 
 	
     </div>
