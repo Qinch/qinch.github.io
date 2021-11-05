@@ -90,7 +90,7 @@ var _hmt = _hmt || [];
 
  
 	
-	<time  datetime="2021-10-10T16:00:00.000Z"><p>发表于 2021-10-11 | 字数 <span class="post-count">395</span>
+	<time  datetime="2021-10-10T16:00:00.000Z"><p>发表于 2021-10-11 | 字数 <span class="post-count">460</span>
 
 </p></time>
       
@@ -109,7 +109,14 @@ var _hmt = _hmt || [];
 <li>RollingUpdate, 即滚动更新（默认的升级策略），该策略会渐进的删除旧的pod,同时创建新的pod, 是应用程序在整个升级过程中都处于可用状态。（注意：在升级过程中，pod的数量可以在期望的副本数量左右浮动，该上限和下限是可以设置的）</li>
 <li>Recreate, 即一次性删除所有的Pod, 然后才创建新的Pod(<code>缺点</code>：存在服务中断的情况)</li>
 </ul>
-<p>2, </p>
+<p>2, 触发升级</p>
+<ul>
+<li><p>触发条件：只要修改deployment中定义的pod模板，k8s就会自动将实际的系统状态收敛为资源中定义的状态。</p>
+</li>
+<li><p>通过<code>kubectl set image deployment testqc nodejs=qinchaowhut/allen:v2</code> 来修改Deployment的pod模板内的镜像。</p>
+</li>
+</ul>
+<p><img src="/img/update.jpg" alt="升级前后"> </p>
 <h6 id="6-3-Deployment相关命令行"><a href="#6-3-Deployment相关命令行" class="headerlink" title="6.3 Deployment相关命令行"></a>6.3 Deployment相关命令行</h6><ul>
 <li><p>kubectl rollout status deployment $DEPLOYMENT_NAME</p>
 <ul>
