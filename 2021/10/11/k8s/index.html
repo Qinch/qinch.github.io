@@ -104,16 +104,12 @@ var _hmt = _hmt || [];
 <h4 id="2-Pods"><a href="#2-Pods" class="headerlink" title="2 Pods"></a>2 Pods</h4><h4 id="3-Services"><a href="#3-Services" class="headerlink" title="3 Services"></a>3 Services</h4><h4 id="4-Volumns"><a href="#4-Volumns" class="headerlink" title="4 Volumns"></a>4 Volumns</h4><h4 id="5-ReplicaSet"><a href="#5-ReplicaSet" class="headerlink" title="5 ReplicaSet"></a>5 ReplicaSet</h4><p>复制控制器</p>
 <h4 id="6-Deployment"><a href="#6-Deployment" class="headerlink" title="6 Deployment"></a>6 Deployment</h4><p>Deployment用于部署应用程序，并且用声明的方式升级应用程序。其中，Deployment由ReplicaSet(1:N)组成，并且由ReplicaSet来创建和管理Pod</p>
 <p><img src="/img/deployment.jpg" alt="Deployment"></p>
-<h5 id="6-2-升级应用程序"><a href="#6-2-升级应用程序" class="headerlink" title="6.2 升级应用程序"></a>6.2 升级应用程序</h5><ul>
-<li><p>1, Deployment的升级策略</p>
+<h5 id="6-2-升级应用程序"><a href="#6-2-升级应用程序" class="headerlink" title="6.2 升级应用程序"></a>6.2 升级应用程序</h5><p>1, Deployment的升级策略</p>
 <ul>
 <li>RollingUpdate, 即滚动更新（默认的升级策略），该策略会渐进的删除旧的pod,同时创建新的pod, 是应用程序在整个升级过程中都处于可用状态。（注意：在升级过程中，pod的数量可以在期望的副本数量左右浮动，该上限和下限是可以设置的）</li>
 <li>Recreate, 即一次性删除所有的Pod, 然后才创建新的Pod(<code>缺点</code>：存在服务中断的情况)</li>
 </ul>
-</li>
-<li><p>2, </p>
-</li>
-</ul>
+<p>2, </p>
 <h6 id="6-3-Deployment相关命令行"><a href="#6-3-Deployment相关命令行" class="headerlink" title="6.3 Deployment相关命令行"></a>6.3 Deployment相关命令行</h6><ul>
 <li><p>kubectl rollout status deployment $DEPLOYMENT_NAME</p>
 <ul>
