@@ -91,7 +91,7 @@ var _hmt = _hmt || [];
 
  
 	
-	<time  datetime="2021-10-10T16:00:00.000Z"><p>发表于 2021-10-11 | 字数 <span class="post-count">506</span>
+	<time  datetime="2021-10-10T16:00:00.000Z"><p>发表于 2021-10-11 | 字数 <span class="post-count">549</span>
 
 </p></time>
       
@@ -102,6 +102,20 @@ var _hmt = _hmt || [];
 			<h4 id="1-简介"><a href="#1-简介" class="headerlink" title="1 简介"></a>1 简介</h4><p>1, 虚拟机和容器的区别</p>
 <p>每个虚拟机运行在自己的Linux内核上(即下图中Guest OS， 每个VM可以安装不同版本的linux系统)，而容器都是调用同一个宿主机内核(如果一个容器化的应用需要一个特定的内核版本，那么它可能不能再每台机器上工作,也不能将一个x86架构编译的应用容器化之后，又期望他在arm架构的机器上运行)。</p>
 <p><img src="/img/vmvscontainer.jpg" alt="虚拟机vs容器"></p>
+<p>2, 创建一个镜像</p>
+<ul>
+<li><p>创建一个名为<code>allen</code>的镜像</p>
+<ul>
+<li><code>docker build -t allen .</code> </li>
+</ul>
+</li>
+<li><p>将该镜像推送到镜像仓库</p>
+<ul>
+<li><code>docker tag allen qinchaowhut/allen:v1</code></li>
+<li><code>docker push qinchaowhut/allen:v1</code></li>
+</ul>
+</li>
+</ul>
 <h4 id="2-Pods"><a href="#2-Pods" class="headerlink" title="2 Pods"></a>2 Pods</h4><h4 id="3-Services"><a href="#3-Services" class="headerlink" title="3 Services"></a>3 Services</h4><h4 id="4-Volumns"><a href="#4-Volumns" class="headerlink" title="4 Volumns"></a>4 Volumns</h4><h4 id="5-ReplicaSet"><a href="#5-ReplicaSet" class="headerlink" title="5 ReplicaSet"></a>5 ReplicaSet</h4><p>复制控制器</p>
 <h4 id="6-Deployment"><a href="#6-Deployment" class="headerlink" title="6 Deployment"></a>6 Deployment</h4><p>Deployment用于部署应用程序，并且用声明的方式升级应用程序。其中，Deployment由ReplicaSet(1:N)组成，并且由ReplicaSet来创建和管理Pod</p>
 <p><img src="/img/deployment.jpg" alt="Deployment"></p>
