@@ -90,7 +90,7 @@ var _hmt = _hmt || [];
 
  
 	
-	<time  datetime="2021-10-10T16:00:00.000Z"><p>发表于 2021-10-11 | 字数 <span class="post-count">1,471</span>
+	<time  datetime="2021-10-10T16:00:00.000Z"><p>发表于 2021-10-11 | 字数 <span class="post-count">1,536</span>
 
 </p></time>
       
@@ -205,6 +205,7 @@ var _hmt = _hmt || [];
 <ul>
 <li><code>kubectl rollout resume deployment testqc</code></li>
 </ul>
+<p>需要指出的是，在滚动升级过程中，想要在一个确切的位置暂停滚动升级目前无法做到。但是可以用两个不同的Deployment并同时调整他们的pod数量，来进行金丝雀发布。</p>
 <h6 id="6-3-Deployment相关命令行"><a href="#6-3-Deployment相关命令行" class="headerlink" title="6.3 Deployment相关命令行"></a>6.3 Deployment相关命令行</h6><ul>
 <li><p>kubectl rollout status deployment $DEPLOYMENT_NAME</p>
 <ul>
