@@ -90,7 +90,7 @@ var _hmt = _hmt || [];
 
  
 	
-	<time  datetime="2021-10-10T16:00:00.000Z"><p>发表于 2021-10-11 | 字数 <span class="post-count">868</span>
+	<time  datetime="2021-10-10T16:00:00.000Z"><p>发表于 2021-10-11 | 字数 <span class="post-count">883</span>
 
 </p></time>
       
@@ -152,7 +152,13 @@ var _hmt = _hmt || [];
 </ul>
 <p>升级完成之后，发送curl请求:<br><img src="/img/httpechov2.jpeg" alt="http response"></p>
 <ul>
-<li>查看升级前后ReplicaSet<br><img src="/img/updaters.jpeg" alt="升级前后"><br>通过上图, 可以看出旧的rs仍然本保留</li>
+<li><p>查看升级前后ReplicaSet<br><img src="/img/updaters.jpeg" alt="升级前后"><br>通过上图, 可以看出旧的rs仍然本保留</p>
+</li>
+<li><p>kubectl rollout status deployment testqc </p>
+<ul>
+<li>可以观察整个升级过程</li>
+</ul>
+</li>
 </ul>
 <p>3, 回滚</p>
 <p>Deployment始终保持着升级后的版本历史记录，其中历史版本号会被保存在ReplicaSet中。<br>由于滚动升级成功之后，不会删除老版本的ReplicaSet，这使得可以回滚到任意一个历史版本(注意，如果手工删除ReplicaSet， 便会丢失Deployement的历史版本，而导致无法回滚)。</p>
