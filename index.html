@@ -91,7 +91,7 @@ var _hmt = _hmt || [];
 
  
 	
-	<time  datetime="2021-10-10T16:00:00.000Z"><p>发表于 2021-10-11 | 字数 <span class="post-count">883</span>
+	<time  datetime="2021-10-10T16:00:00.000Z"><p>发表于 2021-10-11 | 字数 <span class="post-count">1,118</span>
 
 </p></time>
       
@@ -179,6 +179,14 @@ var _hmt = _hmt || [];
 <li>回滚到第一个版本</li>
 <li><img src="/img/undoversion1.jpeg" alt="revision1"></li>
 </ul>
+</li>
+</ul>
+<p>4, 控制滚动升级速率</p>
+<p>在Deployment的滚动升级期间，有两个属性会决定一次替换多少个pod,即maxSurge和maxUnavalibale。（可以通过rollingUpdate的子属性来配置），maxSurge和maxUnavailable可以设置成百分数或者绝对值。</p>
+<ul>
+<li><p>maxSurge:表示除了Deployment中配置的期望副本数之外，最多允许超出的pod的数量。默认值为25%.(如果期望副本数设置为4，那么滚动升级过程中，不会运行超过5个pod).<br><code>需要注意的是</code>：When converting a percentage to an absolute number, the number is rounded up.</p>
+</li>
+<li><p>maxUnavailable:表示滚动升级过程中，相对于期望副本数，允许有多少个pod实例可以处于不可用状态，默认值25%.(如果期望副本数量为4，那么整个发布过程中，只能有一个pod处于不可用状态)<br><code>需要注意的是</code>：When converting a percentage to an absolute number , the number is rouded down.</p>
 </li>
 </ul>
 <h6 id="6-3-Deployment相关命令行"><a href="#6-3-Deployment相关命令行" class="headerlink" title="6.3 Deployment相关命令行"></a>6.3 Deployment相关命令行</h6><ul>
