@@ -91,7 +91,7 @@ var _hmt = _hmt || [];
 
  
 	
-	<time  datetime="2021-10-10T16:00:00.000Z"><p>发表于 2021-10-11 | 字数 <span class="post-count">654</span>
+	<time  datetime="2021-10-10T16:00:00.000Z"><p>发表于 2021-10-11 | 字数 <span class="post-count">657</span>
 
 </p></time>
       
@@ -143,14 +143,9 @@ var _hmt = _hmt || [];
 </ul>
 <p><img src="/img/httpechov1.jpeg" alt="http response"></p>
 <p>2, 触发升级</p>
+<p>触发条件：只要修改deployment中定义的pod模板，k8s就会自动将实际的系统状态收敛为资源中定义的状态。</p>
 <ul>
-<li><p>触发条件：只要修改deployment中定义的pod模板，k8s就会自动将实际的系统状态收敛为资源中定义的状态。</p>
-</li>
-<li><p>通过<code>kubectl set image deployment testqc nodejs=qinchaowhut/allen:v2</code> 来修改Deployment的pod模板内的镜像。</p>
-<ul>
-<li>其中deployment的name为testqc, nodejs为容器name, qinchaowhut/allen:v2为镜像版本</li>
-</ul>
-</li>
+<li>通过<code>kubectl set image deployment testqc nodejs=qinchaowhut/allen:v2</code> 来修改Deployment的pod模板内的镜像(其中deployment的name为testqc, nodejs为容器name, qinchaowhut/allen:v2为镜像版本)</li>
 </ul>
 <p><img src="/img/update.jpg" alt="升级前后"> </p>
 <ul>
@@ -169,7 +164,7 @@ var _hmt = _hmt || [];
 </li>
 </ul>
 <h4 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h4><ul>
-<li>yaml see <a href="https://github.com/Qinch/k8s-in-action-test" target="_blank" rel="external">https://github.com/Qinch/k8s-in-action-test</a></li>
+<li>相关的yaml见 <a href="https://github.com/Qinch/k8s-in-action-test" target="_blank" rel="external">https://github.com/Qinch/k8s-in-action-test</a></li>
 <li>YAML文件可以包含多种资源定义，YAML manifest可以使用包含三个横杠(—)的行来分隔多个对象。</li>
 </ul>
 <h4 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h4><p>《k8s in action》</p>
