@@ -90,7 +90,7 @@ var _hmt = _hmt || [];
 
  
 	
-	<time  datetime="2021-10-10T16:00:00.000Z"><p>发表于 2021-10-11 | 字数 <span class="post-count">673</span>
+	<time  datetime="2021-10-10T16:00:00.000Z"><p>发表于 2021-10-11 | 字数 <span class="post-count">692</span>
 
 </p></time>
       
@@ -121,6 +121,7 @@ var _hmt = _hmt || [];
 <h5 id="6-2-升级应用程序"><a href="#6-2-升级应用程序" class="headerlink" title="6.2 升级应用程序"></a>6.2 升级应用程序</h5><p>1, Deployment的升级策略</p>
 <p>a, RollingUpdate, 即滚动更新（默认的升级策略），该策略会渐进的删除旧的pod,同时创建新的pod, 是应用程序在整个升级过程中都处于可用状态。（注意：在升级过程中，pod的数量可以在期望的副本数量左右浮动，该上限和下限是可以设置的）</p>
 <p>b, Recreate, 即一次性删除所有的Pod, 然后才创建新的Pod(<code>缺点</code>：存在服务中断的情况)</p>
+<p>需要指出的是升级完成之后，旧的ReplicaSet仍然保留（用于回滚，即升级的逆过程）<br><img src="/img/update.jpg" alt="升级前后"> </p>
 <p>在测试环境，滚动更新的yaml文件内容如下：</p>
 <ul>
 <li><a href="https://github.com/Qinch/k8s-in-action-test/blob/master/deployment-v1.yaml" target="_blank" rel="external">deployment-v1.yaml</a></li>
@@ -148,9 +149,8 @@ var _hmt = _hmt || [];
 </ul>
 <p>升级完成之后，发送curl请求:<br><img src="/img/httpechov2.jpeg" alt="http response"></p>
 <ul>
-<li>查看升级前后ReplicaSet<br><img src="/img/update.jpg" alt="升级前后"> </li>
+<li>查看升级前后ReplicaSet<br><img src="/img/updaters.jpeg" alt="升级前后"><br>通过上图, 可以看出旧的rs仍然本保留</li>
 </ul>
-<p>通过上图, 可以看出旧的rs仍然本保留（用于回滚，即升级的逆过程）</p>
 <h6 id="6-3-Deployment相关命令行"><a href="#6-3-Deployment相关命令行" class="headerlink" title="6.3 Deployment相关命令行"></a>6.3 Deployment相关命令行</h6><ul>
 <li><p>kubectl rollout status deployment $DEPLOYMENT_NAME</p>
 <ul>
