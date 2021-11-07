@@ -90,7 +90,7 @@ var _hmt = _hmt || [];
 
  
 	
-	<time  datetime="2021-10-10T16:00:00.000Z"><p>发表于 2021-10-11 | 字数 <span class="post-count">1,153</span>
+	<time  datetime="2021-10-10T16:00:00.000Z"><p>发表于 2021-10-11 | 字数 <span class="post-count">1,185</span>
 
 </p></time>
       
@@ -191,6 +191,10 @@ var _hmt = _hmt || [];
 <ul>
 <li>在我们测试环境中，Deployment设置的期望副本数量为3，所以maxSurge为1, maxUnavailable 是0, 则整个升级过程如下：<br><img src="/img/rollingupdate.jpg" alt="滚动升级过程"></li>
 </ul>
+<ul>
+<li>假设我们配置的期望副本数量仍然为3，但是maxSurge和maxUnavailable都是1，则整个发布过程如下：</li>
+</ul>
+<p><img src="/img/rollingupdate2.jpg" alt="滚动升级过程"></p>
 <h6 id="6-3-Deployment相关命令行"><a href="#6-3-Deployment相关命令行" class="headerlink" title="6.3 Deployment相关命令行"></a>6.3 Deployment相关命令行</h6><ul>
 <li><p>kubectl rollout status deployment $DEPLOYMENT_NAME</p>
 <ul>
