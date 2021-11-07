@@ -90,7 +90,7 @@ var _hmt = _hmt || [];
 
  
 	
-	<time  datetime="2021-10-10T16:00:00.000Z"><p>发表于 2021-10-11 | 字数 <span class="post-count">710</span>
+	<time  datetime="2021-10-10T16:00:00.000Z"><p>发表于 2021-10-11 | 字数 <span class="post-count">844</span>
 
 </p></time>
       
@@ -153,6 +153,26 @@ var _hmt = _hmt || [];
 <ul>
 <li>查看升级前后ReplicaSet<br><img src="/img/updaters.jpeg" alt="升级前后"><br>通过上图, 可以看出旧的rs仍然本保留</li>
 </ul>
+<p>3, 回滚</p>
+<p>Deployment始终保持着升级后的版本历史记录，其中历史版本号会被保存在ReplicaSet中。<br>由于滚动升级成功之后，不会删除老版本的ReplicaSet，这使得可以回滚到任意一个历史版本(注意，如果手工删除ReplicaSet， 便会丢失Deployement的历史版本，而导致无法回滚)。</p>
+<ul>
+<li><p><code>kubectl rollout undo deployment testqc</code></p>
+<ul>
+<li>回滚到上一个版本</li>
+</ul>
+</li>
+<li><p><code>kubectl rollout history deployment testqc</code></p>
+<ul>
+<li>查看升级历史</li>
+</ul>
+</li>
+<li><p><code>kubectl rollout undo deployment testqc --to-revision=1</code></p>
+<ul>
+<li>回滚到第一个版本</li>
+</ul>
+</li>
+</ul>
+<p><img src="/img/undoversion1.jpeg" alt="revision1"></p>
 <h6 id="6-3-Deployment相关命令行"><a href="#6-3-Deployment相关命令行" class="headerlink" title="6.3 Deployment相关命令行"></a>6.3 Deployment相关命令行</h6><ul>
 <li><p>kubectl rollout status deployment $DEPLOYMENT_NAME</p>
 <ul>
