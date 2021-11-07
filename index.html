@@ -91,7 +91,7 @@ var _hmt = _hmt || [];
 
  
 	
-	<time  datetime="2021-10-10T16:00:00.000Z"><p>发表于 2021-10-11 | 字数 <span class="post-count">662</span>
+	<time  datetime="2021-10-10T16:00:00.000Z"><p>发表于 2021-10-11 | 字数 <span class="post-count">673</span>
 
 </p></time>
       
@@ -145,9 +145,9 @@ var _hmt = _hmt || [];
 <p>2, 触发升级</p>
 <p>触发条件：只要修改deployment中定义的pod模板，k8s就会自动将实际的系统状态收敛为资源中定义的状态。</p>
 <ul>
-<li>通过<code>kubectl set image deployment testqc nodejs=qinchaowhut/allen:v2</code> 来修改Deployment的pod模板内的镜像(其中deployment的name为testqc, nodejs为容器name, qinchaowhut/allen:v2为镜像版本)</li>
+<li>通过<code>kubectl set image deployment testqc nodejs=qinchaowhut/allen:v2</code> 来修改Deployment的pod模板内的镜像(其中deployment的name为testqc, nodejs为容器name, qinchaowhut/allen:v2为镜像版本)<br><img src="/img/setallenv2" alt="set image"></li>
 </ul>
-<p><img src="/img/httpechov2.jpeg" alt="http response"></p>
+<p>升级完成之后，发送curl请求:<br><img src="/img/httpechov2.jpeg" alt="http response"></p>
 <ul>
 <li>查看升级前后ReplicaSet<br><img src="/img/update.jpg" alt="升级前后"> </li>
 </ul>
