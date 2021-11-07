@@ -90,7 +90,7 @@ var _hmt = _hmt || [];
 
  
 	
-	<time  datetime="2021-10-10T16:00:00.000Z"><p>发表于 2021-10-11 | 字数 <span class="post-count">657</span>
+	<time  datetime="2021-10-10T16:00:00.000Z"><p>发表于 2021-10-11 | 字数 <span class="post-count">662</span>
 
 </p></time>
       
@@ -146,10 +146,11 @@ var _hmt = _hmt || [];
 <ul>
 <li>通过<code>kubectl set image deployment testqc nodejs=qinchaowhut/allen:v2</code> 来修改Deployment的pod模板内的镜像(其中deployment的name为testqc, nodejs为容器name, qinchaowhut/allen:v2为镜像版本)</li>
 </ul>
-<p><img src="/img/update.jpg" alt="升级前后"> </p>
+<p><img src="img/httpechov2.jpeg" alt="http response"></p>
 <ul>
-<li>通过<code>kubectl get rs</code>命令可以看出旧的rs仍然本保留（用于回滚，即升级的逆过程）</li>
+<li>查看升级前后ReplicaSet<br><img src="/img/update.jpg" alt="升级前后"> </li>
 </ul>
+<p>通过上图, 可以看出旧的rs仍然本保留（用于回滚，即升级的逆过程）</p>
 <h6 id="6-3-Deployment相关命令行"><a href="#6-3-Deployment相关命令行" class="headerlink" title="6.3 Deployment相关命令行"></a>6.3 Deployment相关命令行</h6><ul>
 <li><p>kubectl rollout status deployment $DEPLOYMENT_NAME</p>
 <ul>
