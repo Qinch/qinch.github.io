@@ -121,7 +121,7 @@ var _hmt = _hmt || [];
 <h5 id="6-2-升级应用程序"><a href="#6-2-升级应用程序" class="headerlink" title="6.2 升级应用程序"></a>6.2 升级应用程序</h5><p>1, Deployment的升级策略</p>
 <p>a, RollingUpdate, 即滚动更新（默认的升级策略），该策略会渐进的删除旧的pod,同时创建新的pod, 是应用程序在整个升级过程中都处于可用状态。（注意：在升级过程中，pod的数量可以在期望的副本数量左右浮动，该上限和下限是可以设置的）</p>
 <p>b, Recreate, 即一次性删除所有的Pod, 然后才创建新的Pod(<code>缺点</code>：存在服务中断的情况)</p>
-<p>需要指出的是升级完成之后，旧的ReplicaSet仍然保留（用于回滚，即升级的逆过程）<br><img src="/img/update.jpg" alt="升级前后"> </p>
+<p>需要指出的是升级完成之后，旧的ReplicaSet仍然保留（用于回滚，即升级的逆过程）</p>
 <p>在测试环境，滚动更新的yaml文件内容如下：</p>
 <ul>
 <li><a href="https://github.com/Qinch/k8s-in-action-test/blob/master/deployment-v1.yaml" target="_blank" rel="external">deployment-v1.yaml</a></li>
@@ -144,6 +144,7 @@ var _hmt = _hmt || [];
 <p><img src="/img/httpechov1.jpeg" alt="http response"></p>
 <p>2, 触发升级</p>
 <p>触发条件：只要修改deployment中定义的pod模板，k8s就会自动将实际的系统状态收敛为资源中定义的状态。</p>
+<p><img src="/img/update.jpg" alt="升级前后"> </p>
 <ul>
 <li>通过<code>kubectl set image deployment testqc nodejs=qinchaowhut/allen:v2</code> 来修改Deployment的pod模板内的镜像(其中deployment的name为testqc, nodejs为容器name, qinchaowhut/allen:v2为镜像版本)<br><img src="/img/setallenv2.jpeg" alt="set image"></li>
 </ul>
