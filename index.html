@@ -91,7 +91,7 @@ var _hmt = _hmt || [];
 
  
 	
-	<time  datetime="2021-10-10T16:00:00.000Z"><p>发表于 2021-10-11 | 字数 <span class="post-count">549</span>
+	<time  datetime="2021-10-10T16:00:00.000Z"><p>发表于 2021-10-11 | 字数 <span class="post-count">614</span>
 
 </p></time>
       
@@ -121,9 +121,23 @@ var _hmt = _hmt || [];
 <p><img src="/img/deployment.jpg" alt="Deployment"></p>
 <h5 id="6-2-升级应用程序"><a href="#6-2-升级应用程序" class="headerlink" title="6.2 升级应用程序"></a>6.2 升级应用程序</h5><p>1, Deployment的升级策略</p>
 <ul>
-<li>RollingUpdate, 即滚动更新（默认的升级策略），该策略会渐进的删除旧的pod,同时创建新的pod, 是应用程序在整个升级过程中都处于可用状态。（注意：在升级过程中，pod的数量可以在期望的副本数量左右浮动，该上限和下限是可以设置的）</li>
-<li>Recreate, 即一次性删除所有的Pod, 然后才创建新的Pod(<code>缺点</code>：存在服务中断的情况)</li>
+<li><p>RollingUpdate, 即滚动更新（默认的升级策略），该策略会渐进的删除旧的pod,同时创建新的pod, 是应用程序在整个升级过程中都处于可用状态。（注意：在升级过程中，pod的数量可以在期望的副本数量左右浮动，该上限和下限是可以设置的）</p>
+</li>
+<li><p>Recreate, 即一次性删除所有的Pod, 然后才创建新的Pod(<code>缺点</code>：存在服务中断的情况)</p>
+</li>
+<li><p><a href="https://github.com/Qinch/k8s-in-action-test/blob/master/deployment-v1.yaml" target="_blank" rel="external">deployment-v1.yaml</a></p>
+<ul>
+<li>kubectl create -f deployment-v1yaml –record<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">apiVersion: apps/v1</div><div class="line">kind: Deployment</div><div class="line">metadata:</div><div class="line">  name: testqc </div><div class="line">spec:</div><div class="line">  replicas: 3</div><div class="line">  template:</div><div class="line">    metadata:</div><div class="line">      name: allen</div><div class="line">      labels:</div><div class="line">        app: testing</div><div class="line">    spec:</div><div class="line">      containers:</div><div class="line">      - image: qinchaowhut/allen:v1</div><div class="line">        name: nodejs</div><div class="line">        imagePullPolicy: IfNotPresent</div><div class="line">  selector:</div><div class="line">    matchLabels:</div><div class="line">      app: testing</div></pre></td></tr></table></figure>
+</li>
 </ul>
+</li>
+<li><p><a href="https://github.com/Qinch/k8s-in-action-test/blob/master/svc-loadbalancer.yaml" target="_blank" rel="external">svc-loadbalancer.yaml</a></p>
+<ul>
+<li>kubectl create -f svc-loadbalancer.yaml</li>
+</ul>
+</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">apiVersion: v1</div><div class="line">kind: Service</div><div class="line">metadata:</div><div class="line">  name: allen-loadbalancer</div><div class="line">spec:</div><div class="line">  <span class="built_in">type</span>: LoadBalancer</div><div class="line">  ports:</div><div class="line">  - port: 80</div><div class="line">    targetPort: 8080</div><div class="line">  selector:</div><div class="line">    app: testing</div></pre></td></tr></table></figure>
 <p>2, 触发升级</p>
 <ul>
 <li><p>触发条件：只要修改deployment中定义的pod模板，k8s就会自动将实际的系统状态收敛为资源中定义的状态。</p>
