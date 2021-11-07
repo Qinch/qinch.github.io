@@ -136,7 +136,7 @@ var _hmt = _hmt || [];
 </ul>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">apiVersion: v1</div><div class="line">kind: Service</div><div class="line">metadata:</div><div class="line">  name: allen-loadbalancer</div><div class="line">spec:</div><div class="line">  <span class="built_in">type</span>: LoadBalancer</div><div class="line">  ports:</div><div class="line">  - port: 80</div><div class="line">    targetPort: 8080</div><div class="line">  selector:</div><div class="line">    app: testing</div></pre></td></tr></table></figure>
 <ul>
-<li>run <code>kubectl create -f svc-loadbalancer.yaml</code><br><img src="img/svc-loadbalancer.jpeg" alt="svc"></li>
+<li>run <code>kubectl create -f svc-loadbalancer.yaml</code><br><img src="/img/svc-loadbalancer.jpeg" alt="svc"></li>
 </ul>
 <ul>
 <li>run <code>curl http://127.0.0.1:80</code></li>
@@ -147,7 +147,7 @@ var _hmt = _hmt || [];
 <ul>
 <li>通过<code>kubectl set image deployment testqc nodejs=qinchaowhut/allen:v2</code> 来修改Deployment的pod模板内的镜像(其中deployment的name为testqc, nodejs为容器name, qinchaowhut/allen:v2为镜像版本)</li>
 </ul>
-<p><img src="img/httpechov2.jpeg" alt="http response"></p>
+<p><img src="/img/httpechov2.jpeg" alt="http response"></p>
 <ul>
 <li>查看升级前后ReplicaSet<br><img src="/img/update.jpg" alt="升级前后"> </li>
 </ul>
