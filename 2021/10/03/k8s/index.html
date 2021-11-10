@@ -100,6 +100,7 @@ var _hmt = _hmt || [];
 		  
 		<h3 id="1-简介"><a href="#1-简介" class="headerlink" title="1 简介"></a>1 简介</h3><h4 id="1-1-虚拟机和容器的区别"><a href="#1-1-虚拟机和容器的区别" class="headerlink" title="1.1, 虚拟机和容器的区别"></a>1.1, 虚拟机和容器的区别</h4><p>每个虚拟机运行在自己的Linux内核上(即下图中Guest OS， 每个VM可以安装不同版本的linux系统)，而容器都是调用同一个宿主机内核(如果一个容器化的应用需要一个特定的内核版本，那么它可能不能再每台机器上工作,也不能将一个x86架构编译的应用容器化之后，又期望他在arm架构的机器上运行)。</p>
 <p><img src="/img/vmvscontainer.jpg" alt="虚拟机vs容器"></p>
+<a id="more"></a>
 <h4 id="1-2-容器技术和docker的关系"><a href="#1-2-容器技术和docker的关系" class="headerlink" title="1.2 容器技术和docker的关系"></a>1.2 容器技术和docker的关系</h4><ul>
 <li>docker是容器技术的一个分支，rkt也是一个运行容器的平台，可以作为docker的替代方案。</li>
 </ul>
