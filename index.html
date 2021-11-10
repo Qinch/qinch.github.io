@@ -254,44 +254,6 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2018/11/04/redis-pqsort/">Redis-pqsort</a></h1>
-
- 
-	
-	<time  datetime="2018-11-03T16:00:00.000Z"><p>发表于 2018-11-04 | 字数 <span class="post-count">686</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<h4 id="1-pqsort原理分析"><a href="#1-pqsort原理分析" class="headerlink" title="1.pqsort原理分析"></a>1.pqsort原理分析</h4><h3 id="2-源码"><a href="#2-源码" class="headerlink" title="2.源码"></a>2.源码</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div><div class="line">147</div><div class="line">148</div><div class="line">149</div><div class="line">150</div><div class="line">151</div><div class="line">152</div><div class="line">153</div><div class="line">154</div><div class="line">155</div><div class="line">156</div><div class="line">157</div><div class="line">158</div><div class="line">159</div><div class="line">160</div><div class="line">161</div><div class="line">162</div><div class="line">163</div><div class="line">164</div><div class="line">165</div><div class="line">166</div><div class="line">167</div><div class="line">168</div><div class="line">169</div><div class="line">170</div><div class="line">171</div><div class="line">172</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#include &lt;sys/types.h&gt;</span></div><div class="line"></div><div class="line"><span class="comment">#include &lt;errno.h&gt;</span></div><div class="line"><span class="comment">#include &lt;stdlib.h&gt;</span></div><div class="line"></div><div class="line">static inline char	*med3 (char *, char *, char *,</div><div class="line">    int (*)(const void *, const void *));</div><div class="line">static inline void	 swapfunc (char *, char *, size_t, int);</div><div class="line"></div><div class="line"><span class="comment">#define min(a, b)	(a) &lt; (b) ? a : b</span></div><div class="line"></div><div class="line">/*</div><div class="line"> * Qsort routine from Bentley &amp; McIlroy<span class="string">'s "Engineering a Sort Function".</span></div><div class="line"> */</div><div class="line">#define swapcode(TYPE, parmi, parmj, n) &#123; 		\</div><div class="line">	//i means es包含多少个TYPE			\</div><div class="line">	size_t i = (n) / sizeof (TYPE); 		\</div><div class="line">	TYPE *pi = (TYPE *)(void *)(parmi); 		\</div><div class="line">	TYPE *pj = (TYPE *)(void *)(parmj); 		\</div><div class="line">	do &#123; 						\</div><div class="line">		TYPE	t = *pi;			\</div><div class="line">		*pi++ = *pj;				\</div><div class="line">		*pj++ = t;				\</div><div class="line">        &#125; while (--i &gt; 0);				\</div><div class="line">&#125;</div><div class="line"></div><div class="line">/*</div><div class="line">swaptype:</div><div class="line">0: es == sizeof(long)</div><div class="line">1: a或者es为sizeof(long)整数倍,但是es != sizeof(long)</div><div class="line">2: a和es都不是sizeof(long)的整数倍</div><div class="line">*/</div><div class="line">#define SWAPINIT(a, es) swaptype = ((char *)a - (char *)0) % sizeof(long) || \</div><div class="line">	es % sizeof(long) ? 2 : es == sizeof(long)? 0 : 1;</div><div class="line"></div><div class="line">//n = es, ie交换的a和b指向的元素的内存大小</div><div class="line">static inline void</div><div class="line">swapfunc(char *a, char *b, size_t n, int swaptype)</div><div class="line">&#123;</div><div class="line"></div><div class="line">	if (swaptype &lt;= 1)</div><div class="line">		swapcode(long, a, b, n)</div><div class="line">	else</div><div class="line">		swapcode(char, a, b, n)</div><div class="line">&#125;</div><div class="line"></div><div class="line">//交换a和b指向的内存</div><div class="line">#define swap(a, b)						\</div><div class="line">	if (swaptype == 0) &#123;					\</div><div class="line">		long t = *(long *)(void *)(a);			\</div><div class="line">		*(long *)(void *)(a) = *(long *)(void *)(b);	\</div><div class="line">		*(long *)(void *)(b) = t;			\</div><div class="line">	&#125; else							\</div><div class="line">		swapfunc(a, b, es, swaptype)   //swaptype =1或者2</div><div class="line"></div><div class="line">#define vecswap(a, b, n) if ((n) &gt; 0) swapfunc((a), (b), (size_t)(n), swaptype)</div><div class="line"></div><div class="line">//找到a, b, c的中间值</div><div class="line">static inline char *</div><div class="line">med3(char *a, char *b, char *c,</div><div class="line">    int (*cmp) (const void *, const void *))</div><div class="line">&#123;</div><div class="line"></div><div class="line">	return cmp(a, b) &lt; 0 ?</div><div class="line">	       (cmp(b, c) &lt; 0 ? b : (cmp(a, c) &lt; 0 ? c : a ))</div><div class="line">              :(cmp(b, c) &gt; 0 ? b : (cmp(a, c) &lt; 0 ? a : c ));</div><div class="line">&#125;</div><div class="line"></div><div class="line">static void</div><div class="line">_pqsort(void *a, size_t n, size_t es,</div><div class="line">    int (*cmp) (const void *, const void *), void *lrange, void *rrange)</div><div class="line">&#123;</div><div class="line">	char *pa, *pb, *pc, *pd, *pl, *pm, *pn;</div><div class="line">	size_t d, r;</div><div class="line">	int swaptype, cmp_result;</div><div class="line"></div><div class="line">	//init swaptype</div><div class="line">loop:	SWAPINIT(a, es);</div><div class="line">	if (n &lt; 7) &#123;</div><div class="line">		//采用插入排序</div><div class="line">		for (pm = (char *) a + es; pm &lt; (char *) a + n * es; pm += es)</div><div class="line">			for (pl = pm; pl &gt; (char *) a &amp;&amp; cmp(pl - es, pl) &gt; 0;</div><div class="line">			     pl -= es)</div><div class="line">				swap(pl, pl - es);</div><div class="line">		return;</div><div class="line">	&#125;</div><div class="line">	pm = (char *) a + (n / 2) * es;</div><div class="line">	if (n &gt; 7) &#123;</div><div class="line">		pl = (char *) a;</div><div class="line">		pn = (char *) a + (n - 1) * es;</div><div class="line">		if (n &gt; 40) &#123;</div><div class="line">			d = (n / 8) * es;</div><div class="line">			pl = med3(pl, pl + d, pl + 2 * d, cmp);</div><div class="line">			pm = med3(pm - d, pm, pm + d, cmp);</div><div class="line">			pn = med3(pn - 2 * d, pn - d, pn, cmp);</div><div class="line">		&#125;</div><div class="line">		pm = med3(pl, pm, pn, cmp);</div><div class="line">	&#125;</div><div class="line">	swap(a, pm);</div><div class="line">	pa = pb = (char *) a + es;</div><div class="line"></div><div class="line">	pc = pd = (char *) a + (n - 1) * es;</div><div class="line">	//快排</div><div class="line">	for (;;) &#123;</div><div class="line">		//pa左边的都是等于a[0]的元素</div><div class="line">		while (pb &lt;= pc &amp;&amp; (cmp_result = cmp(pb, a)) &lt;= 0) &#123;</div><div class="line">			if (cmp_result == 0) &#123;</div><div class="line">				swap(pa, pb);</div><div class="line">				pa += es;</div><div class="line">			&#125;</div><div class="line">			pb += es;</div><div class="line">		&#125;</div><div class="line">		//pd右边的都是等于a[0]的元素</div><div class="line">		while (pb &lt;= pc &amp;&amp; (cmp_result = cmp(pc, a)) &gt;= 0) &#123;</div><div class="line">			if (cmp_result == 0) &#123;</div><div class="line">				swap(pc, pd);</div><div class="line">				pd -= es;</div><div class="line">			&#125;</div><div class="line">			pc -= es;</div><div class="line">		&#125;</div><div class="line">		if (pb &gt; pc)</div><div class="line">			break;</div><div class="line">		swap(pb, pc);</div><div class="line">		pb += es;</div><div class="line">		pc -= es;</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	pn = (char *) a + n * es;</div><div class="line">	//pb-pa=小于a[0]的Bytes</div><div class="line">	r = min(pa - (char *) a, pb - pa);</div><div class="line">	vecswap(a, pb - r, r);</div><div class="line">	//</div><div class="line">	r = min((size_t)(pd - pc), pn - pd - es);</div><div class="line">	vecswap(pb, pn - r, r);</div><div class="line">	//left</div><div class="line">	if ((r = pb - pa) &gt; es) &#123;</div><div class="line">                void *_l = a, *_r = ((unsigned char*)a)+r-1;</div><div class="line">                if (!((lrange &lt; _l &amp;&amp; rrange &lt; _l) ||</div><div class="line">                    (lrange &gt; _r &amp;&amp; rrange &gt; _r)))</div><div class="line">		    _pqsort(a, r / es, es, cmp, lrange, rrange);</div><div class="line">        &#125;</div><div class="line">	//right</div><div class="line">	if ((r = pd - pc) &gt; es) &#123;</div><div class="line">                void *_l, *_r;</div><div class="line"></div><div class="line">		/* Iterate rather than recurse to save stack space */</div><div class="line">		a = pn - r;</div><div class="line">		n = r / es;</div><div class="line"></div><div class="line">                _l = a;</div><div class="line">                _r = ((unsigned char*)a)+r-1;</div><div class="line">                if (!((lrange &lt; _l &amp;&amp; rrange &lt; _l) ||</div><div class="line">                    (lrange &gt; _r &amp;&amp; rrange &gt; _r)))</div><div class="line">		    goto loop;</div><div class="line">	&#125;</div><div class="line">/*		qsort(pn - r, r / es, es, cmp);*/</div><div class="line">&#125;</div><div class="line"></div><div class="line">/*</div><div class="line">sort a[lrange, rrange]</div><div class="line">es: ElementSize</div><div class="line">a: array</div><div class="line">n: 数组元素个数</div><div class="line">cmp: CallBack Func</div><div class="line">*/</div><div class="line">void</div><div class="line">pqsort(void *a, size_t n, size_t es,</div><div class="line">    int (*cmp) (const void *, const void *), size_t lrange, size_t rrange)</div><div class="line">&#123;</div><div class="line">    _pqsort(a,n,es,cmp,((unsigned char*)a)+(lrange*es),</div><div class="line">                       ((unsigned char*)a)+((rrange+1)*es)-1);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-
-		
-	
-    </div>
-    <footer>
-      
-        
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
     <h1 class="title"><a href="/2018/10/15/redis-list/">Redis-目录</a></h1>
 
  
@@ -502,6 +464,49 @@ var _hmt = _hmt || [];
 
 
 
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
+    <h1 class="title"><a href="/2017/12/13/redis4-io/">redis4.0_输入/输出缓冲区处理</a></h1>
+
+ 
+	
+	<time  datetime="2017-12-12T16:00:00.000Z"><p>发表于 2017-12-13 | 字数 <span class="post-count">2,806</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<p>之前读了一下redis事件处理器的代码<a href="http://chinchao.xyz/2017/12/10/redis4-event/">点我</a>，今天无所事事，看了下redis对输入缓冲区(querybuf)和输出缓冲区(buf/replylist)的代码，记录一下学习过程。</p>
+<h4 id="1-读缓冲区处理"><a href="#1-读缓冲区处理" class="headerlink" title="1. 读缓冲区处理"></a>1. 读缓冲区处理</h4><p>读取fd数据,然后放入client的输入缓冲区(querybuf)的整个调用栈如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">1211	int processMultibulkBuffer(client *c) &#123;</div><div class="line">(gdb) bt</div><div class="line">#0  processMultibulkBuffer (c=c@entry=0x7ffff6f15e00) at networking.c:1211</div><div class="line">#1  0x000000000043c736 in processInputBuffer (c=0x7ffff6f15e00)</div><div class="line">    at networking.c:1408</div><div class="line">#2  0x00000000004262de in aeProcessEvents (</div><div class="line">    eventLoop=eventLoop@entry=0x7ffff6e340a0, flags=flags@entry=11) at ae.c:452</div><div class="line">#3  0x000000000042670b in aeMain (eventLoop=0x7ffff6e340a0) at ae.c:495</div><div class="line">#4  0x00000000004232d6 in main (argc=&lt;optimized out&gt;, argv=0x7fffffffe3e8)</div><div class="line">    at server.c:3897</div></pre></td></tr></table></figure>
+		
+	
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2017/12/13/redis4-io/#more" class="more-link">阅读全文</a>
+          </div>
+        
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
 
   <nav id="page-nav" class="clearfix">
     <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/2/">下一页 &raquo;</a>
@@ -530,7 +535,7 @@ var _hmt = _hmt || [];
       </li>
     
       <li>
-        <a href="/2018/11/04/redis-pqsort/">Redis-pqsort</a>
+        <a href="/2018/10/15/redis-list/">Redis-目录</a>
       </li>
     
   </ul>
@@ -562,7 +567,7 @@ var _hmt = _hmt || [];
   
     <li><a href="/categories/mysql/">mysql</a><small>1</small></li>
   
-    <li><a href="/categories/redis/">redis</a><small>15</small></li>
+    <li><a href="/categories/redis/">redis</a><small>14</small></li>
   
     <li><a href="/categories/shell/">shell</a><small>1</small></li>
   
@@ -582,7 +587,7 @@ var _hmt = _hmt || [];
 <div class="widget tagcloud">
   <h3 class="title">标签云</h3>
   <div class="entry">
-    <a href="/tags/Asm/" style="font-size: 20px;">Asm</a> <a href="/tags/C/" style="font-size: 17.5px;">C</a> <a href="/tags/Cpp/" style="font-size: 15px;">Cpp</a> <a href="/tags/Endian/" style="font-size: 10px;">Endian</a> <a href="/tags/MFC/" style="font-size: 10px;">MFC</a> <a href="/tags/Transations/" style="font-size: 10px;">Transations</a> <a href="/tags/adlist/" style="font-size: 10px;">adlist</a> <a href="/tags/apue/" style="font-size: 12.5px;">apue</a> <a href="/tags/atoi/" style="font-size: 10px;">atoi</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/civetweb/" style="font-size: 10px;">civetweb</a> <a href="/tags/database/" style="font-size: 10px;">database</a> <a href="/tags/dict/" style="font-size: 10px;">dict</a> <a href="/tags/docker/" style="font-size: 10px;">docker</a> <a href="/tags/event/" style="font-size: 12.5px;">event</a> <a href="/tags/go/" style="font-size: 10px;">go</a> <a href="/tags/https/" style="font-size: 10px;">https</a> <a href="/tags/icp/" style="font-size: 10px;">icp</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/intset/" style="font-size: 10px;">intset</a> <a href="/tags/k8s/" style="font-size: 10px;">k8s</a> <a href="/tags/linux/" style="font-size: 12.5px;">linux</a> <a href="/tags/make/" style="font-size: 10px;">make</a> <a href="/tags/makefile/" style="font-size: 10px;">makefile</a> <a href="/tags/multi/" style="font-size: 10px;">multi</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/network/" style="font-size: 12.5px;">network</a> <a href="/tags/object/" style="font-size: 10px;">object</a> <a href="/tags/pqsort/" style="font-size: 10px;">pqsort</a> <a href="/tags/pub-sub/" style="font-size: 10px;">pub/sub</a> <a href="/tags/redis/" style="font-size: 12.5px;">redis</a> <a href="/tags/redis4-0/" style="font-size: 15px;">redis4.0</a> <a href="/tags/replication/" style="font-size: 10px;">replication</a> <a href="/tags/scp/" style="font-size: 10px;">scp</a> <a href="/tags/sds/" style="font-size: 10px;">sds</a> <a href="/tags/signal/" style="font-size: 10px;">signal</a> <a href="/tags/skiplist/" style="font-size: 10px;">skiplist</a> <a href="/tags/snippet/" style="font-size: 12.5px;">snippet</a> <a href="/tags/sourcecode/" style="font-size: 15px;">sourcecode</a> <a href="/tags/ssl/" style="font-size: 10px;">ssl</a> <a href="/tags/string2ll/" style="font-size: 10px;">string2ll</a> <a href="/tags/t-string/" style="font-size: 10px;">t_string</a> <a href="/tags/thread/" style="font-size: 10px;">thread</a> <a href="/tags/thunk/" style="font-size: 10px;">thunk</a> <a href="/tags/tips/" style="font-size: 10px;">tips</a> <a href="/tags/unpv2/" style="font-size: 10px;">unpv2</a> <a href="/tags/xv6/" style="font-size: 10px;">xv6</a> <a href="/tags/ziplist/" style="font-size: 10px;">ziplist</a> <a href="/tags/内存流/" style="font-size: 10px;">内存流</a> <a href="/tags/勘误/" style="font-size: 10px;">勘误</a>
+    <a href="/tags/Asm/" style="font-size: 20px;">Asm</a> <a href="/tags/C/" style="font-size: 17.5px;">C</a> <a href="/tags/Cpp/" style="font-size: 15px;">Cpp</a> <a href="/tags/Endian/" style="font-size: 10px;">Endian</a> <a href="/tags/MFC/" style="font-size: 10px;">MFC</a> <a href="/tags/Transations/" style="font-size: 10px;">Transations</a> <a href="/tags/adlist/" style="font-size: 10px;">adlist</a> <a href="/tags/apue/" style="font-size: 12.5px;">apue</a> <a href="/tags/atoi/" style="font-size: 10px;">atoi</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/civetweb/" style="font-size: 10px;">civetweb</a> <a href="/tags/database/" style="font-size: 10px;">database</a> <a href="/tags/dict/" style="font-size: 10px;">dict</a> <a href="/tags/docker/" style="font-size: 10px;">docker</a> <a href="/tags/event/" style="font-size: 12.5px;">event</a> <a href="/tags/go/" style="font-size: 10px;">go</a> <a href="/tags/https/" style="font-size: 10px;">https</a> <a href="/tags/icp/" style="font-size: 10px;">icp</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/intset/" style="font-size: 10px;">intset</a> <a href="/tags/k8s/" style="font-size: 10px;">k8s</a> <a href="/tags/linux/" style="font-size: 12.5px;">linux</a> <a href="/tags/make/" style="font-size: 10px;">make</a> <a href="/tags/makefile/" style="font-size: 10px;">makefile</a> <a href="/tags/multi/" style="font-size: 10px;">multi</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/network/" style="font-size: 12.5px;">network</a> <a href="/tags/object/" style="font-size: 10px;">object</a> <a href="/tags/pub-sub/" style="font-size: 10px;">pub/sub</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/redis4-0/" style="font-size: 15px;">redis4.0</a> <a href="/tags/replication/" style="font-size: 10px;">replication</a> <a href="/tags/scp/" style="font-size: 10px;">scp</a> <a href="/tags/sds/" style="font-size: 10px;">sds</a> <a href="/tags/signal/" style="font-size: 10px;">signal</a> <a href="/tags/skiplist/" style="font-size: 10px;">skiplist</a> <a href="/tags/snippet/" style="font-size: 12.5px;">snippet</a> <a href="/tags/sourcecode/" style="font-size: 15px;">sourcecode</a> <a href="/tags/ssl/" style="font-size: 10px;">ssl</a> <a href="/tags/string2ll/" style="font-size: 10px;">string2ll</a> <a href="/tags/t-string/" style="font-size: 10px;">t_string</a> <a href="/tags/thread/" style="font-size: 10px;">thread</a> <a href="/tags/thunk/" style="font-size: 10px;">thunk</a> <a href="/tags/tips/" style="font-size: 10px;">tips</a> <a href="/tags/unpv2/" style="font-size: 10px;">unpv2</a> <a href="/tags/xv6/" style="font-size: 10px;">xv6</a> <a href="/tags/ziplist/" style="font-size: 10px;">ziplist</a> <a href="/tags/内存流/" style="font-size: 10px;">内存流</a> <a href="/tags/勘误/" style="font-size: 10px;">勘误</a>
   </div>
 </div>
 
