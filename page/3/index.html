@@ -182,6 +182,47 @@ var _hmt = _hmt || [];
     <header>
       
 	
+    <h1 class="title"><a href="/2017/04/19/makefile/">Makefile</a></h1>
+
+ 
+	
+	<time  datetime="2017-04-18T16:00:00.000Z"><p>发表于 2017-04-19 | 字数 <span class="post-count">99</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<h4 id="1-makefile的规则"><a href="#1-makefile的规则" class="headerlink" title="1,makefile的规则"></a>1,makefile的规则</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">target ...: prerequisites ...</div><div class="line">	cmd</div><div class="line">	...</div><div class="line">	...</div><div class="line"></div><div class="line">其中，target可以是一个obj file,也可以是一个执行文件，还可以是一个label.</div><div class="line">prerequisites：为生成该target所依赖的文件或target</div><div class="line">cmd(必须以一个Tab键作为开头)：为target要执行的命令</div><div class="line">注：prerequisites中如果有一个以上的文件比target文件要新的话，cmd所定义的命令就会被执行。</div></pre></td></tr></table></figure>
+		
+	
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2017/04/19/makefile/#more" class="more-link">阅读全文</a>
+          </div>
+        
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
     <h1 class="title"><a href="/2017/04/19/thread_signal/">线程-信号</a></h1>
 
  
@@ -206,47 +247,6 @@ var _hmt = _hmt || [];
         
           <div class="alignleft">
             <a href="/2017/04/19/thread_signal/#more" class="more-link">阅读全文</a>
-          </div>
-        
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
-    <h1 class="title"><a href="/2017/04/19/makefile/">Makefile</a></h1>
-
- 
-	
-	<time  datetime="2017-04-18T16:00:00.000Z"><p>发表于 2017-04-19 | 字数 <span class="post-count">99</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<h4 id="1-makefile的规则"><a href="#1-makefile的规则" class="headerlink" title="1,makefile的规则"></a>1,makefile的规则</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">target ...: prerequisites ...</div><div class="line">	cmd</div><div class="line">	...</div><div class="line">	...</div><div class="line"></div><div class="line">其中，target可以是一个obj file,也可以是一个执行文件，还可以是一个label.</div><div class="line">prerequisites：为生成该target所依赖的文件或target</div><div class="line">cmd(必须以一个Tab键作为开头)：为target要执行的命令</div><div class="line">注：prerequisites中如果有一个以上的文件比target文件要新的话，cmd所定义的命令就会被执行。</div></pre></td></tr></table></figure>
-		
-	
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2017/04/19/makefile/#more" class="more-link">阅读全文</a>
           </div>
         
         
@@ -314,11 +314,11 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2016/04/09/cpp-model-6/">C++对象模型-Non-Staitc成员函数</a></h1>
+    <h1 class="title"><a href="/2016/04/09/cpp-model-7/">C++对象模型-ObjectSliced</a></h1>
 
  
 	
-	<time  datetime="2016-04-08T16:00:00.000Z"><p>发表于 2016-04-09 | 字数 <span class="post-count">802</span>
+	<time  datetime="2016-04-08T16:00:00.000Z"><p>发表于 2016-04-09 | 字数 <span class="post-count">458</span>
 
 </p></time>
       
@@ -327,10 +327,10 @@ var _hmt = _hmt || [];
       
 		
 			<h5 id="开发环境"><a href="#开发环境" class="headerlink" title="开发环境"></a>开发环境</h5><p>gcc version 5.4.0 20160609 (Ubuntu 5.4.0-6ubuntu1~16.04.10)  </p>
-<h5 id="1-non-static成员函数调用过程"><a href="#1-non-static成员函数调用过程" class="headerlink" title="1, non-static成员函数调用过程"></a>1, non-static成员函数调用过程</h5><p>class X定义了一个virtual function foo:函数调用过程(栈帧)class X定义了一个virtual function foo:</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#include&lt;iostream&gt;</span></div><div class="line">using namespace std;</div><div class="line"></div><div class="line">//不分析virtual dctor</div><div class="line">class X&#123;</div><div class="line">        public:</div><div class="line">                virtual void foo();</div><div class="line"></div><div class="line">        private:</div><div class="line">                int _x;</div><div class="line">&#125;;</div><div class="line"></div><div class="line">void X::<span class="function"><span class="title">foo</span></span>()</div><div class="line">&#123;</div><div class="line">        cout&lt;&lt;_x&lt;&lt;endl;</div><div class="line">&#125;</div><div class="line"></div><div class="line">X <span class="function"><span class="title">foobar</span></span>()</div><div class="line">&#123;</div><div class="line">        X xx;</div><div class="line">        X *px = new X;</div><div class="line"></div><div class="line">        xx.foo();</div><div class="line">        px-&gt;foo();</div><div class="line"></div><div class="line">        delete px;</div><div class="line">        <span class="built_in">return</span> xx;</div><div class="line">&#125;</div><div class="line"></div><div class="line">int <span class="function"><span class="title">main</span></span>()</div><div class="line">&#123;</div><div class="line">        foobar();</div><div class="line">        <span class="built_in">return</span> 0;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>该程序对应的汇编代码如下（g++ -S -m32 p13.cc）：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line">_ZN1X3fooEv:  //X::foo()</div><div class="line">.LFB1021:</div><div class="line">        .cfi_startproc</div><div class="line">        pushl   %ebp  //ebp压栈([esp]=ebp, esp=esp-4)</div><div class="line">        .cfi_def_cfa_offset 8</div><div class="line">        .cfi_offset 5, -8</div><div class="line">        movl    %esp, %ebp  //ebp=esp</div><div class="line">        .cfi_def_cfa_register 5</div><div class="line">        subl    <span class="variable">$8</span>, %esp  //esp=esp-8</div><div class="line">        movl    8(%ebp), %eax  //eax=[ebp+8],即eax=this</div><div class="line">        movl    4(%eax), %eax  //eax=[eax+4], 即eax=this-&gt;_x</div><div class="line">        subl    <span class="variable">$8</span>, %esp  //esp=esp-8</div><div class="line">        pushl   %eax  //[esp]=eax, esp=esp-4, 即this-&gt;_x压栈</div><div class="line">        pushl   <span class="variable">$_ZSt4cout</span> //std::cout压栈</div><div class="line">        call    _ZNSolsEi  //operator&lt;&lt; 对应两步操作：1，retAddr压栈 2，IP=operator&lt;&lt; func</div><div class="line">        addl    <span class="variable">$16</span>, %esp</div><div class="line">        subl    <span class="variable">$8</span>, %esp</div><div class="line">        pushl   <span class="variable">$_ZSt4endlIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_</span></div><div class="line">        pushl   %eax</div><div class="line">        call    _ZNSolsEPFRSoS_E</div><div class="line">        addl    <span class="variable">$16</span>, %esp</div><div class="line">        nop</div><div class="line">        leave  //ebp=esp, pop ebp</div><div class="line">        .cfi_restore 5</div><div class="line">        .cfi_def_cfa 4, 4</div><div class="line">        ret //pop IP</div><div class="line">        .cfi_endproc</div><div class="line">.LFE1021:</div><div class="line">        .size   _ZN1X3fooEv, .-_ZN1X3fooEv</div><div class="line">        .section        .text._ZN1XC2Ev,<span class="string">"axG"</span>,@progbits,_ZN1XC5Ev,comdat</div><div class="line">        .align 2</div><div class="line">        .weak   _ZN1XC2Ev</div><div class="line">        .type   _ZN1XC2Ev, @<span class="keyword">function</span></div></pre></td></tr></table></figure>
+<h5 id="1-ObjectSliced"><a href="#1-ObjectSliced" class="headerlink" title="1, ObjectSliced"></a>1, ObjectSliced</h5><p>当一个base class object 被直接初始化（copy ctor）/赋值(operator =)为一个derived class object 时，derived object的base 部分会被切割(sliced)以塞入base type内存中，derived type将没有留下任何蛛丝马迹(即：base class object 的vptr不会被derived class object的vptr替换)</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#include&lt;iostream&gt;</span></div><div class="line">using namespace std;</div><div class="line"></div><div class="line">class ZooAnimal&#123;</div><div class="line">        public:</div><div class="line">                ZooAnimal(int l):loc(l)</div><div class="line">                &#123;</div><div class="line">                &#125;</div><div class="line"></div><div class="line">                virtual void <span class="function"><span class="title">print</span></span>()</div><div class="line">                &#123;</div><div class="line">                        cout&lt;&lt;<span class="string">"ZooAnimal"</span>;</div><div class="line">                &#125;</div><div class="line"></div><div class="line">        private:</div><div class="line">                int loc;</div><div class="line">&#125;;</div><div class="line"></div><div class="line"></div><div class="line">class Bear : public ZooAnimal&#123;</div><div class="line">        public:</div><div class="line">                Bear(int c, int l):ZooAnimal(l), cell(c)</div><div class="line">                &#123;</div><div class="line">                &#125;</div><div class="line"></div><div class="line">        private:</div><div class="line">                void <span class="function"><span class="title">print</span></span>()</div><div class="line">                &#123;</div><div class="line">                        cout&lt;&lt;<span class="string">"Bear"</span>;</div><div class="line">                &#125;</div><div class="line"></div><div class="line">        private:</div><div class="line">                int cell;</div><div class="line">&#125;;</div><div class="line"></div><div class="line">int <span class="function"><span class="title">main</span></span>()</div><div class="line">&#123;</div><div class="line">        Bear b(1, 2);</div><div class="line">        ZooAnimal z = b;</div><div class="line">        z.print();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>以上代码对应的汇编如下(g++ -S -m32 p27.cc):</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">_ZN9ZooAnimalC2ERKS_: //ZooAnimal默认copy ctor</div><div class="line">.LFB1031:</div><div class="line">        .cfi_startproc</div><div class="line">        pushl   %ebp</div><div class="line">        .cfi_def_cfa_offset 8</div><div class="line">        .cfi_offset 5, -8</div><div class="line">        movl    %esp, %ebp</div><div class="line">        .cfi_def_cfa_register 5</div><div class="line">        movl    <span class="variable">$_ZTV9ZooAnimal</span>+8, %edx //edx=ZooAnimal.vptr</div><div class="line">        movl    8(%ebp), %eax  //eax=[ebp+8],即eax=z.this</div><div class="line">        movl    %edx, (%eax) //设置z的vptr</div><div class="line">        movl    12(%ebp), %eax //eax=b.this</div><div class="line">        movl    4(%eax), %edx //edx = b.loc</div><div class="line">        movl    8(%ebp), %eax //eax=z.this</div><div class="line">        movl    %edx, 4(%eax) //z.loc = b.loc</div><div class="line">        nop</div><div class="line">        popl    %ebp</div><div class="line">        .cfi_restore 5</div><div class="line">        .cfi_def_cfa 4, 4</div><div class="line">        ret</div><div class="line">        .cfi_endproc</div></pre></td></tr></table></figure>
 		
 	
     </div>
@@ -338,51 +338,7 @@ var _hmt = _hmt || [];
       
         
           <div class="alignleft">
-            <a href="/2016/04/09/cpp-model-6/#more" class="more-link">阅读全文</a>
-          </div>
-        
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
-    <h1 class="title"><a href="/2016/04/09/cpp-model-10/">C++对象模型-virtual继承</a></h1>
-
- 
-	
-	<time  datetime="2016-04-08T16:00:00.000Z"><p>发表于 2016-04-09 | 字数 <span class="post-count">933</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<h4 id="0-测试环境"><a href="#0-测试环境" class="headerlink" title="0.测试环境"></a>0.测试环境</h4><p>gcc version 5.4.0 20160609 (Ubuntu 5.4.0-6ubuntu1~16.04.10)  </p>
-<h4 id="1-虚继承"><a href="#1-虚继承" class="headerlink" title="1.虚继承"></a>1.虚继承</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">        	X</div><div class="line">      	       / \</div><div class="line">      virtual /   \virtual</div><div class="line">             /     \</div><div class="line">	     A	    B	</div><div class="line">             \     /</div><div class="line">              \   /</div><div class="line">               \ /</div><div class="line">                C</div><div class="line"></div><div class="line">`</div></pre></td></tr></table></figure>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div></pre></td><td class="code"><pre><div class="line">class X&#123;</div><div class="line">        public:</div><div class="line">                int i;</div><div class="line">        virtual void <span class="function"><span class="title">show</span></span>()</div><div class="line">        &#123;</div><div class="line">                cout&lt;&lt;<span class="string">"X"</span>&lt;&lt;endl;</div><div class="line">        &#125;</div><div class="line">        virtual ~<span class="function"><span class="title">X</span></span>()</div><div class="line">        &#123;</div><div class="line">                cout&lt;&lt;<span class="string">"~X"</span>;</div><div class="line">        &#125;</div><div class="line">&#125;;</div><div class="line"></div><div class="line">class A:public virtual X&#123;</div><div class="line">        public:</div><div class="line">                int j;</div><div class="line"></div><div class="line">        virtual void <span class="function"><span class="title">show</span></span>()</div><div class="line">        &#123;</div><div class="line">                cout&lt;&lt;<span class="string">"A"</span>&lt;&lt;endl;</div><div class="line">        &#125;</div><div class="line">        virtual ~<span class="function"><span class="title">A</span></span>()</div><div class="line">        &#123;</div><div class="line">                cout&lt;&lt;<span class="string">"~A"</span>;</div><div class="line">        &#125;</div><div class="line">&#125;;</div><div class="line"></div><div class="line">class B:public virtual X&#123;</div><div class="line">        public:</div><div class="line">                int d;</div><div class="line">        virtual void <span class="function"><span class="title">show</span></span>()</div><div class="line">        &#123;</div><div class="line">                cout&lt;&lt;<span class="string">"B"</span>&lt;&lt;endl;</div><div class="line">        &#125;</div><div class="line">        virtual ~<span class="function"><span class="title">B</span></span>()</div><div class="line">        &#123;</div><div class="line">                cout&lt;&lt;<span class="string">"~B"</span>;</div><div class="line">        &#125;</div><div class="line">&#125;;</div><div class="line"></div><div class="line">class C:public A, public B&#123;</div><div class="line">        public:</div><div class="line">                int k;</div><div class="line">        virtual void <span class="function"><span class="title">show</span></span>()</div><div class="line">        &#123;</div><div class="line">                cout&lt;&lt;<span class="string">"C"</span>&lt;&lt;endl;</div><div class="line">        &#125;</div><div class="line">        virtual ~<span class="function"><span class="title">C</span></span>()</div><div class="line">        &#123;</div><div class="line">                cout&lt;&lt;<span class="string">"~C"</span>;</div><div class="line">        &#125;</div><div class="line">&#125;;</div><div class="line"></div><div class="line">void <span class="function"><span class="title">test</span></span>()</div><div class="line">&#123;</div><div class="line">        B *b= new C;</div><div class="line">        b-&gt;show();</div><div class="line">        delete b;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h4 id="1-1-test-函数对应的汇编代码如下"><a href="#1-1-test-函数对应的汇编代码如下" class="headerlink" title="1.1 test()函数对应的汇编代码如下"></a>1.1 test()函数对应的汇编代码如下</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">_Z4testv:  //<span class="built_in">test</span></div><div class="line">.LFB1041:</div><div class="line">        .cfi_startproc</div><div class="line">        pushl   %ebp  //ebp压栈</div><div class="line">        .cfi_def_cfa_offset 8</div><div class="line">        .cfi_offset 5, -8</div><div class="line">        movl    %esp, %ebp //ebp=esp</div><div class="line">        .cfi_def_cfa_register 5</div><div class="line">        pushl   %ebx //ebx压栈</div><div class="line">        subl    <span class="variable">$20</span>, %esp  //esp=esp-20</div><div class="line">        .cfi_offset 3, -12</div><div class="line">        subl    <span class="variable">$12</span>, %esp</div><div class="line">        pushl   <span class="variable">$28</span>  //malloc的内存大小, Class C  Object的大小为28</div><div class="line">        call    _Znwj //malloc内存</div><div class="line">        addl    <span class="variable">$16</span>, %esp</div><div class="line">        movl    %eax, %ebx  //ebx=eax, eax为malloc的内存的首地址，即C.this</div><div class="line">        subl    <span class="variable">$12</span>, %esp</div><div class="line">        pushl   %ebx  //C的首地址压栈</div><div class="line">        call    _ZN1CC1Ev  //C::C()</div><div class="line">        addl    <span class="variable">$16</span>, %esp</div><div class="line">        testl   %ebx, %ebx  //ebx&amp;ebx</div><div class="line">        je      .L36  //<span class="keyword">if</span> ebx&amp;ebx=0, jmp</div><div class="line">        leal    8(%ebx), %eax //eax=C.this+8</div><div class="line">	/*</div><div class="line">		|-------|&lt;-----C.this</div><div class="line">		|  A    |</div><div class="line">		|-------|&lt;-----b</div><div class="line">		|  B    |</div><div class="line">		|-------|</div><div class="line">		|  C    |</div><div class="line">		|-------|</div><div class="line">		|  X    |</div><div class="line">		|-------|</div><div class="line">	*/</div><div class="line">        jmp     .L37</div><div class="line">.L36:</div><div class="line">        movl    <span class="variable">$0</span>, %eax</div><div class="line">.L37:</div><div class="line">        movl    %eax, -12(%ebp)  //b=C.this+8, 即b=BastTypeB.this, 对应的代码为b=new C;</div><div class="line">        movl    -12(%ebp), %eax //eax=b</div><div class="line">        movl    (%eax), %eax //eax=vptr</div><div class="line">        movl    (%eax), %eax //eax=vptr[0]</div><div class="line">        subl    <span class="variable">$12</span>, %esp</div><div class="line">        pushl   -12(%ebp)  //b的地址压栈</div><div class="line">        call    *%eax  //b-&gt;show()</div><div class="line">        addl    <span class="variable">$16</span>, %esp</div><div class="line">        cmpl    <span class="variable">$0</span>, -12(%ebp)</div><div class="line">        je      .L39</div><div class="line">        movl    -12(%ebp), %eax  //eax=b</div><div class="line">        movl    (%eax), %eax //eax=vptr</div><div class="line">        addl    <span class="variable">$8</span>, %eax //eax=vptr+8</div><div class="line">        movl    (%eax), %eax //eax=vptr[2], virtual机制</div><div class="line">        subl    <span class="variable">$12</span>, %esp</div><div class="line">        pushl   -12(%ebp) //b压栈</div><div class="line">        call    *%eax //call vptr[2], delete b</div><div class="line">        addl    <span class="variable">$16</span>, %esp</div><div class="line">.L39:</div><div class="line">	//略</div></pre></td></tr></table></figure>
-		
-	
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2016/04/09/cpp-model-10/#more" class="more-link">阅读全文</a>
+            <a href="/2016/04/09/cpp-model-7/#more" class="more-link">阅读全文</a>
           </div>
         
         
@@ -447,11 +403,11 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2016/04/09/cpp-model-9/">C++对象模型-引用</a></h1>
+    <h1 class="title"><a href="/2016/04/09/cpp-model-6/">C++对象模型-Non-Staitc成员函数</a></h1>
 
  
 	
-	<time  datetime="2016-04-08T16:00:00.000Z"><p>发表于 2016-04-09 | 字数 <span class="post-count">218</span>
+	<time  datetime="2016-04-08T16:00:00.000Z"><p>发表于 2016-04-09 | 字数 <span class="post-count">802</span>
 
 </p></time>
       
@@ -459,10 +415,11 @@ var _hmt = _hmt || [];
     <div class="entry">
       
 		
-			<h4 id="0-测试环境"><a href="#0-测试环境" class="headerlink" title="0.测试环境"></a>0.测试环境</h4><p>gcc version 5.4.0 20160609 (Ubuntu 5.4.0-6ubuntu1~16.04.10)  </p>
-<h4 id="1-引用"><a href="#1-引用" class="headerlink" title="1.引用"></a>1.引用</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line">class Widget&#123;</div><div class="line">public:</div><div class="line">        virtual void show()=0;</div><div class="line"></div><div class="line">        int _w;</div><div class="line">&#125;;</div><div class="line"></div><div class="line">class Bell:public Widget&#123;</div><div class="line">public:</div><div class="line">        void <span class="function"><span class="title">show</span></span>()</div><div class="line">        &#123;</div><div class="line">                cout&lt;&lt;<span class="string">"Bell Bell..."</span>&lt;&lt;endl;</div><div class="line">        &#125;</div><div class="line">&#125;;</div><div class="line"></div><div class="line"></div><div class="line">void <span class="function"><span class="title">test</span></span>()</div><div class="line">&#123;       </div><div class="line">        Bell b;</div><div class="line">        Widget &amp;w =b;</div><div class="line">        w.show();</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>test函数对应的汇编代码如下：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line">_Z4testv:</div><div class="line">.LFB1022:</div><div class="line">        .cfi_startproc</div><div class="line">        pushl   %ebp</div><div class="line">        .cfi_def_cfa_offset 8</div><div class="line">        .cfi_offset 5, -8</div><div class="line">        movl    %esp, %ebp</div><div class="line">        .cfi_def_cfa_register 5</div><div class="line">        subl    <span class="variable">$24</span>, %esp</div><div class="line">        movl    %gs:20, %eax</div><div class="line">        movl    %eax, -12(%ebp)</div><div class="line">        xorl    %eax, %eax</div><div class="line">        subl    <span class="variable">$12</span>, %esp</div><div class="line">        leal    -20(%ebp), %eax  //eax=ebp-20,即eax=b.this</div><div class="line">        pushl   %eax  //b首地址压栈</div><div class="line">        call    _ZN4BellC1Ev //Bell::Bell（）</div><div class="line">        addl    <span class="variable">$16</span>, %esp</div><div class="line">        leal    -20(%ebp), %eax //eax=b.this</div><div class="line">        movl    %eax, -24(%ebp)  //Widget &amp;w=b</div><div class="line">        movl    -24(%ebp), %eax  //eax=&amp;w</div><div class="line">        movl    (%eax), %eax  //eax=vptr4Bell</div><div class="line">        movl    (%eax), %eax //eax = vptr4Bell[0]</div><div class="line">        subl    <span class="variable">$12</span>, %esp</div><div class="line">        pushl   -24(%ebp)  //w.this压栈</div><div class="line">        call    *%eax   //virtual机制，w.show()</div><div class="line">        addl    <span class="variable">$16</span>, %esp</div><div class="line">        nop</div><div class="line">        movl    -12(%ebp), %eax</div><div class="line">        xorl    %gs:20, %eax</div><div class="line">        je      .L5</div><div class="line">        call    __stack_chk_fail</div><div class="line">.L5:</div><div class="line">        leave</div><div class="line">        .cfi_restore 5</div><div class="line">        .cfi_def_cfa 4, 4</div><div class="line">        ret</div><div class="line">        .cfi_endproc</div></pre></td></tr></table></figure>
+			<h5 id="开发环境"><a href="#开发环境" class="headerlink" title="开发环境"></a>开发环境</h5><p>gcc version 5.4.0 20160609 (Ubuntu 5.4.0-6ubuntu1~16.04.10)  </p>
+<h5 id="1-non-static成员函数调用过程"><a href="#1-non-static成员函数调用过程" class="headerlink" title="1, non-static成员函数调用过程"></a>1, non-static成员函数调用过程</h5><p>class X定义了一个virtual function foo:函数调用过程(栈帧)class X定义了一个virtual function foo:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#include&lt;iostream&gt;</span></div><div class="line">using namespace std;</div><div class="line"></div><div class="line">//不分析virtual dctor</div><div class="line">class X&#123;</div><div class="line">        public:</div><div class="line">                virtual void foo();</div><div class="line"></div><div class="line">        private:</div><div class="line">                int _x;</div><div class="line">&#125;;</div><div class="line"></div><div class="line">void X::<span class="function"><span class="title">foo</span></span>()</div><div class="line">&#123;</div><div class="line">        cout&lt;&lt;_x&lt;&lt;endl;</div><div class="line">&#125;</div><div class="line"></div><div class="line">X <span class="function"><span class="title">foobar</span></span>()</div><div class="line">&#123;</div><div class="line">        X xx;</div><div class="line">        X *px = new X;</div><div class="line"></div><div class="line">        xx.foo();</div><div class="line">        px-&gt;foo();</div><div class="line"></div><div class="line">        delete px;</div><div class="line">        <span class="built_in">return</span> xx;</div><div class="line">&#125;</div><div class="line"></div><div class="line">int <span class="function"><span class="title">main</span></span>()</div><div class="line">&#123;</div><div class="line">        foobar();</div><div class="line">        <span class="built_in">return</span> 0;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>该程序对应的汇编代码如下（g++ -S -m32 p13.cc）：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line">_ZN1X3fooEv:  //X::foo()</div><div class="line">.LFB1021:</div><div class="line">        .cfi_startproc</div><div class="line">        pushl   %ebp  //ebp压栈([esp]=ebp, esp=esp-4)</div><div class="line">        .cfi_def_cfa_offset 8</div><div class="line">        .cfi_offset 5, -8</div><div class="line">        movl    %esp, %ebp  //ebp=esp</div><div class="line">        .cfi_def_cfa_register 5</div><div class="line">        subl    <span class="variable">$8</span>, %esp  //esp=esp-8</div><div class="line">        movl    8(%ebp), %eax  //eax=[ebp+8],即eax=this</div><div class="line">        movl    4(%eax), %eax  //eax=[eax+4], 即eax=this-&gt;_x</div><div class="line">        subl    <span class="variable">$8</span>, %esp  //esp=esp-8</div><div class="line">        pushl   %eax  //[esp]=eax, esp=esp-4, 即this-&gt;_x压栈</div><div class="line">        pushl   <span class="variable">$_ZSt4cout</span> //std::cout压栈</div><div class="line">        call    _ZNSolsEi  //operator&lt;&lt; 对应两步操作：1，retAddr压栈 2，IP=operator&lt;&lt; func</div><div class="line">        addl    <span class="variable">$16</span>, %esp</div><div class="line">        subl    <span class="variable">$8</span>, %esp</div><div class="line">        pushl   <span class="variable">$_ZSt4endlIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_</span></div><div class="line">        pushl   %eax</div><div class="line">        call    _ZNSolsEPFRSoS_E</div><div class="line">        addl    <span class="variable">$16</span>, %esp</div><div class="line">        nop</div><div class="line">        leave  //ebp=esp, pop ebp</div><div class="line">        .cfi_restore 5</div><div class="line">        .cfi_def_cfa 4, 4</div><div class="line">        ret //pop IP</div><div class="line">        .cfi_endproc</div><div class="line">.LFE1021:</div><div class="line">        .size   _ZN1X3fooEv, .-_ZN1X3fooEv</div><div class="line">        .section        .text._ZN1XC2Ev,<span class="string">"axG"</span>,@progbits,_ZN1XC5Ev,comdat</div><div class="line">        .align 2</div><div class="line">        .weak   _ZN1XC2Ev</div><div class="line">        .type   _ZN1XC2Ev, @<span class="keyword">function</span></div></pre></td></tr></table></figure>
 		
 	
     </div>
@@ -470,7 +427,7 @@ var _hmt = _hmt || [];
       
         
           <div class="alignleft">
-            <a href="/2016/04/09/cpp-model-9/#more" class="more-link">阅读全文</a>
+            <a href="/2016/04/09/cpp-model-6/#more" class="more-link">阅读全文</a>
           </div>
         
         
@@ -519,6 +476,50 @@ var _hmt = _hmt || [];
         
           <div class="alignleft">
             <a href="/2016/04/09/cpp-model-5/#more" class="more-link">阅读全文</a>
+          </div>
+        
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
+    <h1 class="title"><a href="/2016/04/09/cpp-model-10/">C++对象模型-virtual继承</a></h1>
+
+ 
+	
+	<time  datetime="2016-04-08T16:00:00.000Z"><p>发表于 2016-04-09 | 字数 <span class="post-count">933</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<h4 id="0-测试环境"><a href="#0-测试环境" class="headerlink" title="0.测试环境"></a>0.测试环境</h4><p>gcc version 5.4.0 20160609 (Ubuntu 5.4.0-6ubuntu1~16.04.10)  </p>
+<h4 id="1-虚继承"><a href="#1-虚继承" class="headerlink" title="1.虚继承"></a>1.虚继承</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">        	X</div><div class="line">      	       / \</div><div class="line">      virtual /   \virtual</div><div class="line">             /     \</div><div class="line">	     A	    B	</div><div class="line">             \     /</div><div class="line">              \   /</div><div class="line">               \ /</div><div class="line">                C</div><div class="line"></div><div class="line">`</div></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div></pre></td><td class="code"><pre><div class="line">class X&#123;</div><div class="line">        public:</div><div class="line">                int i;</div><div class="line">        virtual void <span class="function"><span class="title">show</span></span>()</div><div class="line">        &#123;</div><div class="line">                cout&lt;&lt;<span class="string">"X"</span>&lt;&lt;endl;</div><div class="line">        &#125;</div><div class="line">        virtual ~<span class="function"><span class="title">X</span></span>()</div><div class="line">        &#123;</div><div class="line">                cout&lt;&lt;<span class="string">"~X"</span>;</div><div class="line">        &#125;</div><div class="line">&#125;;</div><div class="line"></div><div class="line">class A:public virtual X&#123;</div><div class="line">        public:</div><div class="line">                int j;</div><div class="line"></div><div class="line">        virtual void <span class="function"><span class="title">show</span></span>()</div><div class="line">        &#123;</div><div class="line">                cout&lt;&lt;<span class="string">"A"</span>&lt;&lt;endl;</div><div class="line">        &#125;</div><div class="line">        virtual ~<span class="function"><span class="title">A</span></span>()</div><div class="line">        &#123;</div><div class="line">                cout&lt;&lt;<span class="string">"~A"</span>;</div><div class="line">        &#125;</div><div class="line">&#125;;</div><div class="line"></div><div class="line">class B:public virtual X&#123;</div><div class="line">        public:</div><div class="line">                int d;</div><div class="line">        virtual void <span class="function"><span class="title">show</span></span>()</div><div class="line">        &#123;</div><div class="line">                cout&lt;&lt;<span class="string">"B"</span>&lt;&lt;endl;</div><div class="line">        &#125;</div><div class="line">        virtual ~<span class="function"><span class="title">B</span></span>()</div><div class="line">        &#123;</div><div class="line">                cout&lt;&lt;<span class="string">"~B"</span>;</div><div class="line">        &#125;</div><div class="line">&#125;;</div><div class="line"></div><div class="line">class C:public A, public B&#123;</div><div class="line">        public:</div><div class="line">                int k;</div><div class="line">        virtual void <span class="function"><span class="title">show</span></span>()</div><div class="line">        &#123;</div><div class="line">                cout&lt;&lt;<span class="string">"C"</span>&lt;&lt;endl;</div><div class="line">        &#125;</div><div class="line">        virtual ~<span class="function"><span class="title">C</span></span>()</div><div class="line">        &#123;</div><div class="line">                cout&lt;&lt;<span class="string">"~C"</span>;</div><div class="line">        &#125;</div><div class="line">&#125;;</div><div class="line"></div><div class="line">void <span class="function"><span class="title">test</span></span>()</div><div class="line">&#123;</div><div class="line">        B *b= new C;</div><div class="line">        b-&gt;show();</div><div class="line">        delete b;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="1-1-test-函数对应的汇编代码如下"><a href="#1-1-test-函数对应的汇编代码如下" class="headerlink" title="1.1 test()函数对应的汇编代码如下"></a>1.1 test()函数对应的汇编代码如下</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">_Z4testv:  //<span class="built_in">test</span></div><div class="line">.LFB1041:</div><div class="line">        .cfi_startproc</div><div class="line">        pushl   %ebp  //ebp压栈</div><div class="line">        .cfi_def_cfa_offset 8</div><div class="line">        .cfi_offset 5, -8</div><div class="line">        movl    %esp, %ebp //ebp=esp</div><div class="line">        .cfi_def_cfa_register 5</div><div class="line">        pushl   %ebx //ebx压栈</div><div class="line">        subl    <span class="variable">$20</span>, %esp  //esp=esp-20</div><div class="line">        .cfi_offset 3, -12</div><div class="line">        subl    <span class="variable">$12</span>, %esp</div><div class="line">        pushl   <span class="variable">$28</span>  //malloc的内存大小, Class C  Object的大小为28</div><div class="line">        call    _Znwj //malloc内存</div><div class="line">        addl    <span class="variable">$16</span>, %esp</div><div class="line">        movl    %eax, %ebx  //ebx=eax, eax为malloc的内存的首地址，即C.this</div><div class="line">        subl    <span class="variable">$12</span>, %esp</div><div class="line">        pushl   %ebx  //C的首地址压栈</div><div class="line">        call    _ZN1CC1Ev  //C::C()</div><div class="line">        addl    <span class="variable">$16</span>, %esp</div><div class="line">        testl   %ebx, %ebx  //ebx&amp;ebx</div><div class="line">        je      .L36  //<span class="keyword">if</span> ebx&amp;ebx=0, jmp</div><div class="line">        leal    8(%ebx), %eax //eax=C.this+8</div><div class="line">	/*</div><div class="line">		|-------|&lt;-----C.this</div><div class="line">		|  A    |</div><div class="line">		|-------|&lt;-----b</div><div class="line">		|  B    |</div><div class="line">		|-------|</div><div class="line">		|  C    |</div><div class="line">		|-------|</div><div class="line">		|  X    |</div><div class="line">		|-------|</div><div class="line">	*/</div><div class="line">        jmp     .L37</div><div class="line">.L36:</div><div class="line">        movl    <span class="variable">$0</span>, %eax</div><div class="line">.L37:</div><div class="line">        movl    %eax, -12(%ebp)  //b=C.this+8, 即b=BastTypeB.this, 对应的代码为b=new C;</div><div class="line">        movl    -12(%ebp), %eax //eax=b</div><div class="line">        movl    (%eax), %eax //eax=vptr</div><div class="line">        movl    (%eax), %eax //eax=vptr[0]</div><div class="line">        subl    <span class="variable">$12</span>, %esp</div><div class="line">        pushl   -12(%ebp)  //b的地址压栈</div><div class="line">        call    *%eax  //b-&gt;show()</div><div class="line">        addl    <span class="variable">$16</span>, %esp</div><div class="line">        cmpl    <span class="variable">$0</span>, -12(%ebp)</div><div class="line">        je      .L39</div><div class="line">        movl    -12(%ebp), %eax  //eax=b</div><div class="line">        movl    (%eax), %eax //eax=vptr</div><div class="line">        addl    <span class="variable">$8</span>, %eax //eax=vptr+8</div><div class="line">        movl    (%eax), %eax //eax=vptr[2], virtual机制</div><div class="line">        subl    <span class="variable">$12</span>, %esp</div><div class="line">        pushl   -12(%ebp) //b压栈</div><div class="line">        call    *%eax //call vptr[2], delete b</div><div class="line">        addl    <span class="variable">$16</span>, %esp</div><div class="line">.L39:</div><div class="line">	//略</div></pre></td></tr></table></figure>
+		
+	
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2016/04/09/cpp-model-10/#more" class="more-link">阅读全文</a>
           </div>
         
         
