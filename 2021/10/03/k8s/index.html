@@ -90,7 +90,7 @@ var _hmt = _hmt || [];
 
  
 	
-	<time  datetime="2021-10-02T16:00:00.000Z"><p>发表于 2021-10-03 | 字数 <span class="post-count">3,664</span>
+	<time  datetime="2021-10-02T16:00:00.000Z"><p>发表于 2021-10-03 | 字数 <span class="post-count">3,703</span>
 
 </p></time>
       
@@ -174,11 +174,11 @@ var _hmt = _hmt || [];
 <li>水平伸缩也就以为着多个pod可能提供相同的服务，客户端不想也不关系没个pod的ip, 相反，客户端通过一个单一的ip地址进行访问多个pod.</li>
 </ul>
 <p>服务是一种为一组功能相同的pod提供单一不变的接入点的资源。当服务存在时，该服务的ip地址和端口不会改变。客户端通过ip和port与服务建立连接，然后这些连接会被路由到提供该服务的某个pod上(通过负载均衡)。</p>
-<h4 id="5-2-服务发现"><a href="#5-2-服务发现" class="headerlink" title="5.2 服务发现"></a>5.2 服务发现</h4><p>在k8s集群内部，如果服务先创建，然后再创建客户端pod，那么客户端可以通过DNS发现之前创建的服务。<br>每个服务在k8s集群内部的DNS server中都会存在一个条目，客户端pod可以通过服务名称来访问服务（FQDN）。<br>在前边的例子中，我们创建test-svc服务，则可以通过curl <a href="http://test-svc.default.svc.cluster.local来访问服务。" target="_blank" rel="external">http://test-svc.default.svc.cluster.local来访问服务。</a><br><img src="/img/fqdn.png" alt="FQDN"></p>
 <h4 id="5-3-发现集群内部的服务"><a href="#5-3-发现集群内部的服务" class="headerlink" title="5.3 发现集群内部的服务"></a>5.3 发现集群内部的服务</h4><p>服务的后端可能不止有一个pod, 服务通过标签选择器来指定哪些pod属于同一个组，然后连接到服务的客户端连接，服务会通过负载均衡路由到某个后端pod.</p>
 <p><img src="/img/test-svc.png" alt="集群内pod间连接"></p>
 <p>在测试环境，我们创建一个服务，svc.yaml文件对应的内容为：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">apiVersion: v1</div><div class="line">kind: Service</div><div class="line">metadata:</div><div class="line">  name: <span class="built_in">test</span>-svc</div><div class="line">spec:</div><div class="line">  ports:</div><div class="line">  - port: 80</div><div class="line">    targetPort: 8080</div><div class="line">  selector:</div><div class="line">    app: testing</div></pre></td></tr></table></figure></p>
-<p>然后登陆一个之前创建的dnsutils pod，然后在容器中执行nslookup testsvc<br><img src="/img/svc-test-nl.png" alt="nslookup test-svc"></p>
+<h5 id="5-3-1-服务发现"><a href="#5-3-1-服务发现" class="headerlink" title="5.3.1 服务发现"></a>5.3.1 服务发现</h5><p>在k8s集群内部，创建了服务之后，不需要查询服务的Cluster iP, 然后在把Cluster IP配置给客户端pod。<br>客户端pod可以通过DNS发现之前创建的服务。<br>每个服务在k8s集群内部的DNS server中都会存在一个条目，客户端pod可以通过服务名称来访问服务（FQDN）。<br>在前边的例子中，我们创建test-svc服务, 然后登录之前创建dnsutils pod中的容器， 可以通过通过nslookup查看test-svc.default.svc.cluster.local域名对应的ip(即test-svc的Cluster ip)</p>
+<p>由于都在同一明命名空间，我们可以在dnsutils容器中执行nslookup testsvc,查看服务的Cluster IP<br><img src="/img/svc-test-nl.png" alt="nslookup test-svc"></p>
 <h4 id="5-4-将服务暴露给外部客户端"><a href="#5-4-将服务暴露给外部客户端" class="headerlink" title="5.4 将服务暴露给外部客户端"></a>5.4 将服务暴露给外部客户端</h4><p><img src="/img/externalclient.png" alt="集群外部客户端"></p>
 <p>如上图所示，如果集群外部客户端需要访问集群内部的服务，则可以通过如下几种方式：</p>
 <ul>
