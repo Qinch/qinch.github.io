@@ -90,7 +90,7 @@ var _hmt = _hmt || [];
 
  
 	
-	<time  datetime="2021-10-02T16:00:00.000Z"><p>发表于 2021-10-03 | 字数 <span class="post-count">3,770</span>
+	<time  datetime="2021-10-02T16:00:00.000Z"><p>发表于 2021-10-03 | 字数 <span class="post-count">3,767</span>
 
 </p></time>
       
@@ -147,7 +147,7 @@ var _hmt = _hmt || [];
 <p><img src="/img/docker1.jpg" alt="allen-container容器"></p>
 </li>
 </ul>
-<p>到此介绍了容器相关的基础知识，接下来介绍k8s中的相关概念。</p>
+<p>到此介绍了容器/k8s相关的基础知识，接下来详细介绍k8s。</p>
 <h3 id="2-Pods"><a href="#2-Pods" class="headerlink" title="2 Pods"></a>2 Pods</h3><h4 id="2-1-为什么需要pod"><a href="#2-1-为什么需要pod" class="headerlink" title="2.1 为什么需要pod"></a>2.1 为什么需要pod</h4><p>前边已经提到，容器被设计为每个进程只运行一个进程，那么多个进程就不能聚集在一个单独的容器（但是容器之间是彼此完全隔离的，多个进程分布在对应的多个容器中，进程之间无法做到资源共享）。所以我们需要一种更高级的结构来将容器绑定在一起，并且将它们作为一个单元进行管理，这就是为什么需要pod的根本原理。</p>
 <h4 id="2-2-了解pod"><a href="#2-2-了解pod" class="headerlink" title="2.2 了解pod"></a>2.2 了解pod</h4><ul>
 <li>pod是k8s中的基本的部署单元，在worker nodes之间进行调度。</li>
