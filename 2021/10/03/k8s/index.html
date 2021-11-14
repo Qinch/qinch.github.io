@@ -90,7 +90,7 @@ var _hmt = _hmt || [];
 
  
 	
-	<time  datetime="2021-10-02T16:00:00.000Z"><p>发表于 2021-10-03 | 字数 <span class="post-count">3,803</span>
+	<time  datetime="2021-10-02T16:00:00.000Z"><p>发表于 2021-10-03 | 字数 <span class="post-count">3,857</span>
 
 </p></time>
       
@@ -170,20 +170,20 @@ var _hmt = _hmt || [];
 <h4 id="4-1-创建一个ReplicaSet"><a href="#4-1-创建一个ReplicaSet" class="headerlink" title="4.1 创建一个ReplicaSet"></a>4.1 创建一个ReplicaSet</h4><p>replicaset.yaml文件内容如下:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">apiVersion: apps/v1</div><div class="line">kind: ReplicaSet</div><div class="line">metadata:</div><div class="line"> name: dnsutil-rs</div><div class="line">spec:</div><div class="line"> replicas: 2</div><div class="line"> selector:</div><div class="line">   matchLabels:</div><div class="line">    app: dnsutil</div><div class="line"> template:</div><div class="line">   metadata:</div><div class="line">     labels:</div><div class="line">       app: dnsutil</div><div class="line">   spec:</div><div class="line">     containers:</div><div class="line">     - name: dnsutil</div><div class="line">       image: tutum/dnsutils</div><div class="line">       <span class="built_in">command</span>: [<span class="string">"sleep"</span>, <span class="string">"infinity"</span>]</div></pre></td></tr></table></figure></p>
 <p><img src="/img/replicaset-test.png" alt="创建ReplicaSet"></p>
 <h3 id="5-Services"><a href="#5-Services" class="headerlink" title="5 Services"></a>5 Services</h3><h4 id="5-1-为什么需要服务"><a href="#5-1-为什么需要服务" class="headerlink" title="5.1 为什么需要服务"></a>5.1 为什么需要服务</h4><ul>
-<li>pod是短暂的</li>
+<li>pod是短暂的, 随时都可能被销毁。</li>
 <li>新的pod创建之前不能确定该pod分配的ip</li>
-<li>水平伸缩也就以为着多个pod可能提供相同的服务，客户端不想也不关系没个pod的ip, 相反，客户端通过一个单一的ip地址进行访问多个pod.</li>
+<li>水平伸缩也就以为着多个pod可能提供相同的服务，客户端不想也不关心每个pod的ip, 相反，客户端期望通过一个单一的ip地址进行访问多个pod.</li>
 </ul>
-<p>服务是一种为一组功能相同的pod提供单一不变的接入点的资源。当服务存在时，该服务的ip地址和端口不会改变。客户端通过ip和port与服务建立连接，然后这些连接会被路由到提供该服务的某个pod上(通过负载均衡)。</p>
-<h4 id="5-3-集群内部pod间通信"><a href="#5-3-集群内部pod间通信" class="headerlink" title="5.3 集群内部pod间通信"></a>5.3 集群内部pod间通信</h4><p>服务的后端可能不止有一个pod, 服务通过标签选择器来指定哪些pod属于同一个组，然后连接到服务的客户端连接，服务会通过负载均衡路由到某个后端pod.</p>
+<p>服务是一种为一组功能相同的pod提供单一不变的接入点的资源。当服务存在时，该服务的ip地址和端口（创建服务的时候，通过ports[n].port和ports[n].targetPort 指定了服务端口到pod端口的映射）不会改变。客户端通过ip和port与服务建立连接，然后这些连接会被路由到提供该服务的某个pod上(通过负载均衡)。</p>
+<h4 id="5-2-集群内部pod间通信"><a href="#5-2-集群内部pod间通信" class="headerlink" title="5.2 集群内部pod间通信"></a>5.2 集群内部pod间通信</h4><p>服务的后端可能不止有一个pod, 服务通过标签选择器来指定哪些pod属于同一个组，然后连接到服务的客户端连接，服务会通过负载均衡路由到某个后端pod.</p>
 <p><img src="/img/test-svc.png" alt="集群内pod间连接"></p>
 <p>在测试环境，我们创建一个服务，svc.yaml文件对应的内容为：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">apiVersion: v1</div><div class="line">kind: Service</div><div class="line">metadata:</div><div class="line">  name: <span class="built_in">test</span>-svc</div><div class="line">spec:</div><div class="line">  ports:</div><div class="line">  - port: 80</div><div class="line">    targetPort: 8080</div><div class="line">  selector:</div><div class="line">    app: testing</div></pre></td></tr></table></figure></p>
 <p>同时创建一个ReplicaSet,其中容器运行我们的nodejs应用程序（前边创建的allen镜像）<br>replicaset-fqdn.yaml, 该文件内容如下:</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">apiVersion: apps/v1</div><div class="line">kind: ReplicaSet</div><div class="line">metadata:</div><div class="line"> name: <span class="built_in">test</span>-fqdn</div><div class="line">spec:</div><div class="line"> replicas: 3</div><div class="line"> selector:</div><div class="line">   matchLabels:</div><div class="line">    app: testing</div><div class="line"> template:</div><div class="line">   metadata:</div><div class="line">     labels:</div><div class="line">       app: testing</div><div class="line">   spec:</div><div class="line">     containers:</div><div class="line">     - name: nodejs</div><div class="line">       image: qinchaowhut/allen:v1</div></pre></td></tr></table></figure>
-<h5 id="5-3-1-服务发现"><a href="#5-3-1-服务发现" class="headerlink" title="5.3.1 服务发现"></a>5.3.1 服务发现</h5><p>在k8s集群内部，创建了服务之后，不需要查询服务的Cluster iP, 然后在把Cluster IP配置给客户端pod。<br>客户端pod可以通过DNS发现之前创建的服务。 </p>
+<h5 id="5-2-1-服务发现"><a href="#5-2-1-服务发现" class="headerlink" title="5.2.1 服务发现"></a>5.2.1 服务发现</h5><p>在k8s集群内部，创建了服务之后，不需要查询服务的Cluster iP, 然后在把Cluster IP配置给客户端pod。<br>客户端pod可以通过DNS发现之前创建的服务。 </p>
 <p>每个服务在k8s集群内部的DNS server中都会存在一个条目，客户端pod可以通过服务名称来访问服务（FQDN）。<br>在前边的例子中，我们创建test-svc服务, 然后登录之前创建dnsutils pod中的容器， 可以通过通过nslookup查看test-svc.default.svc.cluster.local域名对应的ip(即test-svc的Cluster ip)<br><code>需要指出的是：</code> Cluseter IP是ping不通的，应为这个Cluseter IP一个虚拟IP, 只有与服务端口结合时才有意义。  </p>
 <p>由于都在同一明命名空间，我们可以在dnsutils容器中执行nslookup testsvc,查看服务的Cluster IP<br><img src="/img/svc-test-nl.png" alt="nslookup test-svc"></p>
-<h4 id="5-4-集群内部服务暴露给外部客户端"><a href="#5-4-集群内部服务暴露给外部客户端" class="headerlink" title="5.4 集群内部服务暴露给外部客户端"></a>5.4 集群内部服务暴露给外部客户端</h4><p><img src="/img/externalclient.png" alt="集群外部客户端"></p>
+<h4 id="5-3-集群内部服务暴露给外部客户端"><a href="#5-3-集群内部服务暴露给外部客户端" class="headerlink" title="5.3 集群内部服务暴露给外部客户端"></a>5.3 集群内部服务暴露给外部客户端</h4><p><img src="/img/externalclient.png" alt="集群外部客户端"></p>
 <p>如上图所示，如果集群外部客户端需要访问集群内部的服务，则可以通过如下几种方式：</p>
 <ul>
 <li>NodePort类型服务</li>
@@ -195,8 +195,8 @@ var _hmt = _hmt || [];
 <p><img src="/img/nodeport.png" alt="NodePort SVC"></p>
 <p>2, LoadBalancer类型服务</p>
 <p>LoadBalancer服务是NodePort服务的一种扩展。客户端通过一个专用的负载均衡器来访问服务（客户端通过负载均衡器的IP连接到服务）。其中负载均衡器将流量重定向到worker node的节点端口。<br><img src="/img/loadbalancer.png" alt="LoadBalancer SVC"></p>
-<h4 id="5-5-pod连接集群外的服务"><a href="#5-5-pod连接集群外的服务" class="headerlink" title="5.5 pod连接集群外的服务"></a>5.5 pod连接集群外的服务</h4><p>略</p>
-<h4 id="5-6-使用headless服务来发现独立的pod"><a href="#5-6-使用headless服务来发现独立的pod" class="headerlink" title="5.6 使用headless服务来发现独立的pod"></a>5.6 使用headless服务来发现独立的pod</h4><p>headless服务，即在创建服务的spec中将cluseterIP字段设置为NONE。<br>当通过DNS服务器查询headless服务名称的时候，DNS服务器返回的是所有pod IP,而不是单个服务的IP. 客户端pod可以通过这些IP连接到其中一个，多个或者全部的pod.</p>
+<h4 id="5-4-pod连接集群外的服务"><a href="#5-4-pod连接集群外的服务" class="headerlink" title="5.4 pod连接集群外的服务"></a>5.4 pod连接集群外的服务</h4><p>略</p>
+<h4 id="5-5-使用headless服务来发现独立的pod"><a href="#5-5-使用headless服务来发现独立的pod" class="headerlink" title="5.5 使用headless服务来发现独立的pod"></a>5.5 使用headless服务来发现独立的pod</h4><p>集群内部pod间也可以通过headless进行通信。headless服务，即在创建服务的spec中将cluseterIP字段设置为NONE。<br>当通过DNS服务器查询headless服务名称的时候，DNS服务器返回的是所有pod IP,而不是单个服务的IP. 客户端pod可以通过这些IP连接到其中一个，多个或者全部的pod.</p>
 <h5 id="5-6-1创建一个headless服务"><a href="#5-6-1创建一个headless服务" class="headerlink" title="5.6.1创建一个headless服务"></a>5.6.1创建一个headless服务</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">apiVersion: v1</div><div class="line">kind: Service</div><div class="line">metadata:</div><div class="line">  name: <span class="built_in">test</span>-svc-headless</div><div class="line">spec:</div><div class="line">  clusterIP: None</div><div class="line">  ports:</div><div class="line">  - port: 80</div><div class="line">    targetPort: 8080</div><div class="line">  selector:</div><div class="line">    app: testing</div></pre></td></tr></table></figure>
 <p><img src="/img/svc-headless.png" alt="headless svc"></p>
 <p>通过nslookup查询test-svc-headless服务<br><img src="/img/svc-headless-test.png" alt="nslookup headless svc"></p>
