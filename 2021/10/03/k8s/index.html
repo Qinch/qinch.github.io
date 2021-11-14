@@ -90,7 +90,7 @@ var _hmt = _hmt || [];
 
  
 	
-	<time  datetime="2021-10-02T16:00:00.000Z"><p>发表于 2021-10-03 | 字数 <span class="post-count">3,863</span>
+	<time  datetime="2021-10-02T16:00:00.000Z"><p>发表于 2021-10-03 | 字数 <span class="post-count">3,880</span>
 
 </p></time>
       
@@ -127,8 +127,14 @@ var _hmt = _hmt || [];
 <li><p><code>Dockerfile</code>的内容如下</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">FROM node:7</div><div class="line">ADD app.js /app.js</div><div class="line">ENTRYPOINT [<span class="string">"node"</span>, <span class="string">"app.js"</span>]</div></pre></td></tr></table></figure>
 </li>
+<li><p><code>app.js</code>和<code>Dockerfile</code>的目录结构如下：</p>
+</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">- image:</div><div class="line">  - app.js</div><div class="line">  - Dockerfile</div></pre></td></tr></table></figure>
+<ul>
 <li><p>创建一个名为<code>allen</code>的镜像</p>
 <ul>
+<li><code>cd ./image</code></li>
 <li><code>docker build -t allen .</code> </li>
 <li><img src="/img/buildimage.jpeg" alt="创建一个新的镜像"></li>
 </ul>
