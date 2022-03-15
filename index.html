@@ -186,7 +186,7 @@ var _hmt = _hmt || [];
 
  
 	
-	<time  datetime="2021-05-01T16:00:00.000Z"><p>发表于 2021-05-02 | 字数 <span class="post-count">100</span>
+	<time  datetime="2021-05-01T16:00:00.000Z"><p>发表于 2021-05-02 | 字数 <span class="post-count">97</span>
 
 </p></time>
       
@@ -194,7 +194,7 @@ var _hmt = _hmt || [];
     <div class="entry">
       
 		
-			<h2 id="1-MySQL架构"><a href="#1-MySQL架构" class="headerlink" title="1, MySQL架构"></a>1, MySQL架构</h2><h3 id="1-1-A-logical-view-of-the-MySQL-server-architecture"><a href="#1-1-A-logical-view-of-the-MySQL-server-architecture" class="headerlink" title="1.1 A logical view of the MySQL server architecture"></a>1.1 A logical view of the MySQL server architecture</h3><p><img src="/img/mysqlarch.jpeg" alt="A logical view of the MySQL server architecture"></p>
+			<h2 id="1-MySQL架构"><a href="#1-MySQL架构" class="headerlink" title="1, MySQL架构"></a>1, MySQL架构</h2><h3 id="1-1-MySQL逻辑架构"><a href="#1-1-MySQL逻辑架构" class="headerlink" title="1.1 MySQL逻辑架构"></a>1.1 MySQL逻辑架构</h3><p><img src="/img/mysqlarch.jpeg" alt="A logical view of the MySQL server architecture"></p>
 <h3 id="1-2-读写锁-共享锁-排他锁"><a href="#1-2-读写锁-共享锁-排他锁" class="headerlink" title="1.2 读写锁(共享锁/排他锁)"></a>1.2 读写锁(共享锁/排他锁)</h3><ul>
 <li>Read locks on a resource are shared, or mutually nonblocking: many clients can read from a resource at the same time and not interfere with each other. </li>
 <li>Write locks, on the other hand, are exclusive—i.e., they block both read locks and other write locks—because the only safe policy is to have a single client writing to the resource at a given time and to prevent all reads when a client is writing.</li>
