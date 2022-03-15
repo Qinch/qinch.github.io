@@ -193,57 +193,6 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2017/12/03/redis4-t_string/">redis4.0_t_string源码剖析</a></h1>
-
- 
-	
-	<time  datetime="2017-12-02T16:00:00.000Z"><p>发表于 2017-12-03 | 字数 <span class="post-count">810</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<h4 id="1-字符串对象介绍"><a href="#1-字符串对象介绍" class="headerlink" title="1.字符串对象介绍"></a>1.字符串对象介绍</h4><ul>
-<li><p>encoding为REDIS_ENCODING_INT</p>
-<ul>
-<li>字符串的内容为“123456”，对应的redisObject内存布局如下：<br><img src="/img/t_string_int.png" alt="encoding_int"></li>
-</ul>
-</li>
-<li><p>encoding为REDIS_ENCODING_EMBSTR内存布局<br><img src="/img/t_string_embstr.png" alt="encoding_embstr"></p>
-</li>
-<li><p>encoding为REDIS_ENCODING_RAW内存布局<br><img src="/img/t_string_raw.png" alt="encoding_raw"></p>
-</li>
-</ul>
-		
-	
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2017/12/03/redis4-t_string/#more" class="more-link">阅读全文</a>
-          </div>
-        
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
     <h1 class="title"><a href="/2017/12/03/redis4-object/">redis4.0_object源码剖析</a></h1>
 
  
@@ -363,6 +312,57 @@ var _hmt = _hmt || [];
         
           <div class="alignleft">
             <a href="/2017/12/03/redis4-ziplist/#more" class="more-link">阅读全文</a>
+          </div>
+        
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
+    <h1 class="title"><a href="/2017/12/03/redis4-t_string/">redis4.0_t_string源码剖析</a></h1>
+
+ 
+	
+	<time  datetime="2017-12-02T16:00:00.000Z"><p>发表于 2017-12-03 | 字数 <span class="post-count">810</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<h4 id="1-字符串对象介绍"><a href="#1-字符串对象介绍" class="headerlink" title="1.字符串对象介绍"></a>1.字符串对象介绍</h4><ul>
+<li><p>encoding为REDIS_ENCODING_INT</p>
+<ul>
+<li>字符串的内容为“123456”，对应的redisObject内存布局如下：<br><img src="/img/t_string_int.png" alt="encoding_int"></li>
+</ul>
+</li>
+<li><p>encoding为REDIS_ENCODING_EMBSTR内存布局<br><img src="/img/t_string_embstr.png" alt="encoding_embstr"></p>
+</li>
+<li><p>encoding为REDIS_ENCODING_RAW内存布局<br><img src="/img/t_string_raw.png" alt="encoding_raw"></p>
+</li>
+</ul>
+		
+	
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2017/12/03/redis4-t_string/#more" class="more-link">阅读全文</a>
           </div>
         
         
