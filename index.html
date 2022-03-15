@@ -186,7 +186,7 @@ var _hmt = _hmt || [];
 
  
 	
-	<time  datetime="2021-05-01T16:00:00.000Z"><p>发表于 2021-05-02 | 字数 <span class="post-count">97</span>
+	<time  datetime="2021-05-01T16:00:00.000Z"><p>发表于 2021-05-02 | 字数 <span class="post-count">301</span>
 
 </p></time>
       
@@ -198,6 +198,32 @@ var _hmt = _hmt || [];
 <h3 id="1-2-读写锁-共享锁-排他锁"><a href="#1-2-读写锁-共享锁-排他锁" class="headerlink" title="1.2 读写锁(共享锁/排他锁)"></a>1.2 读写锁(共享锁/排他锁)</h3><ul>
 <li>Read locks on a resource are shared, or mutually nonblocking: many clients can read from a resource at the same time and not interfere with each other. </li>
 <li>Write locks, on the other hand, are exclusive—i.e., they block both read locks and other write locks—because the only safe policy is to have a single client writing to the resource at a given time and to prevent all reads when a client is writing.</li>
+</ul>
+<h3 id="1-3-四种隔离级别"><a href="#1-3-四种隔离级别" class="headerlink" title="1.3 四种隔离级别"></a>1.3 四种隔离级别</h3><ul>
+<li><p>READ UNCOMMITTED（未提交读）</p>
+<ul>
+<li>In the READ UNCOMMITTED isolation level, transactions can view the results of uncommitted transactions. </li>
+<li>Reading uncommitted data is also known as a dirty read.(脏读)</li>
+</ul>
+</li>
+<li><p>READ COMMITTED(提交读)</p>
+<ul>
+<li>a transaction will see only those changes made by transactions that were already committed when it began, and its changes won’t be visible to others until it has committed.</li>
+<li>You can run the same statement twice and see different data (不可重复读)</li>
+</ul>
+</li>
+<li><p>REPEATABLE READ(可重复读)</p>
+<ul>
+<li>It guarantees that any rows a transaction reads will “look the same” in subsequent reads within the same transaction, but in theory it still allows another tricky problem: phantom reads.</li>
+<li>a phantom read can happen when you select some range of rows, another transaction inserts a new row into the range, and then you select the same range again; you will then see the new “phantom” row.（幻读）</li>
+<li>REPEATABLE READ is MySQL’s default transaction isolation level.</li>
+</ul>
+</li>
+<li><p>SERIALIZABLE(可串行化)</p>
+<ul>
+<li>The highest level of isolation, SERIALIZABLE, solves the phantom read problem by forcing transactions to be ordered so that they can’t possibly conflict. </li>
+</ul>
+</li>
 </ul>
 
 		
