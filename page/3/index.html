@@ -87,6 +87,49 @@ var _hmt = _hmt || [];
     <header>
       
 	
+    <h1 class="title"><a href="/2017/10/02/apue-erros/">APUE中文第三版勘误</a></h1>
+
+ 
+	
+	<time  datetime="2017-10-01T16:00:00.000Z"><p>发表于 2017-10-02 | 字数 <span class="post-count">150</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<p>本博客根据自己对APUE中文第三版的阅读理解，列出其中自己认为翻译错误或者翻译有歧义的部分。</p>
+<h4 id="1-page81"><a href="#1-page81" class="headerlink" title="1,page81"></a>1,page81</h4><p>中文：其中，如果测试文件是否已经存在，mode就为F_OK；否则mode是图4-7中所列常量的按位或。<br>英文(page102)：The mode is either the value F_OK to test if a file exists, or the bitwise OR of any of the flags shown in Figure 4.7.</p>
+<h4 id="2-page89"><a href="#2-page89" class="headerlink" title="2,page89"></a>2,page89</h4><p>中文：对于符号链接，文件长度是在文件名中的实际字节数。<br>英文(page111):For a symbolic link, the file size is the numberof bytes in the filename.<br>
+		
+	
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2017/10/02/apue-erros/#more" class="more-link">阅读全文</a>
+          </div>
+        
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
     <h1 class="title"><a href="/2017/04/19/thread_signal/">线程-信号</a></h1>
 
  
@@ -178,54 +221,6 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2016/04/09/cpp-model-5/">C++对象模型-关于对象</a></h1>
-
- 
-	
-	<time  datetime="2016-04-08T16:00:00.000Z"><p>发表于 2016-04-09 | 字数 <span class="post-count">1,396</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<h5 id="开发环境"><a href="#开发环境" class="headerlink" title="开发环境"></a>开发环境</h5><ul>
-<li>Ubuntu 14.04(32bits)</li>
-<li>GCC      </li>
-<li>编辑器 Cmd Markdown</li>
-<li>画图工具 Processon    </li>
-</ul>
-<h5 id="1-关于对象"><a href="#1-关于对象" class="headerlink" title="1,关于对象"></a>1,关于对象</h5><p>从这篇博客开始真正介绍C++对象模型，前边BB了那么多没用的，终于开始了C++对模型的分析。关于C++对象模型的介绍，我将根据《深度探索C++对象模型》这本书，其书中的每一章，对应一篇博客，博客内容为自己对这本书的理解和补充吧。</p>
-<h6 id="1-1C语言中的struct"><a href="#1-1C语言中的struct" class="headerlink" title="1.1C语言中的struct"></a>1.1C语言中的struct</h6><p>我们知道，C语言是面向过程的，即数据和处理数据的函数时分开的，也就是说，struct中不能包含函数（当然也不能包含static变量）。但是我们可以在struct中声明指向函数的指针来模拟数据和处理数据的函数指针。其中，需要指出的是，c语言中struct变量的数据成员的访问方式都是基于该结构体变量的首地址的偏移量来访问的（同样适用于C++中的class/struct）。<br>即，见如下代码:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#include&lt;stdio.h&gt;</span></div><div class="line"></div><div class="line">struct point3d;</div><div class="line">typedef void (*initfun)(struct point3d*);</div><div class="line"></div><div class="line">struct point3d&#123;</div><div class="line">        <span class="built_in">float</span> x;</div><div class="line">        <span class="built_in">float</span> y;</div><div class="line">        <span class="built_in">float</span> z;</div><div class="line">        initfun init;//指向初始化数据函数的指针</div><div class="line">&#125;;</div><div class="line">void initp(struct point3d* p3d) //struct point3d变量初始化函数</div><div class="line">&#123;</div><div class="line">        p3d-&gt;x=1;</div><div class="line">        p3d-&gt;y=2;</div><div class="line">        p3d-&gt;z=3;</div><div class="line">        <span class="built_in">printf</span>(<span class="string">"%f %f %f\n"</span>,p3d-&gt;x,p3d-&gt;y,p3d-&gt;z);</div><div class="line">        <span class="built_in">return</span>;</div><div class="line">&#125;</div><div class="line"></div><div class="line">int <span class="function"><span class="title">main</span></span>()</div><div class="line">&#123;</div><div class="line">        struct point3d pd;</div><div class="line">        pd.init=initp;//将initp函数地址赋给结构体中指向函数的指针pd.init。</div><div class="line">        pd.init(&amp;pd);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-		
-	
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2016/04/09/cpp-model-5/#more" class="more-link">阅读全文</a>
-          </div>
-        
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
     <h1 class="title"><a href="/2016/04/09/cpp-model-7/">C++对象模型-ObjectSliced</a></h1>
 
  
@@ -251,6 +246,50 @@ var _hmt = _hmt || [];
         
           <div class="alignleft">
             <a href="/2016/04/09/cpp-model-7/#more" class="more-link">阅读全文</a>
+          </div>
+        
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
+    <h1 class="title"><a href="/2016/04/09/cpp-model-9/">C++对象模型-引用</a></h1>
+
+ 
+	
+	<time  datetime="2016-04-08T16:00:00.000Z"><p>发表于 2016-04-09 | 字数 <span class="post-count">218</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<h4 id="0-测试环境"><a href="#0-测试环境" class="headerlink" title="0.测试环境"></a>0.测试环境</h4><p>gcc version 5.4.0 20160609 (Ubuntu 5.4.0-6ubuntu1~16.04.10)  </p>
+<h4 id="1-引用"><a href="#1-引用" class="headerlink" title="1.引用"></a>1.引用</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line">class Widget&#123;</div><div class="line">public:</div><div class="line">        virtual void show()=0;</div><div class="line"></div><div class="line">        int _w;</div><div class="line">&#125;;</div><div class="line"></div><div class="line">class Bell:public Widget&#123;</div><div class="line">public:</div><div class="line">        void <span class="function"><span class="title">show</span></span>()</div><div class="line">        &#123;</div><div class="line">                cout&lt;&lt;<span class="string">"Bell Bell..."</span>&lt;&lt;endl;</div><div class="line">        &#125;</div><div class="line">&#125;;</div><div class="line"></div><div class="line"></div><div class="line">void <span class="function"><span class="title">test</span></span>()</div><div class="line">&#123;       </div><div class="line">        Bell b;</div><div class="line">        Widget &amp;w =b;</div><div class="line">        w.show();</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>test函数对应的汇编代码如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line">_Z4testv:</div><div class="line">.LFB1022:</div><div class="line">        .cfi_startproc</div><div class="line">        pushl   %ebp</div><div class="line">        .cfi_def_cfa_offset 8</div><div class="line">        .cfi_offset 5, -8</div><div class="line">        movl    %esp, %ebp</div><div class="line">        .cfi_def_cfa_register 5</div><div class="line">        subl    <span class="variable">$24</span>, %esp</div><div class="line">        movl    %gs:20, %eax</div><div class="line">        movl    %eax, -12(%ebp)</div><div class="line">        xorl    %eax, %eax</div><div class="line">        subl    <span class="variable">$12</span>, %esp</div><div class="line">        leal    -20(%ebp), %eax  //eax=ebp-20,即eax=b.this</div><div class="line">        pushl   %eax  //b首地址压栈</div><div class="line">        call    _ZN4BellC1Ev //Bell::Bell（）</div><div class="line">        addl    <span class="variable">$16</span>, %esp</div><div class="line">        leal    -20(%ebp), %eax //eax=b.this</div><div class="line">        movl    %eax, -24(%ebp)  //Widget &amp;w=b</div><div class="line">        movl    -24(%ebp), %eax  //eax=&amp;w</div><div class="line">        movl    (%eax), %eax  //eax=vptr4Bell</div><div class="line">        movl    (%eax), %eax //eax = vptr4Bell[0]</div><div class="line">        subl    <span class="variable">$12</span>, %esp</div><div class="line">        pushl   -24(%ebp)  //w.this压栈</div><div class="line">        call    *%eax   //virtual机制，w.show()</div><div class="line">        addl    <span class="variable">$16</span>, %esp</div><div class="line">        nop</div><div class="line">        movl    -12(%ebp), %eax</div><div class="line">        xorl    %gs:20, %eax</div><div class="line">        je      .L5</div><div class="line">        call    __stack_chk_fail</div><div class="line">.L5:</div><div class="line">        leave</div><div class="line">        .cfi_restore 5</div><div class="line">        .cfi_def_cfa 4, 4</div><div class="line">        ret</div><div class="line">        .cfi_endproc</div></pre></td></tr></table></figure>
+		
+	
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2016/04/09/cpp-model-9/#more" class="more-link">阅读全文</a>
           </div>
         
         
@@ -359,50 +398,6 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2016/04/09/cpp-model-9/">C++对象模型-引用</a></h1>
-
- 
-	
-	<time  datetime="2016-04-08T16:00:00.000Z"><p>发表于 2016-04-09 | 字数 <span class="post-count">218</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<h4 id="0-测试环境"><a href="#0-测试环境" class="headerlink" title="0.测试环境"></a>0.测试环境</h4><p>gcc version 5.4.0 20160609 (Ubuntu 5.4.0-6ubuntu1~16.04.10)  </p>
-<h4 id="1-引用"><a href="#1-引用" class="headerlink" title="1.引用"></a>1.引用</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line">class Widget&#123;</div><div class="line">public:</div><div class="line">        virtual void show()=0;</div><div class="line"></div><div class="line">        int _w;</div><div class="line">&#125;;</div><div class="line"></div><div class="line">class Bell:public Widget&#123;</div><div class="line">public:</div><div class="line">        void <span class="function"><span class="title">show</span></span>()</div><div class="line">        &#123;</div><div class="line">                cout&lt;&lt;<span class="string">"Bell Bell..."</span>&lt;&lt;endl;</div><div class="line">        &#125;</div><div class="line">&#125;;</div><div class="line"></div><div class="line"></div><div class="line">void <span class="function"><span class="title">test</span></span>()</div><div class="line">&#123;       </div><div class="line">        Bell b;</div><div class="line">        Widget &amp;w =b;</div><div class="line">        w.show();</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>test函数对应的汇编代码如下：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line">_Z4testv:</div><div class="line">.LFB1022:</div><div class="line">        .cfi_startproc</div><div class="line">        pushl   %ebp</div><div class="line">        .cfi_def_cfa_offset 8</div><div class="line">        .cfi_offset 5, -8</div><div class="line">        movl    %esp, %ebp</div><div class="line">        .cfi_def_cfa_register 5</div><div class="line">        subl    <span class="variable">$24</span>, %esp</div><div class="line">        movl    %gs:20, %eax</div><div class="line">        movl    %eax, -12(%ebp)</div><div class="line">        xorl    %eax, %eax</div><div class="line">        subl    <span class="variable">$12</span>, %esp</div><div class="line">        leal    -20(%ebp), %eax  //eax=ebp-20,即eax=b.this</div><div class="line">        pushl   %eax  //b首地址压栈</div><div class="line">        call    _ZN4BellC1Ev //Bell::Bell（）</div><div class="line">        addl    <span class="variable">$16</span>, %esp</div><div class="line">        leal    -20(%ebp), %eax //eax=b.this</div><div class="line">        movl    %eax, -24(%ebp)  //Widget &amp;w=b</div><div class="line">        movl    -24(%ebp), %eax  //eax=&amp;w</div><div class="line">        movl    (%eax), %eax  //eax=vptr4Bell</div><div class="line">        movl    (%eax), %eax //eax = vptr4Bell[0]</div><div class="line">        subl    <span class="variable">$12</span>, %esp</div><div class="line">        pushl   -24(%ebp)  //w.this压栈</div><div class="line">        call    *%eax   //virtual机制，w.show()</div><div class="line">        addl    <span class="variable">$16</span>, %esp</div><div class="line">        nop</div><div class="line">        movl    -12(%ebp), %eax</div><div class="line">        xorl    %gs:20, %eax</div><div class="line">        je      .L5</div><div class="line">        call    __stack_chk_fail</div><div class="line">.L5:</div><div class="line">        leave</div><div class="line">        .cfi_restore 5</div><div class="line">        .cfi_def_cfa 4, 4</div><div class="line">        ret</div><div class="line">        .cfi_endproc</div></pre></td></tr></table></figure>
-		
-	
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2016/04/09/cpp-model-9/#more" class="more-link">阅读全文</a>
-          </div>
-        
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
     <h1 class="title"><a href="/2016/04/09/cpp-model-6/">C++对象模型-Non-Staitc成员函数</a></h1>
 
  
@@ -428,6 +423,54 @@ var _hmt = _hmt || [];
         
           <div class="alignleft">
             <a href="/2016/04/09/cpp-model-6/#more" class="more-link">阅读全文</a>
+          </div>
+        
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
+    <h1 class="title"><a href="/2016/04/09/cpp-model-5/">C++对象模型-关于对象</a></h1>
+
+ 
+	
+	<time  datetime="2016-04-08T16:00:00.000Z"><p>发表于 2016-04-09 | 字数 <span class="post-count">1,396</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<h5 id="开发环境"><a href="#开发环境" class="headerlink" title="开发环境"></a>开发环境</h5><ul>
+<li>Ubuntu 14.04(32bits)</li>
+<li>GCC      </li>
+<li>编辑器 Cmd Markdown</li>
+<li>画图工具 Processon    </li>
+</ul>
+<h5 id="1-关于对象"><a href="#1-关于对象" class="headerlink" title="1,关于对象"></a>1,关于对象</h5><p>从这篇博客开始真正介绍C++对象模型，前边BB了那么多没用的，终于开始了C++对模型的分析。关于C++对象模型的介绍，我将根据《深度探索C++对象模型》这本书，其书中的每一章，对应一篇博客，博客内容为自己对这本书的理解和补充吧。</p>
+<h6 id="1-1C语言中的struct"><a href="#1-1C语言中的struct" class="headerlink" title="1.1C语言中的struct"></a>1.1C语言中的struct</h6><p>我们知道，C语言是面向过程的，即数据和处理数据的函数时分开的，也就是说，struct中不能包含函数（当然也不能包含static变量）。但是我们可以在struct中声明指向函数的指针来模拟数据和处理数据的函数指针。其中，需要指出的是，c语言中struct变量的数据成员的访问方式都是基于该结构体变量的首地址的偏移量来访问的（同样适用于C++中的class/struct）。<br>即，见如下代码:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#include&lt;stdio.h&gt;</span></div><div class="line"></div><div class="line">struct point3d;</div><div class="line">typedef void (*initfun)(struct point3d*);</div><div class="line"></div><div class="line">struct point3d&#123;</div><div class="line">        <span class="built_in">float</span> x;</div><div class="line">        <span class="built_in">float</span> y;</div><div class="line">        <span class="built_in">float</span> z;</div><div class="line">        initfun init;//指向初始化数据函数的指针</div><div class="line">&#125;;</div><div class="line">void initp(struct point3d* p3d) //struct point3d变量初始化函数</div><div class="line">&#123;</div><div class="line">        p3d-&gt;x=1;</div><div class="line">        p3d-&gt;y=2;</div><div class="line">        p3d-&gt;z=3;</div><div class="line">        <span class="built_in">printf</span>(<span class="string">"%f %f %f\n"</span>,p3d-&gt;x,p3d-&gt;y,p3d-&gt;z);</div><div class="line">        <span class="built_in">return</span>;</div><div class="line">&#125;</div><div class="line"></div><div class="line">int <span class="function"><span class="title">main</span></span>()</div><div class="line">&#123;</div><div class="line">        struct point3d pd;</div><div class="line">        pd.init=initp;//将initp函数地址赋给结构体中指向函数的指针pd.init。</div><div class="line">        pd.init(&amp;pd);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+		
+	
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2016/04/09/cpp-model-5/#more" class="more-link">阅读全文</a>
           </div>
         
         
@@ -493,57 +536,6 @@ var _hmt = _hmt || [];
 
 
 
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
-    <h1 class="title"><a href="/2016/04/07/cpp-model-2/">动态/静态数组内存布局</a></h1>
-
- 
-	
-	<time  datetime="2016-04-06T16:00:00.000Z"><p>发表于 2016-04-07 | 字数 <span class="post-count">1,232</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<h5 id="开发环境"><a href="#开发环境" class="headerlink" title="开发环境"></a>开发环境</h5><ul>
-<li>Ubuntu 14.04(32bits)</li>
-<li>GCC      </li>
-<li>编辑器 Cmd Markdown</li>
-<li>画图工具 Processon    </li>
-</ul>
-<h5 id="1-数组内存布局"><a href="#1-数组内存布局" class="headerlink" title="1,数组内存布局"></a>1,数组内存布局</h5><p><a href="http://chinchao.xyz/2016/04/06/cpp-model-1/">上一节</a> 简单介绍了结构体作为函数参数和返回值的情况。本文准备介绍一下数组的内存布局，即静态数组/动态数组和一维数组/二维数组，顺便介绍一下0长度数组的妙用。</p>
-<h6 id="1-1静态一维数组和动态二维数组"><a href="#1-1静态一维数组和动态二维数组" class="headerlink" title="1.1静态一维数组和动态二维数组"></a>1.1静态一维数组和动态二维数组</h6><p>静态一维数组，即类似于int a[10];动态数据，即类似于int <em>p=(int</em>)malloc(10<em>sizeof(int));（或者int </em>p=new int[10]）;</p>
-<h6 id="1-1-1静态一维数组"><a href="#1-1-1静态一维数组" class="headerlink" title="1.1.1静态一维数组"></a>1.1.1静态一维数组</h6><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#include&lt;stdio.h&gt;</span></div><div class="line"></div><div class="line">int <span class="function"><span class="title">main</span></span>()</div><div class="line">&#123;</div><div class="line">        int a[3];</div><div class="line">        a[0]=1;</div><div class="line">        a[1]=2;</div><div class="line">        a[2]=3;</div><div class="line">        <span class="built_in">printf</span>(<span class="string">"%d %d %d\n"</span>,a[0],a[1],a[2]);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>对应的汇编代码为<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line">	.file	<span class="string">"c2-0.c"</span></div><div class="line">	.section	.rodata</div><div class="line">.LC0:</div><div class="line">	.string	<span class="string">"%d %d %d\n"</span></div><div class="line">	.text</div><div class="line">	.globl	main</div><div class="line">	.type	main, @<span class="keyword">function</span></div><div class="line">main:</div><div class="line">.LFB0:</div><div class="line">	.cfi_startproc</div><div class="line">	pushl	%ebp</div><div class="line">	.cfi_def_cfa_offset 8</div><div class="line">	.cfi_offset 5, -8</div><div class="line">	movl	%esp, %ebp</div><div class="line">	.cfi_def_cfa_register 5</div><div class="line">	andl	$-16, %esp</div><div class="line">	subl	<span class="variable">$32</span>, %esp</div><div class="line">	movl	<span class="variable">$1</span>, 20(%esp) //esp+20即为p[0]的地址</div><div class="line">	movl	<span class="variable">$2</span>, 24(%esp) //esp+24即为p[1]的地址</div><div class="line">	movl	<span class="variable">$3</span>, 28(%esp) //esp+28即为p[2]的地址</div><div class="line">	movl	28(%esp), %ecx</div><div class="line">	movl	24(%esp), %edx</div><div class="line">	movl	20(%esp), %eax</div><div class="line">	movl	%ecx, 12(%esp) //将ecx压栈，即[esp+12]=ecx</div><div class="line">	movl	%edx, 8(%esp) //将edx压栈，即[esp+8]=edx</div><div class="line">	movl	%eax, 4(%esp) //将eax压栈，即[esp+4]=eax</div><div class="line">	movl	$.LC0, (%esp) //类似于“%d %d”字符串的地址</div><div class="line">	call	<span class="built_in">printf</span></div><div class="line">	leave</div><div class="line">	.cfi_restore 5</div><div class="line">	.cfi_def_cfa 4, 4</div><div class="line">	ret</div><div class="line">	.cfi_endproc</div><div class="line">.LFE0:</div><div class="line">	.size	main, .-main</div><div class="line">	.ident	<span class="string">"GCC: (Ubuntu 4.8.4-2ubuntu1~14.04.1) 4.8.4"</span></div><div class="line">	.section	.note.GNU-stack,<span class="string">""</span>,@progbits</div></pre></td></tr></table></figure></p>
-<p>main函数执行时，栈帧为：<br><img src="/img/c2-0.png" alt="img0"><br>
-		
-	
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2016/04/07/cpp-model-2/#more" class="more-link">阅读全文</a>
-          </div>
-        
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
 
   <nav id="page-nav" class="clearfix">
     <a class="extend prev" rel="prev" href="/page/2/">&laquo; 上一页</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/4/">下一页 &raquo;</a>
@@ -564,15 +556,15 @@ var _hmt = _hmt || [];
       </li>
     
       <li>
+        <a href="/2021/05/02/mysql/">《High Performance MySQL》阅读笔记</a>
+      </li>
+    
+      <li>
         <a href="/2021/03/28/golang/">《Go语言并发之道》阅读笔记</a>
       </li>
     
       <li>
         <a href="/2020/01/31/civetweb/">civetweb 支持 mbedtls</a>
-      </li>
-    
-      <li>
-        <a href="/2019/03/17/xv6/">xv6 study</a>
       </li>
     
   </ul>
@@ -604,6 +596,8 @@ var _hmt = _hmt || [];
   
     <li><a href="/categories/makefile/">makefile</a><small>0</small></li>
   
+    <li><a href="/categories/mysql/">mysql</a><small>1</small></li>
+  
     <li><a href="/categories/net/">net</a><small>1</small></li>
   
     <li><a href="/categories/redis/">redis</a><small>12</small></li>
@@ -626,7 +620,7 @@ var _hmt = _hmt || [];
 <div class="widget tagcloud">
   <h3 class="title">标签云</h3>
   <div class="entry">
-    <a href="/tags/Asm/" style="font-size: 20px;">Asm</a> <a href="/tags/C/" style="font-size: 20px;">C</a> <a href="/tags/Cpp/" style="font-size: 17.5px;">Cpp</a> <a href="/tags/Endian/" style="font-size: 10px;">Endian</a> <a href="/tags/Transations/" style="font-size: 10px;">Transations</a> <a href="/tags/adlist/" style="font-size: 10px;">adlist</a> <a href="/tags/apue/" style="font-size: 12.5px;">apue</a> <a href="/tags/atoi/" style="font-size: 10px;">atoi</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/civetweb/" style="font-size: 10px;">civetweb</a> <a href="/tags/concurrency/" style="font-size: 10px;">concurrency</a> <a href="/tags/dict/" style="font-size: 10px;">dict</a> <a href="/tags/docker/" style="font-size: 10px;">docker</a> <a href="/tags/event/" style="font-size: 12.5px;">event</a> <a href="/tags/go/" style="font-size: 10px;">go</a> <a href="/tags/https/" style="font-size: 10px;">https</a> <a href="/tags/icp/" style="font-size: 10px;">icp</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/intset/" style="font-size: 10px;">intset</a> <a href="/tags/k8s/" style="font-size: 10px;">k8s</a> <a href="/tags/linux/" style="font-size: 15px;">linux</a> <a href="/tags/multi/" style="font-size: 10px;">multi</a> <a href="/tags/net/" style="font-size: 10px;">net</a> <a href="/tags/network/" style="font-size: 10px;">network</a> <a href="/tags/object/" style="font-size: 10px;">object</a> <a href="/tags/pub-sub/" style="font-size: 10px;">pub/sub</a> <a href="/tags/redis4-0/" style="font-size: 17.5px;">redis4.0</a> <a href="/tags/scp/" style="font-size: 10px;">scp</a> <a href="/tags/sds/" style="font-size: 10px;">sds</a> <a href="/tags/signal/" style="font-size: 10px;">signal</a> <a href="/tags/skiplist/" style="font-size: 10px;">skiplist</a> <a href="/tags/snippet/" style="font-size: 12.5px;">snippet</a> <a href="/tags/sourcecode/" style="font-size: 17.5px;">sourcecode</a> <a href="/tags/ssl/" style="font-size: 10px;">ssl</a> <a href="/tags/string2ll/" style="font-size: 10px;">string2ll</a> <a href="/tags/t-string/" style="font-size: 10px;">t_string</a> <a href="/tags/tcp/" style="font-size: 10px;">tcp</a> <a href="/tags/thread/" style="font-size: 10px;">thread</a> <a href="/tags/tips/" style="font-size: 10px;">tips</a> <a href="/tags/unpv2/" style="font-size: 10px;">unpv2</a> <a href="/tags/xv6/" style="font-size: 10px;">xv6</a> <a href="/tags/ziplist/" style="font-size: 10px;">ziplist</a> <a href="/tags/内存流/" style="font-size: 10px;">内存流</a> <a href="/tags/勘误/" style="font-size: 10px;">勘误</a>
+    <a href="/tags/Asm/" style="font-size: 20px;">Asm</a> <a href="/tags/C/" style="font-size: 20px;">C</a> <a href="/tags/Cpp/" style="font-size: 17.5px;">Cpp</a> <a href="/tags/Endian/" style="font-size: 10px;">Endian</a> <a href="/tags/Transations/" style="font-size: 10px;">Transations</a> <a href="/tags/adlist/" style="font-size: 10px;">adlist</a> <a href="/tags/apue/" style="font-size: 12.5px;">apue</a> <a href="/tags/atoi/" style="font-size: 10px;">atoi</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/civetweb/" style="font-size: 10px;">civetweb</a> <a href="/tags/concurrency/" style="font-size: 10px;">concurrency</a> <a href="/tags/dict/" style="font-size: 10px;">dict</a> <a href="/tags/docker/" style="font-size: 10px;">docker</a> <a href="/tags/event/" style="font-size: 12.5px;">event</a> <a href="/tags/go/" style="font-size: 10px;">go</a> <a href="/tags/https/" style="font-size: 10px;">https</a> <a href="/tags/icp/" style="font-size: 10px;">icp</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/intset/" style="font-size: 10px;">intset</a> <a href="/tags/k8s/" style="font-size: 10px;">k8s</a> <a href="/tags/linux/" style="font-size: 15px;">linux</a> <a href="/tags/multi/" style="font-size: 10px;">multi</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/net/" style="font-size: 10px;">net</a> <a href="/tags/network/" style="font-size: 10px;">network</a> <a href="/tags/object/" style="font-size: 10px;">object</a> <a href="/tags/pub-sub/" style="font-size: 10px;">pub/sub</a> <a href="/tags/redis4-0/" style="font-size: 17.5px;">redis4.0</a> <a href="/tags/scp/" style="font-size: 10px;">scp</a> <a href="/tags/sds/" style="font-size: 10px;">sds</a> <a href="/tags/signal/" style="font-size: 10px;">signal</a> <a href="/tags/skiplist/" style="font-size: 10px;">skiplist</a> <a href="/tags/snippet/" style="font-size: 12.5px;">snippet</a> <a href="/tags/sourcecode/" style="font-size: 17.5px;">sourcecode</a> <a href="/tags/ssl/" style="font-size: 10px;">ssl</a> <a href="/tags/string2ll/" style="font-size: 10px;">string2ll</a> <a href="/tags/t-string/" style="font-size: 10px;">t_string</a> <a href="/tags/tcp/" style="font-size: 10px;">tcp</a> <a href="/tags/thread/" style="font-size: 10px;">thread</a> <a href="/tags/tips/" style="font-size: 10px;">tips</a> <a href="/tags/unpv2/" style="font-size: 10px;">unpv2</a> <a href="/tags/xv6/" style="font-size: 10px;">xv6</a> <a href="/tags/ziplist/" style="font-size: 10px;">ziplist</a> <a href="/tags/内存流/" style="font-size: 10px;">内存流</a> <a href="/tags/勘误/" style="font-size: 10px;">勘误</a>
   </div>
 </div>
 
