@@ -186,7 +186,7 @@ var _hmt = _hmt || [];
 
  
 	
-	<time  datetime="2021-05-01T16:00:00.000Z"><p>发表于 2021-05-02 | 字数 <span class="post-count">314</span>
+	<time  datetime="2021-05-01T16:00:00.000Z"><p>发表于 2021-05-02 | 字数 <span class="post-count">433</span>
 
 </p></time>
       
@@ -228,6 +228,17 @@ var _hmt = _hmt || [];
 <ul>
 <li>ANSI SQL 隔离级别/每个级别的缺点<br><img src="/img/isolation.jpeg" alt="drawbacks"></li>
 </ul>
+<h2 id="2-索引"><a href="#2-索引" class="headerlink" title="2 索引"></a>2 索引</h2><h3 id="2-1"><a href="#2-1" class="headerlink" title="2.1"></a>2.1</h3><ul>
+<li>Indexes(also called “keys” in MySQL) are data structures that storage engines use to find rows quickly.</li>
+<li>An index contains values from one or more columns in a table. If you index more than one column, the column order is very important, because MySQL can only search efficiently on a leftmost prefix of the index. </li>
+</ul>
+<h3 id="2-2-B-Tree-indexes"><a href="#2-2-B-Tree-indexes" class="headerlink" title="2.2 B-Tree indexes"></a>2.2 B-Tree indexes</h3><ul>
+<li><p>We use the term “B-Tree” for these indexes because that’s what MySQL uses in CREATE TABLE and other statements. However, storage engines might use different storage structures internally. For example, InnoDB uses B+Trees, even though they’re labled BTREE.</p>
+</li>
+<li><p>Also, InnoDB refer to the indexed rows by their primary key values.</p>
+</li>
+</ul>
+<p><img src="/img/index.jpeg" alt="An index built on a B-Tree(technically, a B+Tree) structure"></p>
 
 		
 	
@@ -272,6 +283,43 @@ var _hmt = _hmt || [];
 </li>
 </ul>
 
+		
+	
+    </div>
+    <footer>
+      
+        
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
+    <h1 class="title"><a href="/2021/01/02/unary/">grpc-go unary rpc调用过程</a></h1>
+
+ 
+	
+	<time  datetime="2021-01-01T16:00:00.000Z"><p>发表于 2021-01-02 | 字数 <span class="post-count">0</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			
 		
 	
     </div>
@@ -504,62 +552,9 @@ var _hmt = _hmt || [];
 
 
 
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
-    <h1 class="title"><a href="/2017/12/12/redis4-pub/">redis4.0_发布/订阅</a></h1>
-
- 
-	
-	<time  datetime="2017-12-11T16:00:00.000Z"><p>发表于 2017-12-12 | 字数 <span class="post-count">705</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<h4 id="1-channel的订阅与退订"><a href="#1-channel的订阅与退订" class="headerlink" title="1. channel的订阅与退订"></a>1. channel的订阅与退订</h4><ul>
-<li><p>UBSCRIBE, UNSUBSCRIBE and PUBLISH implement the Publish/Subscribe messaging paradigm where  senders (publishers) are not programmed to send their messages to specific receivers (subscribers). Rather, published messages are characterized into channels, without knowledge of what (if any) subscribers there may be. Subscribers express interest in one or more channels, and only receive messages that are of interest, without knowledge of what (if any) publishers there are.</p>
-</li>
-<li><p>Messages sent by other clients to these channels will be pushed by Redis to all the subscribed clients.</p>
-</li>
-<li><p>A client subscribed to one or more channels should not issue commands, although it can subscribe and unsubscribe to and from other channels. The replies to subscription and unsubscription operations are sent in the form of messages, so that the client can just read a coherent stream of messages where the first element indicates the type of message. The commands that are allowed in the context of a subscribed client are SUBSCRIBE, PSUBSCRIBE, UNSUBSCRIBE, PUNSUBSCRIBE, PING and QUIT.</p>
-<ul>
-<li>Please note that redis-cli will not accept any commands once in subscribed mode and can only quit the mode with Ctrl-C.</li>
-</ul>
-</li>
-<li><p>channel订阅实现:在客户端结构体的pubsub_channels(为dict)添加key为订阅的channel的entry,在server结构体的pubsub_chanels（dict）添加key为channel的entry，该entry为所有订阅该channel的list</p>
-</li>
-</ul>
-		
-	
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2017/12/12/redis4-pub/#more" class="more-link">阅读全文</a>
-          </div>
-        
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
 
   <nav id="page-nav" class="clearfix">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/2/">下一页 &raquo;</a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/2/">下一页 &raquo;</a>
   </nav>
 </div></div>
     <aside id="sidebar" class="alignright">
@@ -585,7 +580,7 @@ var _hmt = _hmt || [];
       </li>
     
       <li>
-        <a href="/2020/01/31/civetweb/">civetweb 支持 mbedtls</a>
+        <a href="/2021/01/02/unary/">grpc-go unary rpc调用过程</a>
       </li>
     
   </ul>
@@ -610,6 +605,8 @@ var _hmt = _hmt || [];
     <li><a href="/categories/civetweb/">civetweb</a><small>1</small></li>
   
     <li><a href="/categories/golang/">golang</a><small>1</small></li>
+  
+    <li><a href="/categories/grpc-go/">grpc-go</a><small>1</small></li>
   
     <li><a href="/categories/k8s/">k8s</a><small>1</small></li>
   
@@ -637,7 +634,7 @@ var _hmt = _hmt || [];
 <div class="widget tagcloud">
   <h3 class="title">标签云</h3>
   <div class="entry">
-    <a href="/tags/Asm/" style="font-size: 20px;">Asm</a> <a href="/tags/C/" style="font-size: 20px;">C</a> <a href="/tags/Cpp/" style="font-size: 17.5px;">Cpp</a> <a href="/tags/Endian/" style="font-size: 10px;">Endian</a> <a href="/tags/Transations/" style="font-size: 10px;">Transations</a> <a href="/tags/adlist/" style="font-size: 10px;">adlist</a> <a href="/tags/apue/" style="font-size: 12.5px;">apue</a> <a href="/tags/atoi/" style="font-size: 10px;">atoi</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/civetweb/" style="font-size: 10px;">civetweb</a> <a href="/tags/concurrency/" style="font-size: 10px;">concurrency</a> <a href="/tags/dict/" style="font-size: 10px;">dict</a> <a href="/tags/docker/" style="font-size: 10px;">docker</a> <a href="/tags/event/" style="font-size: 12.5px;">event</a> <a href="/tags/go/" style="font-size: 10px;">go</a> <a href="/tags/https/" style="font-size: 10px;">https</a> <a href="/tags/icp/" style="font-size: 10px;">icp</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/intset/" style="font-size: 10px;">intset</a> <a href="/tags/k8s/" style="font-size: 10px;">k8s</a> <a href="/tags/linux/" style="font-size: 15px;">linux</a> <a href="/tags/multi/" style="font-size: 10px;">multi</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/net/" style="font-size: 10px;">net</a> <a href="/tags/network/" style="font-size: 10px;">network</a> <a href="/tags/object/" style="font-size: 10px;">object</a> <a href="/tags/pub-sub/" style="font-size: 10px;">pub/sub</a> <a href="/tags/redis4-0/" style="font-size: 17.5px;">redis4.0</a> <a href="/tags/scp/" style="font-size: 10px;">scp</a> <a href="/tags/sds/" style="font-size: 10px;">sds</a> <a href="/tags/signal/" style="font-size: 10px;">signal</a> <a href="/tags/skiplist/" style="font-size: 10px;">skiplist</a> <a href="/tags/snippet/" style="font-size: 12.5px;">snippet</a> <a href="/tags/sourcecode/" style="font-size: 17.5px;">sourcecode</a> <a href="/tags/ssl/" style="font-size: 10px;">ssl</a> <a href="/tags/string2ll/" style="font-size: 10px;">string2ll</a> <a href="/tags/t-string/" style="font-size: 10px;">t_string</a> <a href="/tags/tcp/" style="font-size: 10px;">tcp</a> <a href="/tags/thread/" style="font-size: 10px;">thread</a> <a href="/tags/tips/" style="font-size: 10px;">tips</a> <a href="/tags/unpv2/" style="font-size: 10px;">unpv2</a> <a href="/tags/xv6/" style="font-size: 10px;">xv6</a> <a href="/tags/ziplist/" style="font-size: 10px;">ziplist</a> <a href="/tags/内存流/" style="font-size: 10px;">内存流</a> <a href="/tags/勘误/" style="font-size: 10px;">勘误</a>
+    <a href="/tags/Asm/" style="font-size: 20px;">Asm</a> <a href="/tags/C/" style="font-size: 20px;">C</a> <a href="/tags/Cpp/" style="font-size: 17.5px;">Cpp</a> <a href="/tags/Endian/" style="font-size: 10px;">Endian</a> <a href="/tags/Transations/" style="font-size: 10px;">Transations</a> <a href="/tags/adlist/" style="font-size: 10px;">adlist</a> <a href="/tags/apue/" style="font-size: 12.5px;">apue</a> <a href="/tags/atoi/" style="font-size: 10px;">atoi</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/civetweb/" style="font-size: 10px;">civetweb</a> <a href="/tags/concurrency/" style="font-size: 10px;">concurrency</a> <a href="/tags/dict/" style="font-size: 10px;">dict</a> <a href="/tags/docker/" style="font-size: 10px;">docker</a> <a href="/tags/event/" style="font-size: 12.5px;">event</a> <a href="/tags/go/" style="font-size: 10px;">go</a> <a href="/tags/grpc-go/" style="font-size: 10px;">grpc-go</a> <a href="/tags/https/" style="font-size: 10px;">https</a> <a href="/tags/icp/" style="font-size: 10px;">icp</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/intset/" style="font-size: 10px;">intset</a> <a href="/tags/k8s/" style="font-size: 10px;">k8s</a> <a href="/tags/linux/" style="font-size: 15px;">linux</a> <a href="/tags/multi/" style="font-size: 10px;">multi</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/net/" style="font-size: 10px;">net</a> <a href="/tags/network/" style="font-size: 10px;">network</a> <a href="/tags/object/" style="font-size: 10px;">object</a> <a href="/tags/pub-sub/" style="font-size: 10px;">pub/sub</a> <a href="/tags/redis4-0/" style="font-size: 17.5px;">redis4.0</a> <a href="/tags/scp/" style="font-size: 10px;">scp</a> <a href="/tags/sds/" style="font-size: 10px;">sds</a> <a href="/tags/signal/" style="font-size: 10px;">signal</a> <a href="/tags/skiplist/" style="font-size: 10px;">skiplist</a> <a href="/tags/snippet/" style="font-size: 12.5px;">snippet</a> <a href="/tags/sourcecode/" style="font-size: 17.5px;">sourcecode</a> <a href="/tags/ssl/" style="font-size: 10px;">ssl</a> <a href="/tags/string2ll/" style="font-size: 10px;">string2ll</a> <a href="/tags/t-string/" style="font-size: 10px;">t_string</a> <a href="/tags/tcp/" style="font-size: 10px;">tcp</a> <a href="/tags/thread/" style="font-size: 10px;">thread</a> <a href="/tags/tips/" style="font-size: 10px;">tips</a> <a href="/tags/unpv2/" style="font-size: 10px;">unpv2</a> <a href="/tags/xv6/" style="font-size: 10px;">xv6</a> <a href="/tags/ziplist/" style="font-size: 10px;">ziplist</a> <a href="/tags/内存流/" style="font-size: 10px;">内存流</a> <a href="/tags/勘误/" style="font-size: 10px;">勘误</a>
   </div>
 </div>
 

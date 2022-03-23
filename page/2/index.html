@@ -87,6 +87,59 @@ var _hmt = _hmt || [];
     <header>
       
 	
+    <h1 class="title"><a href="/2017/12/12/redis4-pub/">redis4.0_发布/订阅</a></h1>
+
+ 
+	
+	<time  datetime="2017-12-11T16:00:00.000Z"><p>发表于 2017-12-12 | 字数 <span class="post-count">705</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<h4 id="1-channel的订阅与退订"><a href="#1-channel的订阅与退订" class="headerlink" title="1. channel的订阅与退订"></a>1. channel的订阅与退订</h4><ul>
+<li><p>UBSCRIBE, UNSUBSCRIBE and PUBLISH implement the Publish/Subscribe messaging paradigm where  senders (publishers) are not programmed to send their messages to specific receivers (subscribers). Rather, published messages are characterized into channels, without knowledge of what (if any) subscribers there may be. Subscribers express interest in one or more channels, and only receive messages that are of interest, without knowledge of what (if any) publishers there are.</p>
+</li>
+<li><p>Messages sent by other clients to these channels will be pushed by Redis to all the subscribed clients.</p>
+</li>
+<li><p>A client subscribed to one or more channels should not issue commands, although it can subscribe and unsubscribe to and from other channels. The replies to subscription and unsubscription operations are sent in the form of messages, so that the client can just read a coherent stream of messages where the first element indicates the type of message. The commands that are allowed in the context of a subscribed client are SUBSCRIBE, PSUBSCRIBE, UNSUBSCRIBE, PUNSUBSCRIBE, PING and QUIT.</p>
+<ul>
+<li>Please note that redis-cli will not accept any commands once in subscribed mode and can only quit the mode with Ctrl-C.</li>
+</ul>
+</li>
+<li><p>channel订阅实现:在客户端结构体的pubsub_channels(为dict)添加key为订阅的channel的entry,在server结构体的pubsub_chanels（dict）添加key为channel的entry，该entry为所有订阅该channel的list</p>
+</li>
+</ul>
+		
+	
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2017/12/12/redis4-pub/#more" class="more-link">阅读全文</a>
+          </div>
+        
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
     <h1 class="title"><a href="/2017/12/11/redis4-multi/">redis4.0_Transactions源码剖析</a></h1>
 
  
@@ -252,6 +305,57 @@ var _hmt = _hmt || [];
     <header>
       
 	
+    <h1 class="title"><a href="/2017/12/03/redis4-t_string/">redis4.0_t_string源码剖析</a></h1>
+
+ 
+	
+	<time  datetime="2017-12-02T16:00:00.000Z"><p>发表于 2017-12-03 | 字数 <span class="post-count">810</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<h4 id="1-字符串对象介绍"><a href="#1-字符串对象介绍" class="headerlink" title="1.字符串对象介绍"></a>1.字符串对象介绍</h4><ul>
+<li><p>encoding为REDIS_ENCODING_INT</p>
+<ul>
+<li>字符串的内容为“123456”，对应的redisObject内存布局如下：<br><img src="/img/t_string_int.png" alt="encoding_int"></li>
+</ul>
+</li>
+<li><p>encoding为REDIS_ENCODING_EMBSTR内存布局<br><img src="/img/t_string_embstr.png" alt="encoding_embstr"></p>
+</li>
+<li><p>encoding为REDIS_ENCODING_RAW内存布局<br><img src="/img/t_string_raw.png" alt="encoding_raw"></p>
+</li>
+</ul>
+		
+	
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2017/12/03/redis4-t_string/#more" class="more-link">阅读全文</a>
+          </div>
+        
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
     <h1 class="title"><a href="/2017/12/03/redis4-ziplist/">redis4.0_ziplist源码剖析</a></h1>
 
  
@@ -332,99 +436,6 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2017/12/03/redis4-t_string/">redis4.0_t_string源码剖析</a></h1>
-
- 
-	
-	<time  datetime="2017-12-02T16:00:00.000Z"><p>发表于 2017-12-03 | 字数 <span class="post-count">810</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<h4 id="1-字符串对象介绍"><a href="#1-字符串对象介绍" class="headerlink" title="1.字符串对象介绍"></a>1.字符串对象介绍</h4><ul>
-<li><p>encoding为REDIS_ENCODING_INT</p>
-<ul>
-<li>字符串的内容为“123456”，对应的redisObject内存布局如下：<br><img src="/img/t_string_int.png" alt="encoding_int"></li>
-</ul>
-</li>
-<li><p>encoding为REDIS_ENCODING_EMBSTR内存布局<br><img src="/img/t_string_embstr.png" alt="encoding_embstr"></p>
-</li>
-<li><p>encoding为REDIS_ENCODING_RAW内存布局<br><img src="/img/t_string_raw.png" alt="encoding_raw"></p>
-</li>
-</ul>
-		
-	
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2017/12/03/redis4-t_string/#more" class="more-link">阅读全文</a>
-          </div>
-        
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
-    <h1 class="title"><a href="/2017/12/02/redis4-adlist/">redis4.0_adlist源码剖析</a></h1>
-
- 
-	
-	<time  datetime="2017-12-01T16:00:00.000Z"><p>发表于 2017-12-02 | 字数 <span class="post-count">1,586</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<h4 id="1-adlist介绍"><a href="#1-adlist介绍" class="headerlink" title="1.adlist介绍"></a>1.adlist介绍</h4><p>adlist：双向非循环链表，如图:<br><img src="/img/adlist.png" alt="adlist"></p>
-<h4 id="2-adlist-h源码分析"><a href="#2-adlist-h源码分析" class="headerlink" title="2.adlist.h源码分析"></a>2.adlist.h源码分析</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">/* Node, List, and Iterator are the only data structures used currently. */</div><div class="line">//链表Node,双向非循环链表</div><div class="line">typedef struct listNode &#123;</div><div class="line">    struct listNode *prev;</div><div class="line">    struct listNode *next;</div><div class="line">    void *value;</div><div class="line">&#125; listNode;</div><div class="line"></div><div class="line">//迭代器</div><div class="line">typedef struct listIter &#123;</div><div class="line">    listNode *next;</div><div class="line">    int direction;</div><div class="line">&#125; listIter;</div><div class="line"></div><div class="line">typedef struct list &#123;</div><div class="line">	//指向list中第一个listnode节点</div><div class="line">    listNode *head;</div><div class="line">	//指向list中最后一个listnode节点</div><div class="line">    listNode *tail;</div><div class="line">    void *(*dup)(void *ptr);</div><div class="line">    void (*free)(void *ptr);//用于释放Node中value字段</div><div class="line">    int (*match)(void *ptr, void *key);</div><div class="line">    unsigned long len;//链表的长度</div><div class="line">&#125; list;</div></pre></td></tr></table></figure>
-		
-	
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2017/12/02/redis4-adlist/#more" class="more-link">阅读全文</a>
-          </div>
-        
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
     <h1 class="title"><a href="/2017/12/02/redis4-skiplist/">redis4.0_skiplist源码剖析</a></h1>
 
  
@@ -477,11 +488,11 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2017/12/01/redis4-dict/">redis4.0_dict源码剖析</a></h1>
+    <h1 class="title"><a href="/2017/12/02/redis4-adlist/">redis4.0_adlist源码剖析</a></h1>
 
  
 	
-	<time  datetime="2017-11-30T16:00:00.000Z"><p>发表于 2017-12-01 | 字数 <span class="post-count">6,381</span>
+	<time  datetime="2017-12-01T16:00:00.000Z"><p>发表于 2017-12-02 | 字数 <span class="post-count">1,586</span>
 
 </p></time>
       
@@ -489,18 +500,8 @@ var _hmt = _hmt || [];
     <div class="entry">
       
 		
-			<h4 id="1-dict概述"><a href="#1-dict概述" class="headerlink" title="1.dict概述"></a>1.dict概述</h4><ul>
-<li>dict(字典)：又称为符号表（symbol table）,关联数组（associative array）或者映射（map）,是一种用于保存键值对（key-value pair）的抽象数据结构。字典中每个键都是独一无二的，程序可以在字典中根据键查找与之关联的值，或者根据键来删除整个键值对。</li>
-</ul>
-<h4 id="2-dict结构体"><a href="#2-dict结构体" class="headerlink" title="2.dict结构体"></a>2.dict结构体</h4><ul>
-<li><p>hash table结构体<br><img src="/img/dict0.png" alt="ht"></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">/* Unused arguments generate annoying warnings... */</div><div class="line"><span class="comment">#define DICT_NOTUSED(V) ((void) V)</span></div><div class="line">//<span class="built_in">hash</span> table节点</div><div class="line">typedef struct dictEntry &#123;</div><div class="line">    //键</div><div class="line">    void *key;</div><div class="line">    //值</div><div class="line">    union &#123;</div><div class="line">        void *val;</div><div class="line">        uint64_t u64;</div><div class="line">        int64_t s64;</div><div class="line">        double d;</div><div class="line">    &#125; v;</div><div class="line">    //指向下一个<span class="built_in">hash</span> table节点</div><div class="line">    struct dictEntry *next;</div><div class="line">&#125; dictEntry;</div><div class="line"></div><div class="line">/* This is our <span class="built_in">hash</span> table structure. Every dictionary has two of this as we</div><div class="line"> * implement incremental rehashing, <span class="keyword">for</span> the old to the new table. */</div><div class="line">//<span class="built_in">hash</span> table</div><div class="line">typedef struct dictht &#123;</div><div class="line">    //<span class="built_in">hash</span> table数组[动态二维数组内存布局](http://chinchao.xyz/2016/04/07/cpp-model-2/)</div><div class="line">    dictEntry **table;</div><div class="line">    //<span class="built_in">hash</span> table数组的大小,size=2^n</div><div class="line">    unsigned long size;</div><div class="line">    //sizemash=size-1,<span class="built_in">hash</span> table掩码，用于计算索引值</div><div class="line">    unsigned long sizemask;</div><div class="line">    //<span class="built_in">hash</span> table中节点(dictEntry)的数量</div><div class="line">    unsigned long used;</div><div class="line">&#125; dictht;</div></pre></td></tr></table></figure>
-</li>
-<li><p>dict结构体</p>
-</li>
-</ul>
-<p><img src="/img/dict1.png" alt="ht"></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">//字典</div><div class="line">typedef struct dict &#123;</div><div class="line">    dictType *<span class="built_in">type</span>;</div><div class="line">    void *privdata;</div><div class="line">    dictht ht[2];</div><div class="line">    //rehashidx=-1表示没有进行<span class="built_in">rehash</span>，否则rehashidx表示<span class="built_in">hash</span> table数组中当前待<span class="built_in">rehash</span>的元素的索引</div><div class="line">    long rehashidx; /* rehashing not <span class="keyword">in</span> progress <span class="keyword">if</span> rehashidx == -1 */</div><div class="line">    //安全迭代器的数量</div><div class="line">    unsigned long iterators; /* number of iterators currently running */</div><div class="line">&#125; dict;</div><div class="line"></div><div class="line">//类型特定函数</div><div class="line">typedef struct dictType &#123;</div><div class="line">    uint64_t (*<span class="built_in">hash</span>Function)(const void *key);</div><div class="line">    void *(*keyDup)(void *privdata, const void *key);</div><div class="line">    void *(*valDup)(void *privdata, const void *obj);</div><div class="line">    int (*keyCompare)(void *privdata, const void *key1, const void *key2);</div><div class="line">    void (*keyDestructor)(void *privdata, void *key);</div><div class="line">    void (*valDestructor)(void *privdata, void *obj);</div><div class="line">&#125; dictType;</div></pre></td></tr></table></figure>
+			<h4 id="1-adlist介绍"><a href="#1-adlist介绍" class="headerlink" title="1.adlist介绍"></a>1.adlist介绍</h4><p>adlist：双向非循环链表，如图:<br><img src="/img/adlist.png" alt="adlist"></p>
+<h4 id="2-adlist-h源码分析"><a href="#2-adlist-h源码分析" class="headerlink" title="2.adlist.h源码分析"></a>2.adlist.h源码分析</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">/* Node, List, and Iterator are the only data structures used currently. */</div><div class="line">//链表Node,双向非循环链表</div><div class="line">typedef struct listNode &#123;</div><div class="line">    struct listNode *prev;</div><div class="line">    struct listNode *next;</div><div class="line">    void *value;</div><div class="line">&#125; listNode;</div><div class="line"></div><div class="line">//迭代器</div><div class="line">typedef struct listIter &#123;</div><div class="line">    listNode *next;</div><div class="line">    int direction;</div><div class="line">&#125; listIter;</div><div class="line"></div><div class="line">typedef struct list &#123;</div><div class="line">	//指向list中第一个listnode节点</div><div class="line">    listNode *head;</div><div class="line">	//指向list中最后一个listnode节点</div><div class="line">    listNode *tail;</div><div class="line">    void *(*dup)(void *ptr);</div><div class="line">    void (*free)(void *ptr);//用于释放Node中value字段</div><div class="line">    int (*match)(void *ptr, void *key);</div><div class="line">    unsigned long len;//链表的长度</div><div class="line">&#125; list;</div></pre></td></tr></table></figure>
 		
 	
     </div>
@@ -508,56 +509,7 @@ var _hmt = _hmt || [];
       
         
           <div class="alignleft">
-            <a href="/2017/12/01/redis4-dict/#more" class="more-link">阅读全文</a>
-          </div>
-        
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
-    <h1 class="title"><a href="/2017/12/01/redis4-intset/">redis4.0_intset源码剖析</a></h1>
-
- 
-	
-	<time  datetime="2017-11-30T16:00:00.000Z"><p>发表于 2017-12-01 | 字数 <span class="post-count">2,210</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<h4 id="1-intset概述"><a href="#1-intset概述" class="headerlink" title="1.intset概述"></a>1.intset概述</h4><p>intset(整数集合)可以用于保存类型为int16_t, int32_t, int64_t的整数值，并且保证intset中不会出现重复元素。</p>
-<h4 id="2-intst结构体"><a href="#2-intst结构体" class="headerlink" title="2.intst结构体"></a>2.intst结构体</h4><ul>
-<li><p>表示intset的结构体定义如下：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">typedef struct intset &#123;</div><div class="line">	//intset的编码方式：int*_t</div><div class="line">    uint32_t encoding;</div><div class="line">	//intset中元素的数量</div><div class="line">    uint32_t length;</div><div class="line">	//用于保存元素的数组（0长度数组的妙用）</div><div class="line">    int8_t contents[];</div><div class="line">&#125; intset;</div></pre></td></tr></table></figure>
-</li>
-<li><p>intset对应的图示如下</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">|----------|</div><div class="line">| encoding |</div><div class="line">|----------|</div><div class="line">|  length  |</div><div class="line">|----------|</div><div class="line">|int*_t v0 |</div><div class="line">|----------|</div><div class="line">|int*_t v1 |</div><div class="line">|----------|</div><div class="line">|int*_t    |</div><div class="line">|vlength-1 |</div><div class="line">|----------|</div></pre></td></tr></table></figure>
-</li>
-</ul>
-		
-	
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2017/12/01/redis4-intset/#more" class="more-link">阅读全文</a>
+            <a href="/2017/12/02/redis4-adlist/#more" class="more-link">阅读全文</a>
           </div>
         
         
@@ -625,9 +577,61 @@ var _hmt = _hmt || [];
 
 
 
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
+    <h1 class="title"><a href="/2017/12/01/redis4-dict/">redis4.0_dict源码剖析</a></h1>
+
+ 
+	
+	<time  datetime="2017-11-30T16:00:00.000Z"><p>发表于 2017-12-01 | 字数 <span class="post-count">6,381</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<h4 id="1-dict概述"><a href="#1-dict概述" class="headerlink" title="1.dict概述"></a>1.dict概述</h4><ul>
+<li>dict(字典)：又称为符号表（symbol table）,关联数组（associative array）或者映射（map）,是一种用于保存键值对（key-value pair）的抽象数据结构。字典中每个键都是独一无二的，程序可以在字典中根据键查找与之关联的值，或者根据键来删除整个键值对。</li>
+</ul>
+<h4 id="2-dict结构体"><a href="#2-dict结构体" class="headerlink" title="2.dict结构体"></a>2.dict结构体</h4><ul>
+<li><p>hash table结构体<br><img src="/img/dict0.png" alt="ht"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">/* Unused arguments generate annoying warnings... */</div><div class="line"><span class="comment">#define DICT_NOTUSED(V) ((void) V)</span></div><div class="line">//<span class="built_in">hash</span> table节点</div><div class="line">typedef struct dictEntry &#123;</div><div class="line">    //键</div><div class="line">    void *key;</div><div class="line">    //值</div><div class="line">    union &#123;</div><div class="line">        void *val;</div><div class="line">        uint64_t u64;</div><div class="line">        int64_t s64;</div><div class="line">        double d;</div><div class="line">    &#125; v;</div><div class="line">    //指向下一个<span class="built_in">hash</span> table节点</div><div class="line">    struct dictEntry *next;</div><div class="line">&#125; dictEntry;</div><div class="line"></div><div class="line">/* This is our <span class="built_in">hash</span> table structure. Every dictionary has two of this as we</div><div class="line"> * implement incremental rehashing, <span class="keyword">for</span> the old to the new table. */</div><div class="line">//<span class="built_in">hash</span> table</div><div class="line">typedef struct dictht &#123;</div><div class="line">    //<span class="built_in">hash</span> table数组[动态二维数组内存布局](http://chinchao.xyz/2016/04/07/cpp-model-2/)</div><div class="line">    dictEntry **table;</div><div class="line">    //<span class="built_in">hash</span> table数组的大小,size=2^n</div><div class="line">    unsigned long size;</div><div class="line">    //sizemash=size-1,<span class="built_in">hash</span> table掩码，用于计算索引值</div><div class="line">    unsigned long sizemask;</div><div class="line">    //<span class="built_in">hash</span> table中节点(dictEntry)的数量</div><div class="line">    unsigned long used;</div><div class="line">&#125; dictht;</div></pre></td></tr></table></figure>
+</li>
+<li><p>dict结构体</p>
+</li>
+</ul>
+<p><img src="/img/dict1.png" alt="ht"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">//字典</div><div class="line">typedef struct dict &#123;</div><div class="line">    dictType *<span class="built_in">type</span>;</div><div class="line">    void *privdata;</div><div class="line">    dictht ht[2];</div><div class="line">    //rehashidx=-1表示没有进行<span class="built_in">rehash</span>，否则rehashidx表示<span class="built_in">hash</span> table数组中当前待<span class="built_in">rehash</span>的元素的索引</div><div class="line">    long rehashidx; /* rehashing not <span class="keyword">in</span> progress <span class="keyword">if</span> rehashidx == -1 */</div><div class="line">    //安全迭代器的数量</div><div class="line">    unsigned long iterators; /* number of iterators currently running */</div><div class="line">&#125; dict;</div><div class="line"></div><div class="line">//类型特定函数</div><div class="line">typedef struct dictType &#123;</div><div class="line">    uint64_t (*<span class="built_in">hash</span>Function)(const void *key);</div><div class="line">    void *(*keyDup)(void *privdata, const void *key);</div><div class="line">    void *(*valDup)(void *privdata, const void *obj);</div><div class="line">    int (*keyCompare)(void *privdata, const void *key1, const void *key2);</div><div class="line">    void (*keyDestructor)(void *privdata, void *key);</div><div class="line">    void (*valDestructor)(void *privdata, void *obj);</div><div class="line">&#125; dictType;</div></pre></td></tr></table></figure>
+		
+	
+    </div>
+    <footer>
+      
+        
+          <div class="alignleft">
+            <a href="/2017/12/01/redis4-dict/#more" class="more-link">阅读全文</a>
+          </div>
+        
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
 
   <nav id="page-nav" class="clearfix">
-    <a class="extend prev" rel="prev" href="/">&laquo; 上一页</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/3/">下一页 &raquo;</a>
+    <a class="extend prev" rel="prev" href="/">&laquo; 上一页</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/3/">下一页 &raquo;</a>
   </nav>
 </div></div>
     <aside id="sidebar" class="alignright">
@@ -653,7 +657,7 @@ var _hmt = _hmt || [];
       </li>
     
       <li>
-        <a href="/2020/01/31/civetweb/">civetweb 支持 mbedtls</a>
+        <a href="/2021/01/02/unary/">grpc-go unary rpc调用过程</a>
       </li>
     
   </ul>
@@ -678,6 +682,8 @@ var _hmt = _hmt || [];
     <li><a href="/categories/civetweb/">civetweb</a><small>1</small></li>
   
     <li><a href="/categories/golang/">golang</a><small>1</small></li>
+  
+    <li><a href="/categories/grpc-go/">grpc-go</a><small>1</small></li>
   
     <li><a href="/categories/k8s/">k8s</a><small>1</small></li>
   
@@ -705,7 +711,7 @@ var _hmt = _hmt || [];
 <div class="widget tagcloud">
   <h3 class="title">标签云</h3>
   <div class="entry">
-    <a href="/tags/Asm/" style="font-size: 20px;">Asm</a> <a href="/tags/C/" style="font-size: 20px;">C</a> <a href="/tags/Cpp/" style="font-size: 17.5px;">Cpp</a> <a href="/tags/Endian/" style="font-size: 10px;">Endian</a> <a href="/tags/Transations/" style="font-size: 10px;">Transations</a> <a href="/tags/adlist/" style="font-size: 10px;">adlist</a> <a href="/tags/apue/" style="font-size: 12.5px;">apue</a> <a href="/tags/atoi/" style="font-size: 10px;">atoi</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/civetweb/" style="font-size: 10px;">civetweb</a> <a href="/tags/concurrency/" style="font-size: 10px;">concurrency</a> <a href="/tags/dict/" style="font-size: 10px;">dict</a> <a href="/tags/docker/" style="font-size: 10px;">docker</a> <a href="/tags/event/" style="font-size: 12.5px;">event</a> <a href="/tags/go/" style="font-size: 10px;">go</a> <a href="/tags/https/" style="font-size: 10px;">https</a> <a href="/tags/icp/" style="font-size: 10px;">icp</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/intset/" style="font-size: 10px;">intset</a> <a href="/tags/k8s/" style="font-size: 10px;">k8s</a> <a href="/tags/linux/" style="font-size: 15px;">linux</a> <a href="/tags/multi/" style="font-size: 10px;">multi</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/net/" style="font-size: 10px;">net</a> <a href="/tags/network/" style="font-size: 10px;">network</a> <a href="/tags/object/" style="font-size: 10px;">object</a> <a href="/tags/pub-sub/" style="font-size: 10px;">pub/sub</a> <a href="/tags/redis4-0/" style="font-size: 17.5px;">redis4.0</a> <a href="/tags/scp/" style="font-size: 10px;">scp</a> <a href="/tags/sds/" style="font-size: 10px;">sds</a> <a href="/tags/signal/" style="font-size: 10px;">signal</a> <a href="/tags/skiplist/" style="font-size: 10px;">skiplist</a> <a href="/tags/snippet/" style="font-size: 12.5px;">snippet</a> <a href="/tags/sourcecode/" style="font-size: 17.5px;">sourcecode</a> <a href="/tags/ssl/" style="font-size: 10px;">ssl</a> <a href="/tags/string2ll/" style="font-size: 10px;">string2ll</a> <a href="/tags/t-string/" style="font-size: 10px;">t_string</a> <a href="/tags/tcp/" style="font-size: 10px;">tcp</a> <a href="/tags/thread/" style="font-size: 10px;">thread</a> <a href="/tags/tips/" style="font-size: 10px;">tips</a> <a href="/tags/unpv2/" style="font-size: 10px;">unpv2</a> <a href="/tags/xv6/" style="font-size: 10px;">xv6</a> <a href="/tags/ziplist/" style="font-size: 10px;">ziplist</a> <a href="/tags/内存流/" style="font-size: 10px;">内存流</a> <a href="/tags/勘误/" style="font-size: 10px;">勘误</a>
+    <a href="/tags/Asm/" style="font-size: 20px;">Asm</a> <a href="/tags/C/" style="font-size: 20px;">C</a> <a href="/tags/Cpp/" style="font-size: 17.5px;">Cpp</a> <a href="/tags/Endian/" style="font-size: 10px;">Endian</a> <a href="/tags/Transations/" style="font-size: 10px;">Transations</a> <a href="/tags/adlist/" style="font-size: 10px;">adlist</a> <a href="/tags/apue/" style="font-size: 12.5px;">apue</a> <a href="/tags/atoi/" style="font-size: 10px;">atoi</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/civetweb/" style="font-size: 10px;">civetweb</a> <a href="/tags/concurrency/" style="font-size: 10px;">concurrency</a> <a href="/tags/dict/" style="font-size: 10px;">dict</a> <a href="/tags/docker/" style="font-size: 10px;">docker</a> <a href="/tags/event/" style="font-size: 12.5px;">event</a> <a href="/tags/go/" style="font-size: 10px;">go</a> <a href="/tags/grpc-go/" style="font-size: 10px;">grpc-go</a> <a href="/tags/https/" style="font-size: 10px;">https</a> <a href="/tags/icp/" style="font-size: 10px;">icp</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/intset/" style="font-size: 10px;">intset</a> <a href="/tags/k8s/" style="font-size: 10px;">k8s</a> <a href="/tags/linux/" style="font-size: 15px;">linux</a> <a href="/tags/multi/" style="font-size: 10px;">multi</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/net/" style="font-size: 10px;">net</a> <a href="/tags/network/" style="font-size: 10px;">network</a> <a href="/tags/object/" style="font-size: 10px;">object</a> <a href="/tags/pub-sub/" style="font-size: 10px;">pub/sub</a> <a href="/tags/redis4-0/" style="font-size: 17.5px;">redis4.0</a> <a href="/tags/scp/" style="font-size: 10px;">scp</a> <a href="/tags/sds/" style="font-size: 10px;">sds</a> <a href="/tags/signal/" style="font-size: 10px;">signal</a> <a href="/tags/skiplist/" style="font-size: 10px;">skiplist</a> <a href="/tags/snippet/" style="font-size: 12.5px;">snippet</a> <a href="/tags/sourcecode/" style="font-size: 17.5px;">sourcecode</a> <a href="/tags/ssl/" style="font-size: 10px;">ssl</a> <a href="/tags/string2ll/" style="font-size: 10px;">string2ll</a> <a href="/tags/t-string/" style="font-size: 10px;">t_string</a> <a href="/tags/tcp/" style="font-size: 10px;">tcp</a> <a href="/tags/thread/" style="font-size: 10px;">thread</a> <a href="/tags/tips/" style="font-size: 10px;">tips</a> <a href="/tags/unpv2/" style="font-size: 10px;">unpv2</a> <a href="/tags/xv6/" style="font-size: 10px;">xv6</a> <a href="/tags/ziplist/" style="font-size: 10px;">ziplist</a> <a href="/tags/内存流/" style="font-size: 10px;">内存流</a> <a href="/tags/勘误/" style="font-size: 10px;">勘误</a>
   </div>
 </div>
 
