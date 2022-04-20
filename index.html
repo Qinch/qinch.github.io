@@ -87,11 +87,11 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2022/03/03/cpp-model-list/">C++对象模型-目录</a></h1>
+    <h1 class="title"><a href="/2022/04/20/cpp-model-list/">C++对象模型-目录</a></h1>
 
  
 	
-	<time  datetime="2022-03-03T13:13:04.447Z"><p>发表于 2022-03-03 | 字数 <span class="post-count">141</span>
+	<time  datetime="2022-04-20T12:03:05.050Z"><p>发表于 2022-04-20 | 字数 <span class="post-count">172</span>
 
 </p></time>
       
@@ -115,6 +115,7 @@ var _hmt = _hmt || [];
 <li><a href="http://chinchao.xyz/2016/04/08/cpp-model-3/">switch/if-else实现机制</a></li>
 </ol>
 <h4 id="2-参考文献"><a href="#2-参考文献" class="headerlink" title="2.参考文献"></a>2.参考文献</h4><p>《深度探索C++对象模型》<br>《CSAPP中文第二版》<br>《程序员的自我修养》<br>《C++反汇编与逆向分析技术揭秘》<br>《老码识途》</p>
+<p>我的博客即将同步至腾讯云+社区，邀请大家一同入驻：<a href="https://cloud.tencent.com/developer/support-plan?invite_code=1ay00pvg7r9w7" target="_blank" rel="external">https://cloud.tencent.com/developer/support-plan?invite_code=1ay00pvg7r9w7</a></p>
 
 		
 	
@@ -186,7 +187,7 @@ var _hmt = _hmt || [];
 
  
 	
-	<time  datetime="2021-05-01T16:00:00.000Z"><p>发表于 2021-05-02 | 字数 <span class="post-count">433</span>
+	<time  datetime="2021-05-01T16:00:00.000Z"><p>发表于 2021-05-02 | 字数 <span class="post-count">535</span>
 
 </p></time>
       
@@ -237,9 +238,48 @@ var _hmt = _hmt || [];
 </li>
 <li><p>Also, InnoDB refer to the indexed rows by their primary key values.</p>
 </li>
+<li><p>A B-Tree index speeds up data access because the storage engine doesn’t have to scan the whole table to find the desired data. Instead, it starts at the root node (not shown in this figure). The slots in the root node hold pointers to child nodes, and the storage engine follows these pointers. It finds the right pointer by looking at the values in the node pages, which define the upper and lower bounds of the values in the child nodes. Eventually, the storage engine either determines that the desired value doesn’t exist or successfully reaches a leaf page.</p>
+</li>
 </ul>
 <p><img src="/img/index.jpeg" alt="An index built on a B-Tree(technically, a B+Tree) structure"></p>
 
+		
+	
+    </div>
+    <footer>
+      
+        
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
+    <h1 class="title"><a href="/2021/03/28/go/">《Go语言设计与实现》阅读笔记</a></h1>
+
+ 
+	
+	<time  datetime="2021-03-27T16:00:00.000Z"><p>发表于 2021-03-28 | 字数 <span class="post-count">0</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			
 		
 	
     </div>
@@ -509,49 +549,6 @@ var _hmt = _hmt || [];
 
 
 
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
-    <h1 class="title"><a href="/2017/12/13/redis4-io/">redis4.0_输入/输出缓冲区处理</a></h1>
-
- 
-	
-	<time  datetime="2017-12-12T16:00:00.000Z"><p>发表于 2017-12-13 | 字数 <span class="post-count">2,806</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<p>之前读了一下redis事件处理器的代码<a href="http://chinchao.xyz/2017/12/10/redis4-event/">点我</a>，今天无所事事，看了下redis对输入缓冲区(querybuf)和输出缓冲区(buf/replylist)的代码，记录一下学习过程。</p>
-<h4 id="1-读缓冲区处理"><a href="#1-读缓冲区处理" class="headerlink" title="1. 读缓冲区处理"></a>1. 读缓冲区处理</h4><p>读取fd数据,然后放入client的输入缓冲区(querybuf)的整个调用栈如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">1211	int processMultibulkBuffer(client *c) &#123;</div><div class="line">(gdb) bt</div><div class="line">#0  processMultibulkBuffer (c=c@entry=0x7ffff6f15e00) at networking.c:1211</div><div class="line">#1  0x000000000043c736 in processInputBuffer (c=0x7ffff6f15e00)</div><div class="line">    at networking.c:1408</div><div class="line">#2  0x00000000004262de in aeProcessEvents (</div><div class="line">    eventLoop=eventLoop@entry=0x7ffff6e340a0, flags=flags@entry=11) at ae.c:452</div><div class="line">#3  0x000000000042670b in aeMain (eventLoop=0x7ffff6e340a0) at ae.c:495</div><div class="line">#4  0x00000000004232d6 in main (argc=&lt;optimized out&gt;, argv=0x7fffffffe3e8)</div><div class="line">    at server.c:3897</div></pre></td></tr></table></figure>
-		
-	
-    </div>
-    <footer>
-      
-        
-          <div class="alignleft">
-            <a href="/2017/12/13/redis4-io/#more" class="more-link">阅读全文</a>
-          </div>
-        
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
 
   <nav id="page-nav" class="clearfix">
     <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/2/">下一页 &raquo;</a>
@@ -564,7 +561,7 @@ var _hmt = _hmt || [];
   <ul class="entry">
     
       <li>
-        <a href="/2022/03/03/cpp-model-list/">C++对象模型-目录</a>
+        <a href="/2022/04/20/cpp-model-list/">C++对象模型-目录</a>
       </li>
     
       <li>
@@ -576,11 +573,11 @@ var _hmt = _hmt || [];
       </li>
     
       <li>
-        <a href="/2021/03/28/golang/">《Go语言并发之道》阅读笔记</a>
+        <a href="/2021/03/28/go/">《Go语言设计与实现》阅读笔记</a>
       </li>
     
       <li>
-        <a href="/2021/01/02/unary/">grpc-go unary rpc调用过程</a>
+        <a href="/2021/03/28/golang/">《Go语言并发之道》阅读笔记</a>
       </li>
     
   </ul>
@@ -604,7 +601,7 @@ var _hmt = _hmt || [];
   
     <li><a href="/categories/civetweb/">civetweb</a><small>1</small></li>
   
-    <li><a href="/categories/golang/">golang</a><small>1</small></li>
+    <li><a href="/categories/golang/">golang</a><small>2</small></li>
   
     <li><a href="/categories/grpc-go/">grpc-go</a><small>1</small></li>
   
@@ -634,7 +631,7 @@ var _hmt = _hmt || [];
 <div class="widget tagcloud">
   <h3 class="title">标签云</h3>
   <div class="entry">
-    <a href="/tags/Asm/" style="font-size: 20px;">Asm</a> <a href="/tags/C/" style="font-size: 20px;">C</a> <a href="/tags/Cpp/" style="font-size: 17.5px;">Cpp</a> <a href="/tags/Endian/" style="font-size: 10px;">Endian</a> <a href="/tags/Transations/" style="font-size: 10px;">Transations</a> <a href="/tags/adlist/" style="font-size: 10px;">adlist</a> <a href="/tags/apue/" style="font-size: 12.5px;">apue</a> <a href="/tags/atoi/" style="font-size: 10px;">atoi</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/civetweb/" style="font-size: 10px;">civetweb</a> <a href="/tags/concurrency/" style="font-size: 10px;">concurrency</a> <a href="/tags/dict/" style="font-size: 10px;">dict</a> <a href="/tags/docker/" style="font-size: 10px;">docker</a> <a href="/tags/event/" style="font-size: 12.5px;">event</a> <a href="/tags/go/" style="font-size: 10px;">go</a> <a href="/tags/grpc-go/" style="font-size: 10px;">grpc-go</a> <a href="/tags/https/" style="font-size: 10px;">https</a> <a href="/tags/icp/" style="font-size: 10px;">icp</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/intset/" style="font-size: 10px;">intset</a> <a href="/tags/k8s/" style="font-size: 10px;">k8s</a> <a href="/tags/linux/" style="font-size: 15px;">linux</a> <a href="/tags/multi/" style="font-size: 10px;">multi</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/net/" style="font-size: 10px;">net</a> <a href="/tags/network/" style="font-size: 10px;">network</a> <a href="/tags/object/" style="font-size: 10px;">object</a> <a href="/tags/pub-sub/" style="font-size: 10px;">pub/sub</a> <a href="/tags/redis4-0/" style="font-size: 17.5px;">redis4.0</a> <a href="/tags/scp/" style="font-size: 10px;">scp</a> <a href="/tags/sds/" style="font-size: 10px;">sds</a> <a href="/tags/signal/" style="font-size: 10px;">signal</a> <a href="/tags/skiplist/" style="font-size: 10px;">skiplist</a> <a href="/tags/snippet/" style="font-size: 12.5px;">snippet</a> <a href="/tags/sourcecode/" style="font-size: 17.5px;">sourcecode</a> <a href="/tags/ssl/" style="font-size: 10px;">ssl</a> <a href="/tags/string2ll/" style="font-size: 10px;">string2ll</a> <a href="/tags/t-string/" style="font-size: 10px;">t_string</a> <a href="/tags/tcp/" style="font-size: 10px;">tcp</a> <a href="/tags/thread/" style="font-size: 10px;">thread</a> <a href="/tags/tips/" style="font-size: 10px;">tips</a> <a href="/tags/unpv2/" style="font-size: 10px;">unpv2</a> <a href="/tags/xv6/" style="font-size: 10px;">xv6</a> <a href="/tags/ziplist/" style="font-size: 10px;">ziplist</a> <a href="/tags/内存流/" style="font-size: 10px;">内存流</a> <a href="/tags/勘误/" style="font-size: 10px;">勘误</a>
+    <a href="/tags/Asm/" style="font-size: 20px;">Asm</a> <a href="/tags/C/" style="font-size: 20px;">C</a> <a href="/tags/Cpp/" style="font-size: 17.5px;">Cpp</a> <a href="/tags/Endian/" style="font-size: 10px;">Endian</a> <a href="/tags/Transations/" style="font-size: 10px;">Transations</a> <a href="/tags/adlist/" style="font-size: 10px;">adlist</a> <a href="/tags/apue/" style="font-size: 12.5px;">apue</a> <a href="/tags/atoi/" style="font-size: 10px;">atoi</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/civetweb/" style="font-size: 10px;">civetweb</a> <a href="/tags/concurrency/" style="font-size: 10px;">concurrency</a> <a href="/tags/dict/" style="font-size: 10px;">dict</a> <a href="/tags/docker/" style="font-size: 10px;">docker</a> <a href="/tags/event/" style="font-size: 12.5px;">event</a> <a href="/tags/go/" style="font-size: 10px;">go</a> <a href="/tags/golang/" style="font-size: 10px;">golang</a> <a href="/tags/grpc-go/" style="font-size: 10px;">grpc-go</a> <a href="/tags/https/" style="font-size: 10px;">https</a> <a href="/tags/icp/" style="font-size: 10px;">icp</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/intset/" style="font-size: 10px;">intset</a> <a href="/tags/k8s/" style="font-size: 10px;">k8s</a> <a href="/tags/linux/" style="font-size: 15px;">linux</a> <a href="/tags/multi/" style="font-size: 10px;">multi</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/net/" style="font-size: 10px;">net</a> <a href="/tags/network/" style="font-size: 10px;">network</a> <a href="/tags/object/" style="font-size: 10px;">object</a> <a href="/tags/pub-sub/" style="font-size: 10px;">pub/sub</a> <a href="/tags/redis4-0/" style="font-size: 17.5px;">redis4.0</a> <a href="/tags/scp/" style="font-size: 10px;">scp</a> <a href="/tags/sds/" style="font-size: 10px;">sds</a> <a href="/tags/signal/" style="font-size: 10px;">signal</a> <a href="/tags/skiplist/" style="font-size: 10px;">skiplist</a> <a href="/tags/snippet/" style="font-size: 12.5px;">snippet</a> <a href="/tags/sourcecode/" style="font-size: 17.5px;">sourcecode</a> <a href="/tags/ssl/" style="font-size: 10px;">ssl</a> <a href="/tags/string2ll/" style="font-size: 10px;">string2ll</a> <a href="/tags/t-string/" style="font-size: 10px;">t_string</a> <a href="/tags/tcp/" style="font-size: 10px;">tcp</a> <a href="/tags/thread/" style="font-size: 10px;">thread</a> <a href="/tags/tips/" style="font-size: 10px;">tips</a> <a href="/tags/unpv2/" style="font-size: 10px;">unpv2</a> <a href="/tags/xv6/" style="font-size: 10px;">xv6</a> <a href="/tags/ziplist/" style="font-size: 10px;">ziplist</a> <a href="/tags/内存流/" style="font-size: 10px;">内存流</a> <a href="/tags/勘误/" style="font-size: 10px;">勘误</a>
   </div>
 </div>
 
