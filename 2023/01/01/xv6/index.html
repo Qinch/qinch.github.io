@@ -4,7 +4,7 @@
 
   <meta charset="utf-8">
   
-  <title>Chapter1_Operating system interfaces | Just For Fun</title>
+  <title>xv6学习笔记 | Just For Fun</title>
   <meta name="author" content="qinchao">
   
   <meta name="description" content="qinchao&#39;s blog">
@@ -12,7 +12,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-  <meta property="og:title" content="Chapter1_Operating system interfaces"/>
+  <meta property="og:title" content="xv6学习笔记"/>
   <meta property="og:site_name" content="Just For Fun"/>
 
   
@@ -86,11 +86,11 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title">Chapter1_Operating system interfaces</h1>
+    <h1 class="title">xv6学习笔记</h1>
 
  
 	
-	<time  datetime="2022-09-15T16:00:00.000Z"><p>发表于 2022-09-16 | 字数 <span class="post-count">569</span>
+	<time  datetime="2022-12-31T16:00:00.000Z"><p>发表于 2023-01-01 | 字数 <span class="post-count">5</span>
 
 </p></time>
       
@@ -98,35 +98,7 @@ var _hmt = _hmt || [];
     <div class="entry">
       
 		  
-		<h2 id="1-xv6"><a href="#1-xv6" class="headerlink" title="1 xv6"></a>1 xv6</h2><p><img src="/img/figure1_1.jpeg" alt="img"></p>
-<ol>
-<li>As Figure 1.1 shows, xv6 takes the traditional form of a kernel, a special program that provides services to running programs. Each running program, called a process(a process alternates between executing in user apace and kernel apace), has memory containing instructions, data, and a stack. The instructions implement the program’s computation. The data are the variables on which the computation acts. The stack organizes the program’s procedure calls. A given computer typically has many processes but only a single kernel.<a id="more"></a>
-</li>
-</ol>
-<h2 id="2-shell"><a href="#2-shell" class="headerlink" title="2 shell"></a>2 shell</h2><ol>
-<li>The <code>shel</code>l is an ordinary program that reads commands from the user and executes them. The fact that the shell is a user program, and not part of the kernel, illustrates the power of the system call interface: there is nothing special about the shell.</li>
-</ol>
-<p><img src="/img/pipeshell.jpeg" alt="echo hello world|wc 执行过程"></p>
-<h2 id="3-fork-wait-exec"><a href="#3-fork-wait-exec" class="headerlink" title="3 fork/wait/exec"></a>3 fork/wait/exec</h2><ol>
-<li><code>fork</code> gives the new process an exact copy of the calling process’s memory, both instructions and data. fork returns in both the original and new processes. In the original process, fork returns the new process’s PID. In the new process, fork returns zero. </li>
-<li>The<code>wait</code> system call returns the PID of an exited(or killed)child of the current process and copies the exit status of the child to the address passed to wait. If the caller has no children, wait immediately returns -1.</li>
-<li>The<code>exec</code> system call replaces the calling process’s memory with a new memory image loaded from a file stored in the file system. When exec succeeds, it does not return to the calling program;instead, the instructions loaded from the file start executing at the entry point declared in the ELF header.</li>
-<li><code>Why fork and exec are not combined in a single call?</code>  – I/O redirection.  Fork copies the parent’s file descriptor table along whith its memory, so that the child start with exactly the same open files as the parent. The system call exec replaces the calling process’s memory but preserves its file table. </li>
-</ol>
-<h2 id="4-File-descriptors"><a href="#4-File-descriptors" class="headerlink" title="4 File  descriptors"></a>4 File  descriptors</h2><ul>
-<li>A newly allocated file descriptor is always the lowest-numbered unused descriptor table of the current process.</li>
-<li>ls existing-file non-existing-file &gt; tmp1 2&gt;&amp;1.  how to implement it ?  <strong>2 is a dup of 1.</strong></li>
-</ul>
-<h2 id="5-Pipes"><a href="#5-Pipes" class="headerlink" title="5 Pipes"></a>5 Pipes</h2><ol>
-<li>A <code>pipe</code> is a small kernel buffer exposed to process as a pair of file descriptors, one for reading and one for writing.</li>
-<li>If no data is available, a read on a pipe waits for either data to be written or for all file descriptiors referring to the write end to be closed; in the latter case, read will return 0.</li>
-</ol>
-<h2 id="6-File-system"><a href="#6-File-system" class="headerlink" title="6 File system"></a>6 File system</h2><ol>
-<li>A <code>inode</code> holds metadata about a file, including its type(file or directory or device), its length, the location of the file’s cotent on disk, and the number of links to a file.</li>
-<li>The <code>unlink</code> system call removes a name from the file system. The file’s inode and the disk space holding its content are only freed when the file’s link count is zero and no file descriptors refer to it.</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">// An idiomatic way to create a temporary inode inode with no name that will be </div><div class="line">// cleaned up when the process closes fd or exits.</div><div class="line">fd = open(&quot;/tmp/xyz&quot;, O_CREATE|O_RDWR);</div><div class="line">unlink(&quot;/tmp/xyz&quot;)</div></pre></td></tr></table></figure>
-<h2 id="7-Lab-Xv6-and-Unix-utilities"><a href="#7-Lab-Xv6-and-Unix-utilities" class="headerlink" title="7 Lab: Xv6 and Unix utilities"></a>7 Lab: Xv6 and Unix utilities</h2><p><a href="https://github.com/Qinch/xv6-labs-2022/commits/util" target="_blank" rel="external">https://github.com/Qinch/xv6-labs-2022/commits/util</a> (except prime)</p>
+		<p><a href="https://www.zhihu.com/column/c_1501271666054938624" target="_blank" rel="external">gdb调试xv6</a><br><a href="http://chinchao.xyz/2022/09/16/xv6ch1/">Chapter 1</a></p>
 
 	
     </div>
@@ -185,7 +157,7 @@ var duoshuoQuery = {short_name:"qinch"};
   <ul class="entry">
     
       <li>
-        <a href="/2022/09/16/xv6/">Chapter1_Operating system interfaces</a>
+        <a href="/2023/01/01/xv6/">xv6学习笔记</a>
       </li>
     
       <li>
