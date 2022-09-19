@@ -87,6 +87,71 @@ var _hmt = _hmt || [];
     <header>
       
 	
+    <h1 class="title"><a href="/2022/09/16/xv6ch1/">xv6学习笔记</a></h1>
+
+ 
+	
+	<time  datetime="2022-09-15T16:00:00.000Z"><p>发表于 2022-09-16 | 字数 <span class="post-count">569</span>
+
+</p></time>
+      
+    </header>
+    <div class="entry">
+      
+		
+			<h2 id="1-xv6"><a href="#1-xv6" class="headerlink" title="1 xv6"></a>1 xv6</h2><p><img src="/img/figure1_1.jpeg" alt="img"></p>
+<ol>
+<li>As Figure 1.1 shows, xv6 takes the traditional form of a kernel, a special program that provides services to running programs. Each running program, called a process(a process alternates between executing in user apace and kernel apace), has memory containing instructions, data, and a stack. The instructions implement the program’s computation. The data are the variables on which the computation acts. The stack organizes the program’s procedure calls. A given computer typically has many processes but only a single kernel.</li>
+</ol>
+<h2 id="2-shell"><a href="#2-shell" class="headerlink" title="2 shell"></a>2 shell</h2><ol>
+<li>The <code>shel</code>l is an ordinary program that reads commands from the user and executes them. The fact that the shell is a user program, and not part of the kernel, illustrates the power of the system call interface: there is nothing special about the shell.</li>
+</ol>
+<p><img src="/img/pipeshell.jpeg" alt="echo hello world|wc 执行过程"></p>
+<h2 id="3-fork-wait-exec"><a href="#3-fork-wait-exec" class="headerlink" title="3 fork/wait/exec"></a>3 fork/wait/exec</h2><ol>
+<li><code>fork</code> gives the new process an exact copy of the calling process’s memory, both instructions and data. fork returns in both the original and new processes. In the original process, fork returns the new process’s PID. In the new process, fork returns zero. </li>
+<li>The<code>wait</code> system call returns the PID of an exited(or killed)child of the current process and copies the exit status of the child to the address passed to wait. If the caller has no children, wait immediately returns -1.</li>
+<li>The<code>exec</code> system call replaces the calling process’s memory with a new memory image loaded from a file stored in the file system. When exec succeeds, it does not return to the calling program;instead, the instructions loaded from the file start executing at the entry point declared in the ELF header.</li>
+<li><code>Why fork and exec are not combined in a single call?</code>  – I/O redirection.  Fork copies the parent’s file descriptor table along whith its memory, so that the child start with exactly the same open files as the parent. The system call exec replaces the calling process’s memory but preserves its file table. </li>
+</ol>
+<h2 id="4-File-descriptors"><a href="#4-File-descriptors" class="headerlink" title="4 File  descriptors"></a>4 File  descriptors</h2><ul>
+<li>A newly allocated file descriptor is always the lowest-numbered unused descriptor table of the current process.</li>
+<li>ls existing-file non-existing-file &gt; tmp1 2&gt;&amp;1.  how to implement it ?  <strong>2 is a dup of 1.</strong></li>
+</ul>
+<h2 id="5-Pipes"><a href="#5-Pipes" class="headerlink" title="5 Pipes"></a>5 Pipes</h2><ol>
+<li>A <code>pipe</code> is a small kernel buffer exposed to process as a pair of file descriptors, one for reading and one for writing.</li>
+<li>If no data is available, a read on a pipe waits for either data to be written or for all file descriptiors referring to the write end to be closed; in the latter case, read will return 0.</li>
+</ol>
+<h2 id="6-File-system"><a href="#6-File-system" class="headerlink" title="6 File system"></a>6 File system</h2><ol>
+<li>A <code>inode</code> holds metadata about a file, including its type(file or directory or device), its length, the location of the file’s cotent on disk, and the number of links to a file.</li>
+<li>The <code>unlink</code> system call removes a name from the file system. The file’s inode and the disk space holding its content are only freed when the file’s link count is zero and no file descriptors refer to it.</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">// An idiomatic way to create a temporary inode inode with no name that will be </div><div class="line">// cleaned up when the process closes fd or exits.</div><div class="line">fd = open(&quot;/tmp/xyz&quot;, O_CREATE|O_RDWR);</div><div class="line">unlink(&quot;/tmp/xyz&quot;)</div></pre></td></tr></table></figure>
+<h2 id="7-Lab-Xv6-and-Unix-utilities"><a href="#7-Lab-Xv6-and-Unix-utilities" class="headerlink" title="7 Lab: Xv6 and Unix utilities"></a>7 Lab: Xv6 and Unix utilities</h2><p><a href="https://github.com/Qinch/xv6-labs-2022/commits/util" target="_blank" rel="external">https://github.com/Qinch/xv6-labs-2022/commits/util</a> (except prime)</p>
+
+		
+	
+    </div>
+    <footer>
+      
+        
+        
+      
+    
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+
+
+  <article class="post">
+  <div class="post-content">
+    <header>
+      
+	
     <h1 class="title"><a href="/2022/04/20/cpp-model-list/">C++对象模型-目录</a></h1>
 
  
@@ -350,49 +415,6 @@ var _hmt = _hmt || [];
     <header>
       
 	
-    <h1 class="title"><a href="/2019/03/17/xv6/">xv6 study</a></h1>
-
- 
-	
-	<time  datetime="2019-03-16T16:00:00.000Z"><p>发表于 2019-03-17 | 字数 <span class="post-count">278</span>
-
-</p></time>
-      
-    </header>
-    <div class="entry">
-      
-		
-			<h3 id="1-xv6-book"><a href="#1-xv6-book" class="headerlink" title="1. xv6 book"></a>1. xv6 book</h3><h4 id="1-chapter1-os-interfaces"><a href="#1-chapter1-os-interfaces" class="headerlink" title="1 chapter1: os interfaces"></a>1 chapter1: os interfaces</h4><p>0, The system call <code>exec</code> replaces the calling process’s memory but perserves its file table.</p>
-<p>1, It should be clear why it is a good idea that fork and exec are separate calls. Beacuse if they are separate, the shell can fork a child, use open, close, dup in the child to change the standard input and output file descriptors and then exec.<br>  Two file descriptors share an offset if they were derived from the same original file descriptor by a sequence of fork and dup calls. Otherwise file descriptors do not share offsets, even if they resulted from open calls for the same file. （其实结合APUE看效果更好^-^）</p>
-<p>2, The <code>unlink</code> system call removes a name from the file system. The file’s inode and the disk space holding its content are only freed when the file’s link count is zero and no file descrptors refer to it.</p>
-<h4 id="2-os-organization"><a href="#2-os-organization" class="headerlink" title="2 os organization"></a>2 os organization</h4><p>0, Similarly, Unix transparently switches hardware CPUs among processes, saving and restoring register state as necessary, so that applications don’t have to be aware of time sharing. This transparency allows the operating system to share CPUs even if some applications are in infinite loops. </p>
-<p>1, If an application in user mode attempts to execute a priviliged instruction, then the CPU doesn’t execute the instruction, but switches to supervisor mode so that supervisort-mode code can terminate the application.</p>
-<p>2, Each process has two stacks: a user stack and a kernel stack. While a process in the kernel, its user stack still contains saved data, but isn’t actively used.</p>
-
-		
-	
-    </div>
-    <footer>
-      
-        
-        
-      
-    
-      <div class="clearfix"></div>
-    </footer>
-  </div>
-</article>
-
-
-
-
-
-
-  <article class="post">
-  <div class="post-content">
-    <header>
-      
-	
     <h1 class="title"><a href="/2018/03/24/snippet-pow2/">Round up to the next highest power of 2</a></h1>
 
  
@@ -597,6 +619,10 @@ var _hmt = _hmt || [];
   <ul class="entry">
     
       <li>
+        <a href="/2022/09/16/xv6ch1/">xv6学习笔记</a>
+      </li>
+    
+      <li>
         <a href="/2022/04/20/cpp-model-list/">C++对象模型-目录</a>
       </li>
     
@@ -610,10 +636,6 @@ var _hmt = _hmt || [];
     
       <li>
         <a href="/2021/03/28/golang/">《Go语言并发之道》阅读笔记</a>
-      </li>
-    
-      <li>
-        <a href="/2020/01/31/civetweb/">civetweb 支持 mbedtls</a>
       </li>
     
   </ul>
@@ -667,7 +689,7 @@ var _hmt = _hmt || [];
 <div class="widget tagcloud">
   <h3 class="title">标签云</h3>
   <div class="entry">
-    <a href="/tags/Asm/" style="font-size: 20px;">Asm</a> <a href="/tags/C/" style="font-size: 20px;">C</a> <a href="/tags/Cpp/" style="font-size: 16.67px;">Cpp</a> <a href="/tags/Endian/" style="font-size: 10px;">Endian</a> <a href="/tags/Transations/" style="font-size: 10px;">Transations</a> <a href="/tags/adlist/" style="font-size: 10px;">adlist</a> <a href="/tags/apue/" style="font-size: 10px;">apue</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/civetweb/" style="font-size: 10px;">civetweb</a> <a href="/tags/concurrency/" style="font-size: 10px;">concurrency</a> <a href="/tags/dict/" style="font-size: 10px;">dict</a> <a href="/tags/docker/" style="font-size: 10px;">docker</a> <a href="/tags/event/" style="font-size: 13.33px;">event</a> <a href="/tags/go/" style="font-size: 10px;">go</a> <a href="/tags/https/" style="font-size: 10px;">https</a> <a href="/tags/icp/" style="font-size: 10px;">icp</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/intset/" style="font-size: 10px;">intset</a> <a href="/tags/k8s/" style="font-size: 10px;">k8s</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/multi/" style="font-size: 10px;">multi</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/network/" style="font-size: 10px;">network</a> <a href="/tags/object/" style="font-size: 10px;">object</a> <a href="/tags/pub-sub/" style="font-size: 10px;">pub/sub</a> <a href="/tags/redis4-0/" style="font-size: 16.67px;">redis4.0</a> <a href="/tags/scp/" style="font-size: 10px;">scp</a> <a href="/tags/sds/" style="font-size: 10px;">sds</a> <a href="/tags/skiplist/" style="font-size: 10px;">skiplist</a> <a href="/tags/snippet/" style="font-size: 10px;">snippet</a> <a href="/tags/sourcecode/" style="font-size: 16.67px;">sourcecode</a> <a href="/tags/ssl/" style="font-size: 10px;">ssl</a> <a href="/tags/t-string/" style="font-size: 10px;">t_string</a> <a href="/tags/tips/" style="font-size: 10px;">tips</a> <a href="/tags/unpv2/" style="font-size: 10px;">unpv2</a> <a href="/tags/xv6/" style="font-size: 10px;">xv6</a> <a href="/tags/ziplist/" style="font-size: 10px;">ziplist</a> <a href="/tags/勘误/" style="font-size: 10px;">勘误</a>
+    <a href="/tags/Asm/" style="font-size: 20px;">Asm</a> <a href="/tags/C/" style="font-size: 20px;">C</a> <a href="/tags/Cpp/" style="font-size: 16.67px;">Cpp</a> <a href="/tags/Endian/" style="font-size: 10px;">Endian</a> <a href="/tags/Linux/" style="font-size: 10px;">Linux</a> <a href="/tags/Transations/" style="font-size: 10px;">Transations</a> <a href="/tags/adlist/" style="font-size: 10px;">adlist</a> <a href="/tags/apue/" style="font-size: 10px;">apue</a> <a href="/tags/bits/" style="font-size: 10px;">bits</a> <a href="/tags/civetweb/" style="font-size: 10px;">civetweb</a> <a href="/tags/concurrency/" style="font-size: 10px;">concurrency</a> <a href="/tags/dict/" style="font-size: 10px;">dict</a> <a href="/tags/docker/" style="font-size: 10px;">docker</a> <a href="/tags/event/" style="font-size: 13.33px;">event</a> <a href="/tags/go/" style="font-size: 10px;">go</a> <a href="/tags/https/" style="font-size: 10px;">https</a> <a href="/tags/icp/" style="font-size: 10px;">icp</a> <a href="/tags/int/" style="font-size: 10px;">int</a> <a href="/tags/intset/" style="font-size: 10px;">intset</a> <a href="/tags/k8s/" style="font-size: 10px;">k8s</a> <a href="/tags/multi/" style="font-size: 10px;">multi</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/network/" style="font-size: 10px;">network</a> <a href="/tags/object/" style="font-size: 10px;">object</a> <a href="/tags/pub-sub/" style="font-size: 10px;">pub/sub</a> <a href="/tags/redis4-0/" style="font-size: 16.67px;">redis4.0</a> <a href="/tags/scp/" style="font-size: 10px;">scp</a> <a href="/tags/sds/" style="font-size: 10px;">sds</a> <a href="/tags/skiplist/" style="font-size: 10px;">skiplist</a> <a href="/tags/snippet/" style="font-size: 10px;">snippet</a> <a href="/tags/sourcecode/" style="font-size: 16.67px;">sourcecode</a> <a href="/tags/ssl/" style="font-size: 10px;">ssl</a> <a href="/tags/t-string/" style="font-size: 10px;">t_string</a> <a href="/tags/tips/" style="font-size: 10px;">tips</a> <a href="/tags/unpv2/" style="font-size: 10px;">unpv2</a> <a href="/tags/xv6/" style="font-size: 10px;">xv6</a> <a href="/tags/ziplist/" style="font-size: 10px;">ziplist</a> <a href="/tags/勘误/" style="font-size: 10px;">勘误</a>
   </div>
 </div>
 
