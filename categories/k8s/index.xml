@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>K8s on Just For Fun</title>
+    <link>http://localhost:1313/categories/k8s/</link>
+    <description>Recent content in K8s on Just For Fun</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <lastBuildDate>Fri, 01 Oct 2021 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/categories/k8s/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>kubernetes快速入门</title>
+      <link>http://localhost:1313/posts/k8s/</link>
+      <pubDate>Fri, 01 Oct 2021 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/k8s/</guid>
+      <description>&lt;h3 id=&#34;1-简介&#34;&gt;1 简介&lt;/h3&gt;&#xA;&lt;h4 id=&#34;11-虚拟机和容器的区别&#34;&gt;1.1, 虚拟机和容器的区别&lt;/h4&gt;&#xA;&lt;p&gt;每个虚拟机运行在自己的Linux内核上(即下图中Guest OS， 每个VM可以安装不同版本的linux系统)，而容器都是调用同一个宿主机内核(如果一个容器化的应用需要一个特定的内核版本，那么它可能不能再每台机器上工作,也不能将一个x86架构编译的应用容器化之后，又期望他在arm架构的机器上运行)。&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>
