@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>24 bits解析为有符号整数 - Just For Fun</title>
+  <meta property="og:title" content="24 bits解析为有符号整数 - Just For Fun" />
+  <meta name="twitter:title" content="24 bits解析为有符号整数 - Just For Fun" />
+  <meta name="description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+  <meta property="og:description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+  <meta name="twitter:description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+  <meta name="author" content=""/>
+  <meta property="og:site_name" content="Just For Fun" />
+  <meta property="og:url" content="https://qinch.github.io/posts/bits-int/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.145.0">
+  <link rel="stylesheet" href="/css/style.css" media="all" />
+  <link rel="stylesheet" href="/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
+  <link rel="stylesheet" href="/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/css/custom.css" media="all" />
+
+  <script src="/js/script.js"></script>
+  <script src="/js/custom.js"></script>
+  <script defer src="/fontawesome/all.min.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/">Just For Fun</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-categories"><a href="/categories/" title="Categories">Categories</a></li>
+      <li class="site-navi-item-archives"><a href="/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">24 bits解析为有符号整数</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>Nov 1, 2015</time></li>
+        <li class="article-meta-categories">
+        </li>
+      </ul>
+      
+      <p>最近遇到了24bits来解析为有符号整数的问题，提供如下两个解决思路：</p>
+<h4 id="方法1">方法1:</h4>
+<p>24bits即从高位到低位为:buf[0],buf[1],buf[2] 三个bytes;通过将最高字节buf[0]符号扩展为两个字节（假设从高位到低位为ps[1],ps[0]），然后将ps[1],ps[0],buf[1],buf[2]拼接为int变量的四个字节;见下图; <br>
+<img src="/img/bits2int.png" alt="pic1"></p>
+<h4 id="方法2">方法2</h4>
+<p>类似于：十进制123=1乘以10^2+2乘以10^1+3乘以10^0；将buf[0],buf[1],buf[2]分别乘以相应的指数，即可得到相应的整型值;</p>
+<h4 id="代码如下">代码如下：</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#include&lt;stdio.h&gt;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>//方法1
+</span></span><span style="display:flex;"><span>int getdig1<span style="color:#f92672">(</span>char* buf,int n<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>        int ret<span style="color:#f92672">=</span>0;
+</span></span><span style="display:flex;"><span>        char *pret<span style="color:#f92672">=(</span>unsigned char*<span style="color:#f92672">)</span>&amp;ret;
+</span></span><span style="display:flex;"><span>		short s<span style="color:#f92672">=(</span>short<span style="color:#f92672">)</span>buf<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span>;//buf<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span>符号扩展为2个字节;
+</span></span><span style="display:flex;"><span>        char *ps<span style="color:#f92672">=(</span>unsigned char*<span style="color:#f92672">)</span>&amp;s;
+</span></span><span style="display:flex;"><span>        pret<span style="color:#f92672">[</span>0<span style="color:#f92672">]=</span>buf<span style="color:#f92672">[</span>2<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>        pret<span style="color:#f92672">[</span>1<span style="color:#f92672">]=</span>buf<span style="color:#f92672">[</span>1<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        pret<span style="color:#f92672">[</span>2<span style="color:#f92672">]=</span>ps<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>        pret<span style="color:#f92672">[</span>3<span style="color:#f92672">]=</span>ps<span style="color:#f92672">[</span>1<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> ret;
+</span></span><span style="display:flex;"><span> <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>//方法2
+</span></span><span style="display:flex;"><span>int getdig2<span style="color:#f92672">(</span>char *buf,int n<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>	int ret<span style="color:#f92672">=</span>buf<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span><span style="color:#e6db74">&lt;&lt;16;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">	ret|=((unsigned char)buf[1</span><span style="color:#f92672">])</span><span style="color:#e6db74">&lt;&lt;8;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">	ret|=(unsigned char)buf[2];
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">	return ret;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">}
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74"> void resolve(unsigned char* buf,int n,int  (*ret)[50],int fn)
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74"> {
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">	 int i=0;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">	 int k=0;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        for( i=0;i&lt;1;i++)
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        {
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            for( k=7;k&gt;=0;k--)
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            {
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">                ret[k][i]=getdig1(buf+i*24+(7-k)*3,3);
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">                printf(&#34;%d\n&#34;,ret[k][i]);
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            }
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        }
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74"> }
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">int main()
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">{
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">	int test[8</span><span style="color:#f92672">][</span>50<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>	char recv<span style="color:#f92672">[</span>24<span style="color:#f92672">]={</span>0x0d,0xd7,0x00,0x0c,0xa1,0xff,0xf5,0x27,0xff,0xf7,0x60, <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>	0xff,0xfb,0xfe,0x00,0x00,0xd3,0xff,0xf8,0x4a,0xff,0xfb,0x89,0x00 <span style="color:#f92672">}</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	resolve<span style="color:#f92672">(</span>recv,24,test,8<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div>
+    </article>
+
+    
+<ul class="article-share">
+</ul>
+
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer">
+          <a href="/posts/linux-io/" data-toggle="tooltip" data-placement="top" title="Linux内存流">&lt; Newer</a>
+      </li>
+      <li class="pager-older">
+        <a href="/posts/endian/" data-toggle="tooltip" data-placement="top" title="大小端法互换">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright"></div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-"><a href="" title=""></a></li>
+  </ul>
+  <div class="powerdby">
+    <a href="https://github.com/qinch" rel="me" target="_blank"><i class="fa-brands fa-github" style="font-size: 16px;"></i></a>&nbsp&nbsp
+    <a href="mailto:qinchaowhut@qq.com" target="_blank"><i class="fa-solid fa-envelope" style="font-size: 16px;"></i></a></li><br>
+    ©2015-2024 qinch | Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+      <script async src="https://www.googletagmanager.com/gtag/js?id=Toracking%20ID"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'Toracking ID');
+        }
+      </script>
+
+</body>
+</html>

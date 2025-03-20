@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>kubernetes快速入门（上） - Just For Fun</title>
+  <meta property="og:title" content="kubernetes快速入门（上） - Just For Fun" />
+  <meta name="twitter:title" content="kubernetes快速入门（上） - Just For Fun" />
+  <meta name="description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+  <meta property="og:description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+  <meta name="twitter:description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+  <meta name="author" content=""/>
+  <meta property="og:site_name" content="Just For Fun" />
+  <meta property="og:url" content="https://qinch.github.io/posts/kss/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.145.0">
+  <link rel="stylesheet" href="/css/style.css" media="all" />
+  <link rel="stylesheet" href="/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
+  <link rel="stylesheet" href="/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/css/custom.css" media="all" />
+
+  <script src="/js/script.js"></script>
+  <script src="/js/custom.js"></script>
+  <script defer src="/fontawesome/all.min.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/">Just For Fun</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-categories"><a href="/categories/" title="Categories">Categories</a></li>
+      <li class="site-navi-item-archives"><a href="/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">kubernetes快速入门（上）</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>Oct 1, 2021</time></li>
+        <li class="article-meta-categories">
+        </li>
+      </ul>
+      
+      <h1 id="1-简介">1 简介</h1>
+<h2 id="11-虚拟机和容器的区别">1.1 虚拟机和容器的区别</h2>
+<ul>
+<li>每个虚拟机可以运行自己独立的操作系统(如下图所示：其中VM1 可以运行Ubuntu 24.04(Linux 6.8 内核)，另一个VM2可以运行CentOS 7（Linux 3.10.0 内核））。</li>
+<li>而所有容器都共享同一个宿主机内核（即：Host OS），容器镜像仅包含用户空间（比如库、工具），不包含Linux内核(即：如果一个容器化的应用依赖Linux 6.8内核的功能，则宿主机Linux内核必须≥6.8，否则无法运行；此外，一个x86_64架构编译的应用容器化之后，也无法直接在ARM机器上运行)。
+<img src="/img/kss_pic1.jpg" alt="图1"></li>
+</ul>
+<h2 id="12-容器技术和docker的关系">1.2 容器技术和docker的关系</h2>
+<ul>
+<li>Docker只是容器技术的一个分支，Containerd也是一个运行容器的平台，可以作为docker的替代方案。</li>
+</ul>
+<h2 id="13-容器的单一职责原则">1.3 容器的单一职责原则</h2>
+<ul>
+<li>每个容器应该专注于运行​​单个主进程​​，而不是将多个进程部署在同一容器中。这一原则是容器化设计的核心思想之一，旨在提升系统的可维护性、可扩展性和稳定性。</li>
+<li>如果单个容器中运行多个不相关的进程，那么开发者需要保持容器中的所有进程都运行正常（比如，一个容器中运行两个进程，其中一个生产者进程，另外一个消费者进程，如果消费者进程崩溃之后，我们需要考虑消费者进程重启的机制，确保生产者/消费者进程都处于正常运行状态，而如果单个容器中只运行一个消费者进程，在该进程崩溃之后，我们只需要重启该容器就可以了，这时候生产者进程可以正常运行，做到了故障隔离）。</li>
+</ul>
+<h2 id="14-什么是kubernetes">1.4 什么是Kubernetes</h2>
+<ul>
+<li>
+<p>百度百科中Kubernetes的定义:</p>
+<ul>
+<li>Kubernetes，简称K8s，是用8代替名字中间的8个字符“ubernete”而成的缩写。</li>
+<li>K8s是一个开源的，用于管理云平台中多个主机上的容器化的应用，Kubernetes的目标是让部署容器化的应用简单并且高效（powerful），Kubernetes提供了应用部署，规划，更新，维护的一种机制。</li>
+</ul>
+</li>
+<li>
+<p>一个简单的K8s集群如下图所示（由一个master node和一个或多个Worker Node组成）. 当开发者提交App描述文件（比如描述期望运行多少个副本，指定的Docker镜像，App版本更新策略等）到master节点，然后K8s把该App部署到Worker Nodes（这个时候，我们可能并不关心App具体部署到K8s的哪个Woker Node；当然K8s也支持将App部署到某些特定的Worker Nodes）。</p>
+</li>
+</ul>
+<p><img src="/img/kss_pic2.jpg" alt="图2"></p>
+<ul>
+<li>一个更详细的K8s集群如下图（<a href="https://docs.google.com/drawings/d/14ZFJR7taVPco3iVtWdnnWot-W8ZLI5XpV1HXlmhXAZI/edit">图片链接</a>）所示（在后边章节我们会分别介绍图中的Pod/Label/ReplicaSet/Service/Deployment等资源），该K8s集群由一个Master Node和3个Worker Node组成：</li>
+</ul>
+<p><img src="/img/kss_pic3.jpg" alt="图3"></p>
+<h2 id="15-k8s和docker的关系">1.5 K8s和Docker的关系</h2>
+<ul>
+<li>Docker用于将应用容器化。</li>
+<li>K8s并不是一个专门为Docker容器设计的容器编排系统，K8s不仅支持Docker容器类型，也支持Containerd以及其他的容器类型（比如：CRI-O）。</li>
+</ul>
+<h2 id="16-创建一个docker镜像">1.6 创建一个Docker镜像</h2>
+<p>在开发环境安装Docker环境之后，我们可以创建一个Node.js的应用（<a href="https://github.com/luksa/kubernetes-in-action">参考</a>），该应用接收HTTP请求，并且进行响应。</p>
+<ul>
+<li>app.js内容如下：</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>const http <span style="color:#f92672">=</span> require<span style="color:#f92672">(</span><span style="color:#e6db74">&#39;http&#39;</span><span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span>const os <span style="color:#f92672">=</span> require<span style="color:#f92672">(</span><span style="color:#e6db74">&#39;os&#39;</span><span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>// 输出服务器启动日志
+</span></span><span style="display:flex;"><span>console.log<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Kubia server starting...&#34;</span><span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>// 定义请求处理函数，接收request和response
+</span></span><span style="display:flex;"><span>var handler <span style="color:#f92672">=</span> <span style="color:#66d9ef">function</span><span style="color:#f92672">(</span>request, response<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>  console.log<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Received request from &#34;</span> + request.connection.remoteAddress<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  // 设置HTTP响应状态码为200
+</span></span><span style="display:flex;"><span>  response.writeHead<span style="color:#f92672">(</span>200<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span>  // 响应hostname
+</span></span><span style="display:flex;"><span>  response.end<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;This is v1 running in pod &#34;</span> + os.hostname<span style="color:#f92672">()</span> + <span style="color:#e6db74">&#34;\n&#34;</span><span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>// 创建HTTP服务器实例
+</span></span><span style="display:flex;"><span>var www <span style="color:#f92672">=</span> http.createServer<span style="color:#f92672">(</span>handler<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span>// 启动服务器监听8080端口
+</span></span><span style="display:flex;"><span>www.listen<span style="color:#f92672">(</span>8080<span style="color:#f92672">)</span>;
+</span></span></code></pre></div><ul>
+<li>Dockerfile的内容如下</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>FROM node:7                   <span style="color:#75715e"># 构建所基于的基础镜像</span>
+</span></span><span style="display:flex;"><span>ADD app.js /app.js            <span style="color:#75715e"># 把app.js文件从本地文件夹添加到镜像的根目录</span>
+</span></span><span style="display:flex;"><span>ENTRYPOINT <span style="color:#f92672">[</span><span style="color:#e6db74">&#34;node&#34;</span>, <span style="color:#e6db74">&#34;app.js&#34;</span><span style="color:#f92672">]</span> <span style="color:#75715e"># 当镜像被运行时需要被执行的命令</span>
+</span></span></code></pre></div><ul>
+<li>app.js和Dockerfile的目录结构如下：</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>- image:
+</span></span><span style="display:flex;"><span>  - app.js
+</span></span><span style="display:flex;"><span>  - Dockerfile
+</span></span></code></pre></div><ul>
+<li>创建一个名为allen的镜像
+<ul>
+<li>cd ./image</li>
+<li>docker build -t allen .</li>
+</ul>
+</li>
+<li>将该镜像推送到镜像仓库(docker hub)
+<ul>
+<li>docker tag allen qinchaowhut/allen:v1</li>
+<li>docker push qinchaowhut/allen:v1</li>
+</ul>
+</li>
+<li>运行allen镜像
+<ul>
+<li>docker run &ndash;name allen-container -p 8080:8080 -d qinchaowhut/allen:v1</li>
+<li>curl http://localhost:8080
+<img src="/img/kss_pic4.jpg" alt="图4"></li>
+</ul>
+</li>
+</ul>
+<p>到这里我们已经介绍了容器/k8s相关的基本知识，接下来介绍k8s中的相关概念。</p>
+<h1 id="2-pod">2 Pod</h1>
+<h2 id="21-什么是pod">2.1 什么是Pod</h2>
+<p>Pod是在 K8s中创建和管理的、最小的可部署的计算单元， 它在Worker Node之间进行调度。</p>
+<ul>
+<li>
+<p>一个Pod包含一个或者多个容器，这些容器共享存储、网络、以及怎样运行这些容器的规约（我们可以把pod看作一个独立的逻辑机器，该机器包含一个或者多个容器，将这些容器绑定在一起共享某些资源（比如IP/端口））。</p>
+</li>
+<li>
+<p>一个Pod的所有容器都运行在同一个Woker Node中(即：一个Pod不会跨越两个Worker Node）。</p>
+</li>
+<li>
+<p>Pod的生命周期是短暂的，其生命周期可能因调度、故障或升级而随时终止（每个Pod都有自己的IP，当旧的Pod被销毁后，新创建的Pod会动态分配新的IP地址）。</p>
+</li>
+</ul>
+<h2 id="22-为什么需要pod">2.2 为什么需要Pod</h2>
+<ul>
+<li>在1.3节中我们提到容器的单一职责原则，即每个容器只运行一个进程，那么多个进程就要运行在多个不同的容器中（注意：多个容器之间是彼此隔离的），此时进程之间无法做到资源共享（比如，以生产者/消费进程为例，他们通过共享内存和信号量来通信，如果生产者进程和消费者进程分布在两个不同的容器（不容器间IPC是相互隔离的），那么生产者进程和消费者进程是无法通信）。</li>
+<li>因此我们需要一种更高级的结构来将容器相对紧密的耦合在一起，并且将它们作为一个单元进行管理(即：Pod，用于多个容器间共享某些资源)。</li>
+</ul>
+<h2 id="23-创建一个pod">2.3 创建一个Pod</h2>
+<p>我们从Docker Hub上找了个一个dns相关的镜像（即：tutum/dnsutils），来创建一个Pod, 对应的dnsutils.yaml如下</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>apiVersion: v1
+</span></span><span style="display:flex;"><span>kind: Pod                <span style="color:#75715e"># k8s资源类型</span>
+</span></span><span style="display:flex;"><span>metadata:                <span style="color:#75715e"># pod元数据</span>
+</span></span><span style="display:flex;"><span> name: dnsutil-pod       <span style="color:#75715e"># pod的名称</span>
+</span></span><span style="display:flex;"><span>spec:                    <span style="color:#75715e"># pod规格</span>
+</span></span><span style="display:flex;"><span> containers:
+</span></span><span style="display:flex;"><span> - image: tutum/dnsutils <span style="color:#75715e"># 创建容器所用的镜像</span>
+</span></span><span style="display:flex;"><span>   name: dnsutil         <span style="color:#75715e"># 容器的名称</span>
+</span></span><span style="display:flex;"><span>   command: <span style="color:#f92672">[</span><span style="color:#e6db74">&#34;sleep&#34;</span>, <span style="color:#e6db74">&#34;infinity&#34;</span><span style="color:#f92672">]</span>
+</span></span></code></pre></div><ul>
+<li>kubectl create -f dnsutils.yaml
+<img src="/img/kss_pic5.jpg" alt="图5"></li>
+</ul>
+<h1 id="3-label">3 Label</h1>
+<h2 id="31-什么是label">3.1 什么是Label</h2>
+<p>Label（标签）是一个可以附加到K8s对象（比如Pod，Woker Node等）上的任意key-value对（一个Label就是一个key/value对，每个资源可以拥有多个Label, 并且可以随时进行添加和修改）， 然后通过Selector(标签选择器)来选择具有相应Label的K8s对象。</p>
+<h2 id="31-为什么需要label">3.1 为什么需要Label</h2>
+<p>Label使用户能够以松散耦合的方式将他们自己的组织结构映射到系统对象，而无需客户端存储这些映射（即：如下图所示，在同一个K8s集群中运行着6个Pod, 其中在Pod1/Pod2/Pod3运行着App1，在Pod4/Pod5中运行着App2，我们通过给Pod1/Pod2/Pod3打上“紫色的标签”来标识这写是运行着App1的Pod，通过给Pod4/Pod5打上“蓝色的标签”来标识运行着App2的Pod集合；此时如果我们想找出所有运行着App1的Pod，我们通过Selector（标签选择器）来筛选贴着“紫色的标签”的Pod就行了）。</p>
+<p><img src="/img/kss_pic6.jpg" alt="图6"></p>
+<h2 id="31-创建一个label">3.1 创建一个Label</h2>
+<p>我们可以在2.3节创建的dnsutil-pod添加标签app=dnsutil，然后通过kubectl get 命令行查看标签为app=dnsutil的Pod</p>
+<ul>
+<li>kubectl label po dnsutil-pod app=dnsutil</li>
+<li>kubectl get po -l app=dnsutil</li>
+</ul>
+<p><img src="/img/kss_pic7.jpg" alt="图7"></p>
+<h1 id="4-replicaset">4 ReplicaSet</h1>
+<h2 id="41-什么是replicaset">4.1 什么是ReplicaSet</h2>
+<ul>
+<li>ReplicaSet（副本控制器）是一种K8s资源，通过它可以维护一组在任何时候都处于运行状态的 Pod 副本的稳定集合（如果其中某个Pod因为Worker Node断电/断网（或者其他任何原因）导致该Pod消失，则ReplicaSet会注意到这个缺少了的Pod，并且创建新的Pod来替代消失的Pod）。</li>
+<li>ReplicaSet是一种期望式的声明方式，我们只需要告诉它我期望的副本数量，而不用告诉它应该到底新增Pod还是删除Pod来达到我们期望的Pod数量。</li>
+</ul>
+<h2 id="42-为什么需要replicaset">4.2 为什么需要ReplicaSet</h2>
+<ul>
+<li>
+<p>在2.3节中，我们通过手工的方式创建了dnsutil-pod, 如果dsnutils-pod由于Worker Node断网（或者任何其他原因），则该Pod则会消失，此时不会自动创建新的Pod。通过ReplicaSet可以做到持续监控当前处于运行状态的Pod，并且确保和期望的Pod副本数量一致。</p>
+</li>
+<li>
+<p>如果我们想创建100个dnsutil-pod，只能通过手工创建吗？此时我们可以通过ReplicaSet期望式的声明方式，只需要告诉ReplicaSet我期望dnsutil-pod的副本数量是100，而不需要告诉ReplicaSet具体是新增还是删除dnsutil-pod。</p>
+</li>
+</ul>
+<h2 id="43-创建一个replicaset">4.3 创建一个ReplicaSet</h2>
+<p>replicaset.yaml文件内容如下:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>apiVersion: apps/v1
+</span></span><span style="display:flex;"><span>kind: ReplicaSet 
+</span></span><span style="display:flex;"><span>metadata:
+</span></span><span style="display:flex;"><span> name: dnsutil-rs    <span style="color:#75715e"># replica set 名字</span>
+</span></span><span style="display:flex;"><span>spec: 
+</span></span><span style="display:flex;"><span> replicas: <span style="color:#ae81ff">2</span>         <span style="color:#75715e"># 期望pod的数量</span>
+</span></span><span style="display:flex;"><span> selector:
+</span></span><span style="display:flex;"><span>   matchLabels:      <span style="color:#75715e"># 操作label app=dnsutil的pod</span>
+</span></span><span style="display:flex;"><span>    app: dnsutil 
+</span></span><span style="display:flex;"><span> template:           <span style="color:#75715e"># 创建新pod所用的pod模版 </span>
+</span></span><span style="display:flex;"><span>   metadata:
+</span></span><span style="display:flex;"><span>     labels:
+</span></span><span style="display:flex;"><span>       app: dnsutil
+</span></span><span style="display:flex;"><span>   spec:
+</span></span><span style="display:flex;"><span>     containers:
+</span></span><span style="display:flex;"><span>     - name: dnsutil
+</span></span><span style="display:flex;"><span>       image: tutum/dnsutils
+</span></span><span style="display:flex;"><span>       command: <span style="color:#f92672">[</span><span style="color:#e6db74">&#34;sleep&#34;</span>, <span style="color:#e6db74">&#34;infinity&#34;</span><span style="color:#f92672">]</span>
+</span></span></code></pre></div><p>需要指出的是，由于我们在3.1节创建了一个Label为app=dnsutil的Pod，并且我们期望的Pod数量是2，所以此时ReplicaSet（name: dnsutil-rs）只需要再创建一个新的Pod即可以满足期望的Pod数量。</p>
+<p><img src="/img/kss_pic9.jpg" alt="图9"></p>
+<h1 id="5-service">5 Service</h1>
+<h2 id="51-什么是service">5.1 什么是Service</h2>
+<ul>
+<li>Service是将运行在一个或一组Pod上的网络应用程序公开为网络服务的方法（即：Service是一种为一组功能相同的Pod提供单一不变的接入点（即一个固定的IP地址）的资源）。</li>
+<li>当Service存在时，则该Service的IP地址和端口不会改变，客户端通过该IP和端口与Service建立连接，然后这些链接会被路由到该Service后端的某个Pod上。</li>
+</ul>
+<p><img src="/img/kss_pic10.jpg" alt="图10"></p>
+<h2 id="52-为什么需要service">5.2 为什么需要Service</h2>
+<ul>
+<li>在2.1节，我们提到Pod的运行是短暂的（即：Pod是临时资源，我们不应该期待单个Pod一直持续运行），其生命周期可能因Worker Node故障（或者任何其他原因）而随时终止（在2.1节我们提到每个Pod都有一个独立的IP，当旧的Pod被销毁后，新创建的Pod会动态分配新的IP地址）。</li>
+<li>在K8s集群中，可能多个Pod副本运行着相同的容器，此时客户端可能并不关心每个Pod的IP，而是期望通过一个单一不变的IP地址进行访问这些Pod（最终由Service后端的某一个Pod来提供服务）。</li>
+</ul>
+<h2 id="53-集群内部pod间通信">5.3 集群内部Pod间通信</h2>
+<p>Service通过标签选择器来指定哪些Pod属于同一个组（图中Service（test-svc）选择所有贴着“紫色的标签“的Pod），然后将连接到该Service的客户端链接通过负载均衡路由到某一个后端Pod。
+<img src="/img/kss_pic11.jpg" alt="图11"></p>
+<h3 id="531-创建一个service">5.3.1 创建一个Service</h3>
+<ul>
+<li>在测试环境，我们创建一个Service，svc.yaml文件对应的内容为：</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>apiVersion: v1
+</span></span><span style="display:flex;"><span>kind: Service
+</span></span><span style="display:flex;"><span>metadata:
+</span></span><span style="display:flex;"><span>  name: test-svc
+</span></span><span style="display:flex;"><span>spec:
+</span></span><span style="display:flex;"><span>  ports:
+</span></span><span style="display:flex;"><span>  - port: <span style="color:#ae81ff">80</span>         <span style="color:#75715e"># 该服务的可用端口</span>
+</span></span><span style="display:flex;"><span>    targetPort: <span style="color:#ae81ff">8080</span> <span style="color:#75715e"># 服务将连接转发到的容器端口</span>
+</span></span><span style="display:flex;"><span>  selector:          <span style="color:#75715e"># label app=testing的pod属于该服务</span>
+</span></span><span style="display:flex;"><span>    app: testing
+</span></span></code></pre></div><ul>
+<li>同时创建一个新的ReplicaSet，其中容器运行我们的Node.js应用程序（1.6节中的allen镜像）replicaset-fqdn.yaml, 该文件内容如下:</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>apiVersion: apps/v1
+</span></span><span style="display:flex;"><span>kind: ReplicaSet
+</span></span><span style="display:flex;"><span>metadata:
+</span></span><span style="display:flex;"><span> name: fqdn-test
+</span></span><span style="display:flex;"><span>spec:
+</span></span><span style="display:flex;"><span> replicas: <span style="color:#ae81ff">3</span>
+</span></span><span style="display:flex;"><span> selector:
+</span></span><span style="display:flex;"><span>   matchLabels:
+</span></span><span style="display:flex;"><span>    app: testing   <span style="color:#75715e"># 操作label app=testing的Pod</span>
+</span></span><span style="display:flex;"><span> template:
+</span></span><span style="display:flex;"><span>   metadata:
+</span></span><span style="display:flex;"><span>     labels:
+</span></span><span style="display:flex;"><span>       app: testing
+</span></span><span style="display:flex;"><span>   spec:
+</span></span><span style="display:flex;"><span>     containers:
+</span></span><span style="display:flex;"><span>     - name: nodejs
+</span></span><span style="display:flex;"><span>       image: qinchaowhut/allen:v1
+</span></span></code></pre></div><ul>
+<li>
+<p>在创建了Service之后，我们并不需要查询该Service的IP, 然后再把IP配置给客户端pod。客户端Pod可以通过Service名称（FQDN）来访问服务。在下图中，我们登录之前创建dnsutils pod中的容器，可以通过通过nslookup查看test-svc.default.svc.cluster.local域名对应的IP(即：test-svc的Cluster IP)）。</p>
+</li>
+<li>
+<p>由于都在同一个namespace，我们可以在dnsutils容器中执行nslookup testsvc，查看Service的Cluster IP。
+<img src="/img/pic12.jpg" alt="图12"></p>
+</li>
+</ul>
+<h2 id="54-集群内部pod暴露给外部客户端">5.4 集群内部Pod暴露给外部客户端</h2>
+<p>接下来我们介绍一下集群外部客户端通过NodePort和LoadBalancer Service访问集群内部的服务。</p>
+<h3 id="541-nodeport-service">5.4.1 NodePort Service</h3>
+<p>在每个Worker Node上开放静态端口（所有Woker Node使用同一个端口号），外部客户端可以直接通过任一Woker Node 的IP和静态端口访问后端 Pod。</p>
+<p><img src="/img/kss_pic13.jpg" alt="图13"></p>
+<h3 id="542-loadbalancer-service">5.4.2 LoadBalancer Service</h3>
+<p>LoadBalancer服务是NodePort服务的一种扩展，使用云平台的负载均衡器向外部公开 Service（其中负载均衡器将外部客户端的请求重定向到Worker Node的静态端口）。</p>
+<p><img src="/img/kss_pic14.jpg" alt="图14"></p>
+<h2 id="55-headless-service">5.5 Headless Service</h2>
+<ul>
+<li>Headless Service允许客户端直接连接到它所偏好的任一或者全部Pod（即：当通过DNS服务器查询Headless Service名称的时候，DNS服务器返回的是所有Pod IP，而不是单个Service的IP）。</li>
+</ul>
+<h3 id="551创建一个headless-service">5.5.1创建一个Headless Service</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>apiVersion: v1
+</span></span><span style="display:flex;"><span>kind: Service
+</span></span><span style="display:flex;"><span>metadata:
+</span></span><span style="display:flex;"><span>  name: test-svc-headless
+</span></span><span style="display:flex;"><span>spec:
+</span></span><span style="display:flex;"><span>  clusterIP: None   <span style="color:#75715e"># 注意，这里需要设置为NONE</span>
+</span></span><span style="display:flex;"><span>  ports:
+</span></span><span style="display:flex;"><span>  - port: <span style="color:#ae81ff">80</span>
+</span></span><span style="display:flex;"><span>    targetPort: <span style="color:#ae81ff">8080</span>
+</span></span><span style="display:flex;"><span>  selector:
+</span></span><span style="display:flex;"><span>    app: testing
+</span></span></code></pre></div><p><img src="/img/kss_pic15.jpg" alt="图15"></p>
+<ul>
+<li>通过nslookup查询test-svc-headless Service：
+<img src="/img/kss_pic16.jpg" alt="图16"></li>
+</ul>
+<h1 id="6-deployment">6 Deployment</h1>
+<h2 id="61-什么是deployment">6.1 什么是Deployment</h2>
+<p>Deployment用于声明式地定义、部署和更新应用程序（Deployment由ReplicaSet组成（1:N），并且由ReplicaSet来创建和管理Pod）。</p>
+<ul>
+<li>当创建Deployment时，会创建新的 ReplicaSet，然后ReplicaSet创建期望数量的Pod</li>
+<li>当更新Deployment中定义的Pod模版时，新的 ReplicaSet 会被创建，Deployment 以受控速率将 Pod 从旧 ReplicaSet 迁移到新 ReplicaSet。</li>
+</ul>
+<h2 id="62-创建一个deployment">6.2 创建一个Deployment</h2>
+<ul>
+<li>在测试环境，Deployment yaml文件内容如下：</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>apiVersion: apps/v1
+</span></span><span style="display:flex;"><span>kind: Deployment
+</span></span><span style="display:flex;"><span>metadata:
+</span></span><span style="display:flex;"><span>  name: testqc
+</span></span><span style="display:flex;"><span>spec:
+</span></span><span style="display:flex;"><span>  replicas: <span style="color:#ae81ff">3</span>
+</span></span><span style="display:flex;"><span>  template:
+</span></span><span style="display:flex;"><span>    metadata:
+</span></span><span style="display:flex;"><span>      name: allen
+</span></span><span style="display:flex;"><span>      labels:
+</span></span><span style="display:flex;"><span>        app: testing
+</span></span><span style="display:flex;"><span>    spec:
+</span></span><span style="display:flex;"><span>      containers:
+</span></span><span style="display:flex;"><span>      - image: qinchaowhut/allen:v1
+</span></span><span style="display:flex;"><span>        name: nodejs
+</span></span><span style="display:flex;"><span>        imagePullPolicy: IfNotPresent
+</span></span><span style="display:flex;"><span>  selector:
+</span></span><span style="display:flex;"><span>    matchLabels:
+</span></span><span style="display:flex;"><span>      app: testing
+</span></span></code></pre></div><ul>
+<li>kubectl create -f deployment-v1.yaml &ndash;record</li>
+</ul>
+<p><img src="/img/kss_pic17.jpg" alt="图17"></p>
+<ul>
+<li>在测试环境，LoadBalancer Service yaml文件内容如下：</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>apiVersion: v1
+</span></span><span style="display:flex;"><span>kind: Service
+</span></span><span style="display:flex;"><span>metadata:
+</span></span><span style="display:flex;"><span>  name: allen-loadbalancer
+</span></span><span style="display:flex;"><span>spec:
+</span></span><span style="display:flex;"><span>  type: LoadBalancer
+</span></span><span style="display:flex;"><span>  ports:
+</span></span><span style="display:flex;"><span>  - port: <span style="color:#ae81ff">80</span>
+</span></span><span style="display:flex;"><span>    targetPort: <span style="color:#ae81ff">8080</span>
+</span></span><span style="display:flex;"><span>  selector:
+</span></span><span style="display:flex;"><span>    app: testing
+</span></span></code></pre></div><ul>
+<li>kubectl create -f svc-loadbalancer.yaml</li>
+</ul>
+<p><img src="/img/kss_pic18.jpg" alt="图18"></p>
+<ul>
+<li>curl http://127.0.0.1:80
+<img src="/img/kss_pic19.jpg" alt="图19"></li>
+</ul>
+<h2 id="62-deployment的升级策略">6.2 Deployment的升级策略</h2>
+<ul>
+<li>RollingUpdate（默认的升级策略），即滚动更新，该策略会逐步创建新 Pod 并终止旧 Pod ，使应用程序在整个升级过程中都处于可用状态（注意：在升级过程中，会同时运行应用程序的多个版本）。</li>
+<li>Recreate， 即先终止所有旧 Pod，再一次性创建新Pod(注意：在升级过程中，存在服务中断的情况)。</li>
+</ul>
+<h2 id="63-触发升级">6.3 触发升级</h2>
+<p>触发条件：只要deployment中定义的pod模板发生变更，则会触发自动升级。</p>
+<ul>
+<li>可以通过修改Deployment中pod模板的镜像，来触发升级。</li>
+<li>通过kubectl set image deployment testqc nodejs=qinchaowhut/allen:v2 来修改Deployment的pod模板内的镜像(其中deployment的name为testqc, nodejs为容器name, qinchaowhut/allen:v2为镜像版本)</li>
+</ul>
+<p><img src="/img/kss_pic20.jpg" alt="图20">
+<img src="/img/kss_pic21.jpg" alt="图21"></p>
+<ul>
+<li>
+<p>升级完成之后，发送curl请求:
+<img src="/img/kss_pic22.jpg" alt="图22"></p>
+</li>
+<li>
+<p>查看升级前后ReplicaSet（通过下图, 可以看出旧的ReplicaSet仍然在保留）
+<img src="/img/kss_pic23.jpg" alt="图23"></p>
+</li>
+</ul>
+<h2 id="65-控制rollingupdate速率">6.5 控制RollingUpdate速率</h2>
+<p>在Deployment的滚动升级期间，我门可以通过指定maxUnavailable和maxSurge来控制滚动更新过程。</p>
+<ul>
+<li>
+<p>maxUnavailable：用来指定滚动更新过程中，相对于期望的副本数不可用的 Pod 的个数上限。该值可以是绝对数字（比如，5），也可以是所需 Pod 的百分比（比如30%），需要注意的是：When converting a percentage to an absolute number , the number is rouded down。</p>
+</li>
+<li>
+<p>maxSurge：用来指定可以创建的超出期望的副本数的 Pod 数量（同样这个值可以是绝对数字，也可以是所需Pod的百分比），需要注意的是：When converting a percentage to an absolute number, the number is rounded up。</p>
+</li>
+</ul>
+<p>在我们测试环境中，我们将6.2节中的Deployment描述文件修改如下：</p>
+<ul>
+<li>replicas（期望副本数量）：3</li>
+<li>maxUnavailable：3*15%=0（向下取整），即最少有3个Pod同时运行（replicas - maxUnavailable）</li>
+<li>maxSurge：3*30%=1（向上取整），即最多可以有4个Pod同时运行（replicas + maxSurge)。</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>apiVersion: apps/v1
+</span></span><span style="display:flex;"><span>kind: Deployment
+</span></span><span style="display:flex;"><span>metadata:
+</span></span><span style="display:flex;"><span>  name: testqc
+</span></span><span style="display:flex;"><span>spec:
+</span></span><span style="display:flex;"><span>  replicas: <span style="color:#ae81ff">3</span>              <span style="color:#75715e"># 期望副本数量</span>
+</span></span><span style="display:flex;"><span>  strategy:
+</span></span><span style="display:flex;"><span>    type: RollingUpdate    <span style="color:#75715e"># 滚动更新</span>
+</span></span><span style="display:flex;"><span>    rollingUpdate:
+</span></span><span style="display:flex;"><span>      maxSurge: 30%        <span style="color:#75715e"># 3*30%=1（向上取整）</span>
+</span></span><span style="display:flex;"><span>      maxUnavailable: 15%  <span style="color:#75715e"># 3*15%=0（向下取整）</span>
+</span></span><span style="display:flex;"><span>  minReadySeconds: <span style="color:#ae81ff">180</span>     <span style="color:#75715e"># 减慢升级的速率，便于我们观察滚动升级过程</span>
+</span></span><span style="display:flex;"><span>  template:
+</span></span><span style="display:flex;"><span>    metadata:
+</span></span><span style="display:flex;"><span>      name: allen
+</span></span><span style="display:flex;"><span>      labels:
+</span></span><span style="display:flex;"><span>        app: testing
+</span></span><span style="display:flex;"><span>    spec:
+</span></span><span style="display:flex;"><span>      containers:
+</span></span><span style="display:flex;"><span>      - image: qinchaowhut/allen:v1
+</span></span><span style="display:flex;"><span>        name: nodejs
+</span></span><span style="display:flex;"><span>        imagePullPolicy: IfNotPresent
+</span></span><span style="display:flex;"><span>  selector:
+</span></span><span style="display:flex;"><span>    matchLabels:
+</span></span><span style="display:flex;"><span>      app: testing
+</span></span></code></pre></div><p>具体的升级过程如下：</p>
+<ul>
+<li>Step0：在触发升级之前，存在3(replicas)个老的Pod同时运行，然后触发升级（执行命令kubectl set image deployment testqc nodejs=qinchaowhut/allen:v2 ）。</li>
+</ul>
+<p><img src="/img/kss_pic24.jpg" alt="图24"></p>
+<ul>
+<li>Step1：当前存在3个的Pod正在运行（其中3个老的Pod），由于要求至少有3个Pod同时运行，所以不能删除任何一个老的Pod；由于要求最多可以有4个Pod同时运行，所以可以创建一个新的Pod，直到新的Pod创建完成（并且新的Pod可用），然后继续执行滚动升级。</li>
+</ul>
+<p><img src="/img/kss_pic25.jpg" alt="图25"></p>
+<ul>
+<li>Step2：当前存在4个Pod正在运行（其中3个老的Pod，一个新的Pod），由于要求至少3个Pod同时运行，所以我门可以删除一个老的Pod；由于要求最多可以4个Pod同时运行，所以再创建一个新的Pod，直到新的Pod创建完成（并且新的Pod可用），然后继续执行滚动升级。</li>
+</ul>
+<p><img src="/img/kss_pic26.jpg" alt="图26"></p>
+<ul>
+<li>Step3：当前存在4个Pod正在芸晴（其中2个老的Pod，两个新的Pod），由于要求至少3个Pod同时运行，所以可以删除一个老的Pod；由于要求最多可以可以4个Pod同时运行，所以可以再创建一个新的Pod，直到新的Pod创建完成（并且新的Pod可用），然后继续执行滚动升级。</li>
+</ul>
+<p><img src="/img/kss_pic27.jpg" alt="图27"></p>
+<ul>
+<li>Step4：当前存在4个Pod正在运行（其中1个老的Pod，3个新的Pod），由于要求至少3个Pod同时运行，所以可以删除一个老的Pod；当前存在3个新的Pod，已经满足期望的副本数量，这时候不再创建新的Pod。</li>
+</ul>
+<p><img src="/img/kss_pic28.jpg" alt="图28"></p>
+<ul>
+<li>Step5：滚动升级完成。
+<img src="/img/kss_pic29.jpg" alt="图29"></li>
+</ul>
+<h1 id="7-参考资料">7 参考资料</h1>
+<ul>
+<li>《kubernetes in action》</li>
+<li><a href="https://kubernetes.io/zh-cn/docs/concepts/overview/">https://kubernetes.io/zh-cn/docs/concepts/overview/</a></li>
+<li><a href="https://omerio.com/2015/12/18/learn-the-kubernetes-key-concepts-in-10-minutes/">https://omerio.com/2015/12/18/learn-the-kubernetes-key-concepts-in-10-minutes/</a></li>
+</ul>
+    </article>
+
+    
+<ul class="article-share">
+</ul>
+
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer">
+          <a href="/posts/xv6/" data-toggle="tooltip" data-placement="top" title="跟着xv6学习OS Kernel">&lt; Newer</a>
+      </li>
+      <li class="pager-older">
+        <a href="/posts/civetweb/" data-toggle="tooltip" data-placement="top" title="civetweb支持mbedtls">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright"></div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-"><a href="" title=""></a></li>
+  </ul>
+  <div class="powerdby">
+    <a href="https://github.com/qinch" rel="me" target="_blank"><i class="fa-brands fa-github" style="font-size: 16px;"></i></a>&nbsp&nbsp
+    <a href="mailto:qinchaowhut@qq.com" target="_blank"><i class="fa-solid fa-envelope" style="font-size: 16px;"></i></a></li><br>
+    ©2015-2024 qinch | Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+      <script async src="https://www.googletagmanager.com/gtag/js?id=Toracking%20ID"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'Toracking ID');
+        }
+      </script>
+
+</body>
+</html>

@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>C&#43;&#43;对象模型-关于对象 - Just For Fun</title>
+  <meta property="og:title" content="C&#43;&#43;对象模型-关于对象 - Just For Fun" />
+  <meta name="twitter:title" content="C&#43;&#43;对象模型-关于对象 - Just For Fun" />
+  <meta name="description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+  <meta property="og:description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+  <meta name="twitter:description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+  <meta name="author" content=""/>
+  <meta property="og:site_name" content="Just For Fun" />
+  <meta property="og:url" content="https://qinch.github.io/posts/cpp-model-5/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.145.0">
+  <link rel="stylesheet" href="/css/style.css" media="all" />
+  <link rel="stylesheet" href="/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
+  <link rel="stylesheet" href="/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/css/custom.css" media="all" />
+
+  <script src="/js/script.js"></script>
+  <script src="/js/custom.js"></script>
+  <script defer src="/fontawesome/all.min.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/">Just For Fun</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-categories"><a href="/categories/" title="Categories">Categories</a></li>
+      <li class="site-navi-item-archives"><a href="/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">C&#43;&#43;对象模型-关于对象</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>Apr 9, 2016</time></li>
+        <li class="article-meta-categories">
+        </li>
+      </ul>
+      
+      <h5 id="开发环境">开发环境</h5>
+<ul>
+<li>Ubuntu 14.04(32bits)</li>
+<li>GCC</li>
+<li>编辑器 Cmd Markdown</li>
+<li>画图工具 Processon</li>
+</ul>
+<h5 id="1关于对象">1,关于对象</h5>
+<p>从这篇博客开始真正介绍C++对象模型，前边BB了那么多没用的，终于开始了C++对模型的分析。关于C++对象模型的介绍，我将根据《深度探索C++对象模型》这本书，其书中的每一章，对应一篇博客，博客内容为自己对这本书的理解和补充吧。</p>
+<h6 id="11c语言中的struct">1.1C语言中的struct</h6>
+<p>我们知道，C语言是面向过程的，即数据和处理数据的函数时分开的，也就是说，struct中不能包含函数（当然也不能包含static变量）。但是我们可以在struct中声明指向函数的指针来模拟数据和处理数据的函数指针。其中，需要指出的是，c语言中struct变量的数据成员的访问方式都是基于该结构体变量的首地址的偏移量来访问的（同样适用于C++中的class/struct）。
+即，见如下代码:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#include&lt;stdio.h&gt;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>struct point3d;
+</span></span><span style="display:flex;"><span>typedef void <span style="color:#f92672">(</span>*initfun<span style="color:#f92672">)(</span>struct point3d*<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>struct point3d<span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>        float x;
+</span></span><span style="display:flex;"><span>        float y;
+</span></span><span style="display:flex;"><span>        float z;
+</span></span><span style="display:flex;"><span>        initfun init;//指向初始化数据函数的指针
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>;
+</span></span><span style="display:flex;"><span>void initp<span style="color:#f92672">(</span>struct point3d* p3d<span style="color:#f92672">)</span> //struct point3d变量初始化函数
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>        p3d-&gt;x<span style="color:#f92672">=</span>1;
+</span></span><span style="display:flex;"><span>        p3d-&gt;y<span style="color:#f92672">=</span>2;
+</span></span><span style="display:flex;"><span>        p3d-&gt;z<span style="color:#f92672">=</span>3;
+</span></span><span style="display:flex;"><span>        printf<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;%f %f %f\n&#34;</span>,p3d-&gt;x,p3d-&gt;y,p3d-&gt;z<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>int main<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>        struct point3d pd;
+</span></span><span style="display:flex;"><span>        pd.init<span style="color:#f92672">=</span>initp;//将initp函数地址赋给结构体中指向函数的指针pd.init。
+</span></span><span style="display:flex;"><span>        pd.init<span style="color:#f92672">(</span>&amp;pd<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><h6 id="12-class">1.2 class</h6>
+<p>需要指出的是，C++类的非static的成员函数都有一个隐式的参数，即this(class object *const this)指针（对象的首地址）。在gcc，通过压栈来传递this指针。在vc6.0,通过ecx寄存器来传递this指针。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#include&lt;iostream&gt;</span>
+</span></span><span style="display:flex;"><span>using namespace std;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>class point3d<span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>        private:
+</span></span><span style="display:flex;"><span>                float x;
+</span></span><span style="display:flex;"><span>                float y;
+</span></span><span style="display:flex;"><span>                float z;
+</span></span><span style="display:flex;"><span>                friend ostream&amp; operator&lt;&lt;<span style="color:#f92672">(</span>ostream&amp;,point3d&amp;<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span>        public:
+</span></span><span style="display:flex;"><span>                point3d<span style="color:#f92672">()</span>:x<span style="color:#f92672">(</span>1<span style="color:#f92672">)</span>,y<span style="color:#f92672">(</span>2<span style="color:#f92672">)</span>,z<span style="color:#f92672">(</span>3<span style="color:#f92672">){}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>//该函数不能作为class的成员函数，因为它的第一个参数不是point3d的对象！
+</span></span><span style="display:flex;"><span>//设置为友元函数，可以访问class point3d的私有数据成员。
+</span></span><span style="display:flex;"><span>inline ostream&amp; operator &lt;&lt;<span style="color:#f92672">(</span>ostream&amp; os, point3d&amp; pt<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>        os<span style="color:#e6db74">&lt;&lt;pt.x&lt;&lt;&#39; &#39;&lt;&lt;pt</span>.y&lt;&lt;<span style="color:#e6db74">&#39; &#39;</span><span style="color:#e6db74">&lt;&lt;pt.z&lt;&lt;endl;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        return os;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">}
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">int main()
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">{
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        p</span>oint3d pd;
+</span></span><span style="display:flex;"><span>        cout&lt;&lt;pd;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>以上程序对应的汇编代码为（C++ name mangling）：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>	.file	<span style="color:#e6db74">&#34;c5-1.cpp&#34;</span>
+</span></span><span style="display:flex;"><span>	.local	_ZStL8__ioinit
+</span></span><span style="display:flex;"><span>	.comm	_ZStL8__ioinit,1,1
+</span></span><span style="display:flex;"><span>	.section	.text._ZN7point3dC2Ev,<span style="color:#e6db74">&#34;axG&#34;</span>,@progbits,_ZN7point3dC5Ev,comdat
+</span></span><span style="display:flex;"><span>	.align <span style="color:#ae81ff">2</span>
+</span></span><span style="display:flex;"><span>	.weak	_ZN7point3dC2Ev
+</span></span><span style="display:flex;"><span>	.type	_ZN7point3dC2Ev, @function
+</span></span><span style="display:flex;"><span>_ZN7point3dC2Ev:  //即函数point3d::point3d<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span>.LFB972:
+</span></span><span style="display:flex;"><span>	.cfi_startproc
+</span></span><span style="display:flex;"><span>	pushl	%ebp  //ebp压栈
+</span></span><span style="display:flex;"><span>	.cfi_def_cfa_offset <span style="color:#ae81ff">8</span>
+</span></span><span style="display:flex;"><span>	.cfi_offset 5, -8
+</span></span><span style="display:flex;"><span>	movl	%esp, %ebp  //ebp<span style="color:#f92672">=</span>esp
+</span></span><span style="display:flex;"><span> 	.cfi_def_cfa_register <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>	movl	8<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %edx //将this<span style="color:#f92672">(</span>即point3d对象的首地址<span style="color:#f92672">)</span>之后怎赋值给edx,即edx<span style="color:#f92672">=</span>this
+</span></span><span style="display:flex;"><span>	movl	.LC0, %eax //即eax<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>	movl	%eax, <span style="color:#f92672">(</span>%edx<span style="color:#f92672">)</span>//edx即为class point3d中x的首地址，即this-&gt;x<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>	movl	8<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %edx //edx<span style="color:#f92672">=</span>this
+</span></span><span style="display:flex;"><span>	movl	.LC1, %eax //eax<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>
+</span></span><span style="display:flex;"><span>	movl	%eax, 4<span style="color:#f92672">(</span>%edx<span style="color:#f92672">)</span> //edx+4即为y的首地址，即this-&gt;y<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>
+</span></span><span style="display:flex;"><span>	movl	8<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %edx //edx<span style="color:#f92672">=</span>this
+</span></span><span style="display:flex;"><span>	movl	.LC2, %eax //eax<span style="color:#f92672">=</span><span style="color:#ae81ff">3</span>
+</span></span><span style="display:flex;"><span>	movl	%eax, 8<span style="color:#f92672">(</span>%edx<span style="color:#f92672">)</span> //this-&gt;z<span style="color:#f92672">=</span>3,其中edx+8即this-&gt;z 
+</span></span><span style="display:flex;"><span>	popl	%ebp //ebp<span style="color:#f92672">=</span>old ebp,esp+<span style="color:#f92672">=</span><span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span>	.cfi_restore <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>	.cfi_def_cfa 4, <span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span>	ret //eip<span style="color:#f92672">=</span>ret addr, esp<span style="color:#f92672">+=</span><span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span>	.cfi_endproc
+</span></span><span style="display:flex;"><span>.LFE972:
+</span></span><span style="display:flex;"><span>	.size	_ZN7point3dC2Ev, .-_ZN7point3dC2Ev
+</span></span><span style="display:flex;"><span>	.weak	_ZN7point3dC1Ev
+</span></span><span style="display:flex;"><span>	.set	_ZN7point3dC1Ev,_ZN7point3dC2Ev
+</span></span><span style="display:flex;"><span>	.section	.text._ZlsRSoR7point3d,<span style="color:#e6db74">&#34;axG&#34;</span>,@progbits,_ZlsRSoR7point3d,comdat
+</span></span><span style="display:flex;"><span>	.weak	_ZlsRSoR7point3d
+</span></span><span style="display:flex;"><span>	.type	_ZlsRSoR7point3d, @function
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>main:
+</span></span><span style="display:flex;"><span>.LFB975:
+</span></span><span style="display:flex;"><span>	.cfi_startproc
+</span></span><span style="display:flex;"><span>	pushl	%ebp  //ebp压栈
+</span></span><span style="display:flex;"><span>	.cfi_def_cfa_offset <span style="color:#ae81ff">8</span>
+</span></span><span style="display:flex;"><span>	.cfi_offset 5, -8
+</span></span><span style="display:flex;"><span>	movl	%esp, %ebp  //ebp<span style="color:#f92672">=</span>esp
+</span></span><span style="display:flex;"><span>	.cfi_def_cfa_register <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>	andl	$-16, %esp //esp为16的整数倍
+</span></span><span style="display:flex;"><span>	subl	$32, %esp //esp-<span style="color:#f92672">=</span><span style="color:#ae81ff">32</span>
+</span></span><span style="display:flex;"><span>	leal	20<span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span>, %eax //eax<span style="color:#f92672">=</span>esp+20,<span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>	即pd对象的首地址（也就是我们说的this指针）
+</span></span><span style="display:flex;"><span>	movl	%eax, <span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span> //将eax压栈，即将pd的<span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>	首地址压栈<span style="color:#f92672">(</span>需要重点指出的，this指针作为类<span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>	非static成员函数的隐式参数，gcc采用压栈方<span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>	式传递this指针，而VC6.0通过ecx寄存器来传递this指针<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>	call	_ZN7point3dC1Ev //调用构造函数pointd3d<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span>	leal	20<span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span>, %eax //esp+20即pd对象的首地址
+</span></span><span style="display:flex;"><span>	movl	%eax, 4<span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span> //eax压栈
+</span></span><span style="display:flex;"><span>	movl	$_ZSt4cout, <span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span> //cout压栈
+</span></span><span style="display:flex;"><span>	call	_ZlsRSoR7point3d  //调用operator&lt;&lt;函数
+</span></span><span style="display:flex;"><span>	movl	$0, %eax
+</span></span><span style="display:flex;"><span>	leave //esp<span style="color:#f92672">=</span>ebp,pop ebp;
+</span></span><span style="display:flex;"><span>	.cfi_restore <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>	.cfi_def_cfa 4, <span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span>	ret
+</span></span><span style="display:flex;"><span>	.cfi_endproc
+</span></span><span style="display:flex;"><span>.LFE975:
+</span></span><span style="display:flex;"><span>	.size	main, .-main
+</span></span><span style="display:flex;"><span>	.type	_Z41__static_initialization_and_destruction_0ii, @function
+</span></span><span style="display:flex;"><span>_Z41__static_initialization_and_destruction_0ii:
+</span></span><span style="display:flex;"><span>.LFB983:
+</span></span><span style="display:flex;"><span>	.cfi_startproc
+</span></span><span style="display:flex;"><span>	pushl	%ebp
+</span></span><span style="display:flex;"><span>	.cfi_def_cfa_offset <span style="color:#ae81ff">8</span>
+</span></span><span style="display:flex;"><span>	.cfi_offset 5, -8
+</span></span><span style="display:flex;"><span>	movl	%esp, %ebp
+</span></span><span style="display:flex;"><span>	.cfi_def_cfa_register <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>	subl	$24, %esp
+</span></span><span style="display:flex;"><span>	cmpl	$1, 8<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>	jne	.L6
+</span></span><span style="display:flex;"><span>	cmpl	$65535, 12<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>	jne	.L6
+</span></span><span style="display:flex;"><span>	movl	$_ZStL8__ioinit, <span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>	call	_ZNSt8ios_base4InitC1Ev
+</span></span><span style="display:flex;"><span>	movl	$__dso_handle, 8<span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>	movl	$_ZStL8__ioinit, 4<span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>	movl	$_ZNSt8ios_base4InitD1Ev, <span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>	call	__cxa_atexit
+</span></span><span style="display:flex;"><span>.L6:
+</span></span><span style="display:flex;"><span>	leave
+</span></span><span style="display:flex;"><span>	.cfi_restore <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>	.cfi_def_cfa 4, <span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span>	ret
+</span></span><span style="display:flex;"><span>	.cfi_endproc
+</span></span><span style="display:flex;"><span>.LFE983:
+</span></span><span style="display:flex;"><span>	.size	_Z41__static_initialization_and_destruction_0ii, .-_Z41__static_initialization_and_destruction_0ii
+</span></span><span style="display:flex;"><span>	.type	_GLOBAL__sub_I_main, @function
+</span></span><span style="display:flex;"><span>_GLOBAL__sub_I_main:
+</span></span><span style="display:flex;"><span>.LFB984:
+</span></span><span style="display:flex;"><span>	.cfi_startproc
+</span></span><span style="display:flex;"><span>	pushl	%ebp
+</span></span><span style="display:flex;"><span>	.cfi_def_cfa_offset <span style="color:#ae81ff">8</span>
+</span></span><span style="display:flex;"><span>	.cfi_offset 5, -8
+</span></span><span style="display:flex;"><span>	movl	%esp, %ebp
+</span></span><span style="display:flex;"><span>	.cfi_def_cfa_register <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>	subl	$24, %esp
+</span></span><span style="display:flex;"><span>	movl	$65535, 4<span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>	movl	$1, <span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>	call	_Z41__static_initialization_and_destruction_0ii
+</span></span><span style="display:flex;"><span>	leave
+</span></span><span style="display:flex;"><span>	.cfi_restore <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>	.cfi_def_cfa 4, <span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span>	ret
+</span></span><span style="display:flex;"><span>	.cfi_endproc
+</span></span><span style="display:flex;"><span>.LFE984:
+</span></span><span style="display:flex;"><span>	.size	_GLOBAL__sub_I_main, .-_GLOBAL__sub_I_main
+</span></span><span style="display:flex;"><span>	.section	.init_array,<span style="color:#e6db74">&#34;aw&#34;</span>
+</span></span><span style="display:flex;"><span>	.align <span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span>	.long	_GLOBAL__sub_I_main
+</span></span><span style="display:flex;"><span>	.section	.rodata
+</span></span><span style="display:flex;"><span>	.align <span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span>.LC0:
+</span></span><span style="display:flex;"><span>	.long	<span style="color:#ae81ff">1065353216</span>
+</span></span><span style="display:flex;"><span>	.align <span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span>.LC1:
+</span></span><span style="display:flex;"><span>	.long	<span style="color:#ae81ff">1073741824</span>
+</span></span><span style="display:flex;"><span>	.align <span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span>.LC2:
+</span></span><span style="display:flex;"><span>	.long	<span style="color:#ae81ff">1077936128</span>
+</span></span><span style="display:flex;"><span>	.hidden	__dso_handle
+</span></span><span style="display:flex;"><span>	.ident	<span style="color:#e6db74">&#34;GCC: (Ubuntu 4.8.4-2ubuntu1~14.04.1) 4.8.4&#34;</span>
+</span></span><span style="display:flex;"><span>	.section	.note.GNU-stack,<span style="color:#e6db74">&#34;&#34;</span>,@progbits
+</span></span></code></pre></div><p>其中调用构造函数point3d::point3d()时的栈帧结构为：
+<img src="/img/c5-x.png" alt="statck0"></p>
+<h6 id="121-class对象内存布局">1.2.1 class对象内存布局</h6>
+<p>C++在内存布局以及存取时间上主要的额外负担是虚函数（即链接时的多态）和虚继承（即多次出现在继承体系中的父类，在子类对象中有一个单一共享的实例，其最典型的是菱形继承）
+另外，需要指出的是，C++中class和struct关键字都可以包含函数，其不同点在于，class默认为private，struct默认为public.在继承时，class默认为私有继承，strutc默认为公有继承。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#include&lt;iostream&gt;</span>
+</span></span><span style="display:flex;"><span>using namespace std;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>class point<span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>        float x;
+</span></span><span style="display:flex;"><span>public:
+</span></span><span style="display:flex;"><span>        point<span style="color:#f92672">()</span>:x<span style="color:#f92672">(</span>1<span style="color:#f92672">){}</span>
+</span></span><span style="display:flex;"><span>	virtual void draw<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>		cout&lt;&lt;<span style="color:#e6db74">&#34;draw point&#34;</span><span style="color:#e6db74">&lt;&lt;endl;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">	}
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        virtual ~point()
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        {//需要将析构函数声明为虚函数(用于动态绑定)
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">                cout&lt;&lt;&#34;point&#34;&lt;&lt;endl</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>class point2d:public point<span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>        float y;
+</span></span><span style="display:flex;"><span>public:
+</span></span><span style="display:flex;"><span>        point2d<span style="color:#f92672">()</span>:point<span style="color:#f92672">()</span>,y<span style="color:#f92672">(</span>2<span style="color:#f92672">){}</span>
+</span></span><span style="display:flex;"><span>        ~point2d<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>                cout&lt;&lt;<span style="color:#e6db74">&#34;point2&#34;</span><span style="color:#e6db74">&lt;&lt;endl;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        }
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">};
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">int main()
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">{
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        point *p=ne</span>w point2d;
+</span></span><span style="display:flex;"><span>        delete p;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>   
+</span></span></code></pre></div><p>class point的对象对应的内存布局
+<img src="/img/c5-0.png" alt="layout1">
+class point2d的对象对应的内存布局
+<img src="/img/c5-1.png" alt="layout2"></p>
+<p>通过对比point和point2d的对象内存布局，可知，如果父类中定义了虚函数，并且在子类中进行了重写，则在子类的对象模型中，用子类重写的函数的地址将父类的虚函数地址替换掉，否则不进行替换。</p>
+    </article>
+
+    
+<ul class="article-share">
+</ul>
+
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer">
+          <a href="/posts/cpp-model-10/" data-toggle="tooltip" data-placement="top" title="C&#43;&#43;对象模型-virtual继承">&lt; Newer</a>
+      </li>
+      <li class="pager-older">
+        <a href="/posts/cpp-model-9/" data-toggle="tooltip" data-placement="top" title="C&#43;&#43;对象模型-引用">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright"></div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-"><a href="" title=""></a></li>
+  </ul>
+  <div class="powerdby">
+    <a href="https://github.com/qinch" rel="me" target="_blank"><i class="fa-brands fa-github" style="font-size: 16px;"></i></a>&nbsp&nbsp
+    <a href="mailto:qinchaowhut@qq.com" target="_blank"><i class="fa-solid fa-envelope" style="font-size: 16px;"></i></a></li><br>
+    ©2015-2024 qinch | Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+      <script async src="https://www.googletagmanager.com/gtag/js?id=Toracking%20ID"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'Toracking ID');
+        }
+      </script>
+
+</body>
+</html>

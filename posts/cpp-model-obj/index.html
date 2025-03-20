@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>C&#43;&#43;对象模型_Class Obj作为函数参数 - Just For Fun</title>
+  <meta property="og:title" content="C&#43;&#43;对象模型_Class Obj作为函数参数 - Just For Fun" />
+  <meta name="twitter:title" content="C&#43;&#43;对象模型_Class Obj作为函数参数 - Just For Fun" />
+  <meta name="description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+  <meta property="og:description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+  <meta name="twitter:description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+  <meta name="author" content=""/>
+  <meta property="og:site_name" content="Just For Fun" />
+  <meta property="og:url" content="https://qinch.github.io/posts/cpp-model-obj/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.145.0">
+  <link rel="stylesheet" href="/css/style.css" media="all" />
+  <link rel="stylesheet" href="/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
+  <link rel="stylesheet" href="/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/css/custom.css" media="all" />
+
+  <script src="/js/script.js"></script>
+  <script src="/js/custom.js"></script>
+  <script defer src="/fontawesome/all.min.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/">Just For Fun</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-categories"><a href="/categories/" title="Categories">Categories</a></li>
+      <li class="site-navi-item-archives"><a href="/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">C&#43;&#43;对象模型_Class Obj作为函数参数</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>May 10, 2015</time></li>
+        <li class="article-meta-categories">
+        </li>
+      </ul>
+      
+      <h5 id="开发环境">开发环境</h5>
+<ul>
+<li>VC6.0</li>
+<li>编辑器 Cmd Markdown</li>
+</ul>
+<ol>
+<li>
+<p>关于C/C++中基本类型（如：int,int*等）作为函数参数时，是通过将该变量的值压栈来进行参数传递；本文通过C++反汇编代码分析了当对象作为函数参数时（该形参非引用或指针），参数如何传递以及此时栈帧的结构。</p>
+</li>
+<li>
+<p>对象作为函数参数时，参数传递过程(如：函数的声明为：void show(class Object obj);该函数的调用的为show(arg);其中实参arg的类型为class Object)：1,在栈顶上为obj对象分配内存空间，然后将对象arg的首地址压栈;2,调用拷贝构造函数（此为C++中三种调用拷贝构造函数情况之一），将arg的数据成员拷贝至obj;3,执行show()函数体（此时，ebp+8即为obj的首地址）。</p>
+</li>
+</ol>
+<ol start="3">
+<li>具体分析过程，见代码注释。</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>//C++源码。
+</span></span><span style="display:flex;"><span>//VC6.0
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#include&lt;iostream&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#includestdio&gt;</span>
+</span></span><span style="display:flex;"><span>using namespace std;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>class CBase<span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span> int i;
+</span></span><span style="display:flex;"><span>public:
+</span></span><span style="display:flex;"><span> CBase<span style="color:#f92672">(</span>int i<span style="color:#f92672">=</span>0<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>  this-&gt;i<span style="color:#f92672">=</span>i;
+</span></span><span style="display:flex;"><span> <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span> CBase<span style="color:#f92672">(</span>CBase&amp; rhs<span style="color:#f92672">)</span> //拷贝构造函数。
+</span></span><span style="display:flex;"><span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>  i<span style="color:#f92672">=</span>rhs.i;
+</span></span><span style="display:flex;"><span>  printf<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;拷贝构造函数=%d\n&#34;</span>,i<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span> <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span> void show<span style="color:#f92672">(</span>CBase B1, CBase B2<span style="color:#f92672">)</span> //对象作为形参。
+</span></span><span style="display:flex;"><span> <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>  printf<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;show=%d,%d\n&#34;</span>,B1.i,B2.i<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span> <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>;
+</span></span><span style="display:flex;"><span>int main<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span> CBase Base;
+</span></span><span style="display:flex;"><span> CBase Basex<span style="color:#f92672">(</span>1<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span> CBase Basexx<span style="color:#f92672">(</span>2<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span> Base.show<span style="color:#f92672">(</span>Basex,Basexx<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span>// printf<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;this is an end!\n&#34;</span><span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>---------------------------------------------------------------------------------
+</span></span><span style="display:flex;"><span>//main函数对应的汇编代码。
+</span></span><span style="display:flex;"><span> int main<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span>24: <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>0040D4A0 push ebp
+</span></span><span style="display:flex;"><span>0040D4A1 mov ebp,esp
+</span></span><span style="display:flex;"><span>0040D4A3 sub esp,54h
+</span></span><span style="display:flex;"><span>0040D4A6 push ebx
+</span></span><span style="display:flex;"><span>0040D4A7 push esi
+</span></span><span style="display:flex;"><span>0040D4A8 push edi
+</span></span><span style="display:flex;"><span>0040D4A9 lea edi,<span style="color:#f92672">[</span>ebp-54h<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>0040D4AC mov ecx,15h
+</span></span><span style="display:flex;"><span>0040D4B1 mov eax,0CCCCCCCCh
+</span></span><span style="display:flex;"><span>0040D4B6 rep stos dword ptr <span style="color:#f92672">[</span>edi<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>25: CBase Base;
+</span></span><span style="display:flex;"><span>0040D4B8 push <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>0040D4BA lea ecx,<span style="color:#f92672">[</span>ebp-4<span style="color:#f92672">]</span> //ecx保存的是对象Base的this指针。
+</span></span><span style="display:flex;"><span>0040D4BD call @ILT+0<span style="color:#f92672">(</span>CBase::CBase<span style="color:#f92672">)</span> <span style="color:#f92672">(</span>00401005<span style="color:#f92672">)</span>//调用构造函数
+</span></span><span style="display:flex;"><span>26: CBase Basex<span style="color:#f92672">(</span>1<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span>0040D4C2 push <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>0040D4C4 lea ecx,<span style="color:#f92672">[</span>ebp-8<span style="color:#f92672">]</span> //ecx保存的是对象Basex的this指针。
+</span></span><span style="display:flex;"><span>0040D4C7 call @ILT+0<span style="color:#f92672">(</span>CBase::CBase<span style="color:#f92672">)</span> <span style="color:#f92672">(</span>00401005<span style="color:#f92672">)</span>//调用构造函数
+</span></span><span style="display:flex;"><span>27: CBase Basexx<span style="color:#f92672">(</span>2<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span>0040D4CC push <span style="color:#ae81ff">2</span>
+</span></span><span style="display:flex;"><span>0040D4CE lea ecx,<span style="color:#f92672">[</span>ebp-0Ch<span style="color:#f92672">]</span> //ecx保存的是对象Basexx的this指针。
+</span></span><span style="display:flex;"><span>0040D4D1 call @ILT+0<span style="color:#f92672">(</span>CBase::CBase<span style="color:#f92672">)</span> <span style="color:#f92672">(</span>00401005<span style="color:#f92672">)</span>//调用构造函数
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>28: Base.show<span style="color:#f92672">(</span>Basex,Basexx<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span>0040D4D6 push ecx //等价于esp<span style="color:#f92672">=</span>esp-4;
+</span></span><span style="display:flex;"><span>0040D4D7 mov ecx,esp //ecx保存的是show函数的形参B2的this指针。
+</span></span><span style="display:flex;"><span>0040D4D9 lea eax,<span style="color:#f92672">[</span>ebp-0Ch<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>0040D4DC push eax //对Basexx的this（即Basexx对象的首地址）指针压栈。
+</span></span><span style="display:flex;"><span>0040D4DD call @ILT+10<span style="color:#f92672">(</span>CBase::CBase<span style="color:#f92672">)</span> <span style="color:#f92672">(</span>0040100f<span style="color:#f92672">)</span>//调用拷贝构造函数
+</span></span><span style="display:flex;"><span>0040D4E2 push ecx //等价于esp<span style="color:#f92672">=</span>esp-4;
+</span></span><span style="display:flex;"><span>0040D4E3 mov ecx,esp //ecx保存的是show函数的形参B1的this指针。
+</span></span><span style="display:flex;"><span>0040D4E5 lea edx,<span style="color:#f92672">[</span>ebp-8<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>0040D4E8 push edx //对Basex的this（即Basex对象的首地址）指针压栈。
+</span></span><span style="display:flex;"><span>0040D4E9 call @ILT+10<span style="color:#f92672">(</span>CBase::CBase<span style="color:#f92672">)</span> <span style="color:#f92672">(</span>0040100f<span style="color:#f92672">)</span>//调用拷贝构造函数
+</span></span><span style="display:flex;"><span>0040D4EE lea ecx,<span style="color:#f92672">[</span>ebp-4<span style="color:#f92672">]</span> //ecx保存的是Base对象的this指针。
+</span></span><span style="display:flex;"><span>0040D4F1 call @ILT+20<span style="color:#f92672">(</span>CBase::show<span style="color:#f92672">)</span> <span style="color:#f92672">(</span>00401019<span style="color:#f92672">)</span>//调用show函数。
+</span></span><span style="display:flex;"><span>29: printf<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;this is an end!\n&#34;</span><span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span>0040D4F6 push offset string <span style="color:#e6db74">&#34;this is an end!\n&#34;</span> <span style="color:#f92672">(</span>00422fa4<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>0040D4FB call printf <span style="color:#f92672">(</span>0040d7c0<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>0040D500 add esp,4
+</span></span><span style="display:flex;"><span>30: <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>0040D503 pop edi
+</span></span><span style="display:flex;"><span>0040D504 pop esi
+</span></span><span style="display:flex;"><span>0040D505 pop ebx
+</span></span><span style="display:flex;"><span>0040D506 add esp,54h
+</span></span><span style="display:flex;"><span>0040D509 cmp ebp,esp
+</span></span><span style="display:flex;"><span>0040D50B call __chkesp <span style="color:#f92672">(</span>004010b0<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>0040D510 mov esp,ebp
+</span></span><span style="display:flex;"><span>0040D512 pop ebp
+</span></span><span style="display:flex;"><span>0040D513 ret
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>//show函数对应的汇编代码。
+</span></span><span style="display:flex;"><span>16: void show<span style="color:#f92672">(</span>CBase B1,CBase B2<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>17: <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>0040D550 push ebp
+</span></span><span style="display:flex;"><span>0040D551 mov ebp,esp
+</span></span><span style="display:flex;"><span>0040D553 sub esp,44h
+</span></span><span style="display:flex;"><span>0040D556 push ebx
+</span></span><span style="display:flex;"><span>0040D557 push esi
+</span></span><span style="display:flex;"><span>0040D558 push edi
+</span></span><span style="display:flex;"><span>0040D559 push ecx
+</span></span><span style="display:flex;"><span>0040D55A lea edi,<span style="color:#f92672">[</span>ebp-44h<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>0040D55D mov ecx,11h
+</span></span><span style="display:flex;"><span>0040D562 mov eax,0CCCCCCCCh
+</span></span><span style="display:flex;"><span>0040D567 rep stos dword ptr <span style="color:#f92672">[</span>edi<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>0040D569 pop ecx
+</span></span><span style="display:flex;"><span>0040D56A mov dword ptr <span style="color:#f92672">[</span>ebp-4<span style="color:#f92672">]</span>,ecx
+</span></span><span style="display:flex;"><span>18: printf<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;show=%d,%d\n&#34;</span>,B1.i,B2.i<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span>0040D56D mov eax,dword ptr <span style="color:#f92672">[</span>ebp+0Ch<span style="color:#f92672">]</span> //ebp+0Ch对应的是B2的首地址。
+</span></span><span style="display:flex;"><span>0040D570 push eax
+</span></span><span style="display:flex;"><span>0040D571 mov ecx,dword ptr <span style="color:#f92672">[</span>ebp+8<span style="color:#f92672">]</span> //ebp+8h对应的是B1的首地址。
+</span></span><span style="display:flex;"><span>0040D574 push ecx
+</span></span><span style="display:flex;"><span>0040D575 push offset string <span style="color:#e6db74">&#34;show=%d,%d\n&#34;</span> <span style="color:#f92672">(</span>00422fcc<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>0040D57A call printf <span style="color:#f92672">(</span>0040d7c0<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>0040D57F add esp,0Ch
+</span></span><span style="display:flex;"><span>19: <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>0040D582 pop edi
+</span></span><span style="display:flex;"><span>0040D583 pop esi
+</span></span><span style="display:flex;"><span>0040D584 pop ebx
+</span></span><span style="display:flex;"><span>0040D585 add esp,44h
+</span></span><span style="display:flex;"><span>0040D588 cmp ebp,esp
+</span></span><span style="display:flex;"><span>0040D58A call __chkesp <span style="color:#f92672">(</span>004010b0<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>0040D58F mov esp,ebp
+</span></span><span style="display:flex;"><span>0040D591 pop ebp
+</span></span><span style="display:flex;"><span>0040D592 ret <span style="color:#ae81ff">8</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>//拷贝构造函数对应的汇编代码（注释略）。
+</span></span><span style="display:flex;"><span>11: CBase<span style="color:#f92672">(</span>CBase&amp; rhs<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>0040D840 push ebp
+</span></span><span style="display:flex;"><span>0040D841 mov ebp,esp
+</span></span><span style="display:flex;"><span>0040D843 sub esp,44h
+</span></span><span style="display:flex;"><span>0040D846 push ebx
+</span></span><span style="display:flex;"><span>0040D847 push esi
+</span></span><span style="display:flex;"><span>0040D848 push edi
+</span></span><span style="display:flex;"><span>0040D849 push ecx
+</span></span><span style="display:flex;"><span>0040D84A lea edi,<span style="color:#f92672">[</span>ebp-44h<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>0040D84D mov ecx,11h
+</span></span><span style="display:flex;"><span>0040D852 mov eax,0CCCCCCCCh
+</span></span><span style="display:flex;"><span>0040D857 rep stos dword ptr <span style="color:#f92672">[</span>edi<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>0040D859 pop ecx
+</span></span><span style="display:flex;"><span>0040D85A mov dword ptr <span style="color:#f92672">[</span>ebp-4<span style="color:#f92672">]</span>,ecx
+</span></span><span style="display:flex;"><span>12: <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>13: i<span style="color:#f92672">=</span>rhs.i;
+</span></span><span style="display:flex;"><span>0040D85D mov eax,dword ptr <span style="color:#f92672">[</span>ebp-4<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>0040D860 mov ecx,dword ptr <span style="color:#f92672">[</span>ebp+8<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>0040D863 mov edx,dword ptr <span style="color:#f92672">[</span>ecx<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>0040D865 mov dword ptr <span style="color:#f92672">[</span>eax<span style="color:#f92672">]</span>,edx
+</span></span><span style="display:flex;"><span>14: printf<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;拷贝构造函数=%d\n&#34;</span>,i<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span>0040D867 mov eax,dword ptr <span style="color:#f92672">[</span>ebp-4<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>0040D86A mov ecx,dword ptr <span style="color:#f92672">[</span>eax<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>0040D86C push ecx
+</span></span><span style="display:flex;"><span>0040D86D push offset string <span style="color:#e6db74">&#34;\xbf\xbd\xb1\xb4\xb9\xb9\xd4\xec\xba\xaf\xca\xfd=%d\n&#34;</span> <span style="color:#f92672">(</span>00422fb8<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>0040D872 call printf <span style="color:#f92672">(</span>0040d7c0<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>0040D877 add esp,8
+</span></span><span style="display:flex;"><span>15: <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>0040D87A mov eax,dword ptr <span style="color:#f92672">[</span>ebp-4<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>0040D87D pop edi
+</span></span><span style="display:flex;"><span>0040D87E pop esi
+</span></span><span style="display:flex;"><span>0040D87F pop ebx
+</span></span><span style="display:flex;"><span>0040D880 add esp,44h
+</span></span><span style="display:flex;"><span>0040D883 cmp ebp,esp
+</span></span><span style="display:flex;"><span>0040D885 call __chkesp <span style="color:#f92672">(</span>004010b0<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>0040D88A mov esp,ebp
+</span></span><span style="display:flex;"><span>0040D88C pop ebp
+</span></span><span style="display:flex;"><span>0040D88D ret <span style="color:#ae81ff">4</span>
+</span></span></code></pre></div><ol start="4">
+<li>当执行show函数作用域内代码时，栈结构图示如下：</li>
+</ol>
+<p><img src="/img/obj.png" alt="stack"></p>
+    </article>
+
+    
+<ul class="article-share">
+</ul>
+
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer">
+          <a href="/posts/scp/" data-toggle="tooltip" data-placement="top" title="scp.exp脚本:scp命令自动输入密码">&lt; Newer</a>
+      </li>
+      <li class="pager-older">
+        <a href="/posts/cpp-model-del/" data-toggle="tooltip" data-placement="top" title="C&#43;&#43;对象模型_operator delete异常分析">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright"></div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-"><a href="" title=""></a></li>
+  </ul>
+  <div class="powerdby">
+    <a href="https://github.com/qinch" rel="me" target="_blank"><i class="fa-brands fa-github" style="font-size: 16px;"></i></a>&nbsp&nbsp
+    <a href="mailto:qinchaowhut@qq.com" target="_blank"><i class="fa-solid fa-envelope" style="font-size: 16px;"></i></a></li><br>
+    ©2015-2024 qinch | Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+      <script async src="https://www.googletagmanager.com/gtag/js?id=Toracking%20ID"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'Toracking ID');
+        }
+      </script>
+
+</body>
+</html>

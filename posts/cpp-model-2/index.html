@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>动态/静态数组内存布局 - Just For Fun</title>
+  <meta property="og:title" content="动态/静态数组内存布局 - Just For Fun" />
+  <meta name="twitter:title" content="动态/静态数组内存布局 - Just For Fun" />
+  <meta name="description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+  <meta property="og:description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+  <meta name="twitter:description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+  <meta name="author" content=""/>
+  <meta property="og:site_name" content="Just For Fun" />
+  <meta property="og:url" content="https://qinch.github.io/posts/cpp-model-2/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.145.0">
+  <link rel="stylesheet" href="/css/style.css" media="all" />
+  <link rel="stylesheet" href="/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
+  <link rel="stylesheet" href="/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/css/custom.css" media="all" />
+
+  <script src="/js/script.js"></script>
+  <script src="/js/custom.js"></script>
+  <script defer src="/fontawesome/all.min.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/">Just For Fun</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-categories"><a href="/categories/" title="Categories">Categories</a></li>
+      <li class="site-navi-item-archives"><a href="/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">动态/静态数组内存布局</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>Apr 7, 2016</time></li>
+        <li class="article-meta-categories">
+        </li>
+      </ul>
+      
+      <h5 id="开发环境">开发环境</h5>
+<ul>
+<li>Ubuntu 14.04(32bits)</li>
+<li>GCC</li>
+<li>编辑器 Cmd Markdown</li>
+<li>画图工具 Processon</li>
+</ul>
+<h5 id="1数组内存布局">1,数组内存布局</h5>
+<p><a href="http://chinchao.xyz/2016/04/06/cpp-model-1/">上一节</a> 简单介绍了结构体作为函数参数和返回值的情况。本文准备介绍一下数组的内存布局，即静态数组/动态数组和一维数组/二维数组，顺便介绍一下0长度数组的妙用。</p>
+<h6 id="11静态一维数组和动态二维数组">1.1静态一维数组和动态二维数组</h6>
+<p>静态一维数组，即类似于int a[10];动态数据，即类似于int <em>p=(int</em>)malloc(10*sizeof(int));（或者int *p=new int[10]）;</p>
+<h6 id="111静态一维数组">1.1.1静态一维数组</h6>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#include&lt;stdio.h&gt;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>int main<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>        int a<span style="color:#f92672">[</span>3<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>        a<span style="color:#f92672">[</span>0<span style="color:#f92672">]=</span>1;
+</span></span><span style="display:flex;"><span>        a<span style="color:#f92672">[</span>1<span style="color:#f92672">]=</span>2;
+</span></span><span style="display:flex;"><span>        a<span style="color:#f92672">[</span>2<span style="color:#f92672">]=</span>3;
+</span></span><span style="display:flex;"><span>        printf<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;%d %d %d\n&#34;</span>,a<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span>,a<span style="color:#f92672">[</span>1<span style="color:#f92672">]</span>,a<span style="color:#f92672">[</span>2<span style="color:#f92672">])</span>;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>对应的汇编代码为</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>	.file	<span style="color:#e6db74">&#34;c2-0.c&#34;</span>
+</span></span><span style="display:flex;"><span>	.section	.rodata
+</span></span><span style="display:flex;"><span>.LC0:
+</span></span><span style="display:flex;"><span>	.string	<span style="color:#e6db74">&#34;%d %d %d\n&#34;</span>
+</span></span><span style="display:flex;"><span>	.text
+</span></span><span style="display:flex;"><span>	.globl	main
+</span></span><span style="display:flex;"><span>	.type	main, @function
+</span></span><span style="display:flex;"><span>main:
+</span></span><span style="display:flex;"><span>.LFB0:
+</span></span><span style="display:flex;"><span>	.cfi_startproc
+</span></span><span style="display:flex;"><span>	pushl	%ebp
+</span></span><span style="display:flex;"><span>	.cfi_def_cfa_offset <span style="color:#ae81ff">8</span>
+</span></span><span style="display:flex;"><span>	.cfi_offset 5, -8
+</span></span><span style="display:flex;"><span>	movl	%esp, %ebp
+</span></span><span style="display:flex;"><span>	.cfi_def_cfa_register <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>	andl	$-16, %esp
+</span></span><span style="display:flex;"><span>	subl	$32, %esp
+</span></span><span style="display:flex;"><span>	movl	$1, 20<span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span> //esp+20即为p<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span>的地址
+</span></span><span style="display:flex;"><span>	movl	$2, 24<span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span> //esp+24即为p<span style="color:#f92672">[</span>1<span style="color:#f92672">]</span>的地址
+</span></span><span style="display:flex;"><span>	movl	$3, 28<span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span> //esp+28即为p<span style="color:#f92672">[</span>2<span style="color:#f92672">]</span>的地址
+</span></span><span style="display:flex;"><span>	movl	28<span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span>, %ecx
+</span></span><span style="display:flex;"><span>	movl	24<span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span>, %edx
+</span></span><span style="display:flex;"><span>	movl	20<span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span>, %eax
+</span></span><span style="display:flex;"><span>	movl	%ecx, 12<span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span> //将ecx压栈，即<span style="color:#f92672">[</span>esp+12<span style="color:#f92672">]=</span>ecx
+</span></span><span style="display:flex;"><span>	movl	%edx, 8<span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span> //将edx压栈，即<span style="color:#f92672">[</span>esp+8<span style="color:#f92672">]=</span>edx
+</span></span><span style="display:flex;"><span>	movl	%eax, 4<span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span> //将eax压栈，即<span style="color:#f92672">[</span>esp+4<span style="color:#f92672">]=</span>eax
+</span></span><span style="display:flex;"><span>	movl	$.LC0, <span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span> //类似于“%d %d”字符串的地址
+</span></span><span style="display:flex;"><span>	call	printf
+</span></span><span style="display:flex;"><span>	leave
+</span></span><span style="display:flex;"><span>	.cfi_restore <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>	.cfi_def_cfa 4, <span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span>	ret
+</span></span><span style="display:flex;"><span>	.cfi_endproc
+</span></span><span style="display:flex;"><span>.LFE0:
+</span></span><span style="display:flex;"><span>	.size	main, .-main
+</span></span><span style="display:flex;"><span>	.ident	<span style="color:#e6db74">&#34;GCC: (Ubuntu 4.8.4-2ubuntu1~14.04.1) 4.8.4&#34;</span>
+</span></span><span style="display:flex;"><span>	.section	.note.GNU-stack,<span style="color:#e6db74">&#34;&#34;</span>,@progbits
+</span></span></code></pre></div><p>main函数执行时，栈帧为：
+<img src="/img/c2-0.png" alt="img0"></p>
+<h6 id="12--动态一维数组">1.2  动态一维数组</h6>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#include&lt;stdio.h&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#include&lt;stdlib.h&gt;</span>
+</span></span><span style="display:flex;"><span>int main<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>    int *p<span style="color:#f92672">=(</span>int*<span style="color:#f92672">)</span>malloc<span style="color:#f92672">(</span>sizeof<span style="color:#f92672">(</span>3*sizeof<span style="color:#f92672">(</span>int<span style="color:#f92672">)))</span>;
+</span></span><span style="display:flex;"><span>    p<span style="color:#f92672">[</span>0<span style="color:#f92672">]=</span>1;
+</span></span><span style="display:flex;"><span>    p<span style="color:#f92672">[</span>1<span style="color:#f92672">]=</span>2;
+</span></span><span style="display:flex;"><span>    p<span style="color:#f92672">[</span>2<span style="color:#f92672">]=</span>3;
+</span></span><span style="display:flex;"><span>    free<span style="color:#f92672">(</span>p<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>对应的汇编代码为</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>	.file	<span style="color:#e6db74">&#34;c2-1.c&#34;</span>
+</span></span><span style="display:flex;"><span>	.text
+</span></span><span style="display:flex;"><span>	.globl	main
+</span></span><span style="display:flex;"><span>	.type	main, @function
+</span></span><span style="display:flex;"><span>main:
+</span></span><span style="display:flex;"><span>.LFB2:
+</span></span><span style="display:flex;"><span>	.cfi_startproc
+</span></span><span style="display:flex;"><span>	pushl	%ebp
+</span></span><span style="display:flex;"><span>	.cfi_def_cfa_offset <span style="color:#ae81ff">8</span>
+</span></span><span style="display:flex;"><span>	.cfi_offset 5, -8
+</span></span><span style="display:flex;"><span>	movl	%esp, %ebp
+</span></span><span style="display:flex;"><span>	.cfi_def_cfa_register <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>	andl	$-16, %esp
+</span></span><span style="display:flex;"><span>	subl	$32, %esp
+</span></span><span style="display:flex;"><span>	movl	$12, <span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span> //将12压栈
+</span></span><span style="display:flex;"><span>	call	malloc //调用malloc函数
+</span></span><span style="display:flex;"><span>	movl	%eax, 28<span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span> //eax为malloc在堆上分配空间的首地址<span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>	，esp+28即为p的地址
+</span></span><span style="display:flex;"><span>	movl	28<span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span>, %eax //获取p,即p指向的内存的首地址 
+</span></span><span style="display:flex;"><span>	movl	$1, <span style="color:#f92672">(</span>%eax<span style="color:#f92672">)</span>  //即p<span style="color:#f92672">[</span>0<span style="color:#f92672">]=</span><span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>	movl	28<span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span>, %eax //p
+</span></span><span style="display:flex;"><span>	addl	$4, %eax //p+<span style="color:#f92672">=</span><span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span>	movl	$2, <span style="color:#f92672">(</span>%eax<span style="color:#f92672">)</span> //即p<span style="color:#f92672">[</span>1<span style="color:#f92672">]=</span><span style="color:#ae81ff">2</span>
+</span></span><span style="display:flex;"><span>	movl	28<span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span>, %eax
+</span></span><span style="display:flex;"><span>	addl	$8, %eax
+</span></span><span style="display:flex;"><span>	movl	$3, <span style="color:#f92672">(</span>%eax<span style="color:#f92672">)</span> //p<span style="color:#f92672">[</span>2<span style="color:#f92672">]=</span><span style="color:#ae81ff">3</span>
+</span></span><span style="display:flex;"><span>	movl	28<span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span>, %eax
+</span></span><span style="display:flex;"><span>	movl	%eax, <span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span> //将p压栈，即p指向的堆上内存的首地址
+</span></span><span style="display:flex;"><span>	call	free
+</span></span><span style="display:flex;"><span>	leave
+</span></span><span style="display:flex;"><span>	.cfi_restore <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>	.cfi_def_cfa 4, <span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span>	ret
+</span></span><span style="display:flex;"><span>	.cfi_endproc
+</span></span><span style="display:flex;"><span>.LFE2:
+</span></span><span style="display:flex;"><span>	.size	main, .-main
+</span></span><span style="display:flex;"><span>	.ident	<span style="color:#e6db74">&#34;GCC: (Ubuntu 4.8.4-2ubuntu1~14.04.1) 4.8.4&#34;</span>
+</span></span><span style="display:flex;"><span>	.section	.note.GNU-stack,<span style="color:#e6db74">&#34;&#34;</span>,@progbits
+</span></span></code></pre></div><p>通过对比静态一维数组，和动态一维数组，可以知道，静态数组名为数组的首地址，但是并不占用内存（据此，可以实现0长度数组的妙用）。动态二维数组,在堆上分配的首地址保存在指针内，需要分配内存。</p>
+<h5 id="113-0长度数组的妙用">1.1.3 0长度数组的妙用</h5>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>typedef struct test<span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>	int i;
+</span></span><span style="display:flex;"><span>	int j;
+</span></span><span style="display:flex;"><span>	unsigned char ch<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>test;
+</span></span><span style="display:flex;"><span>其中的ch<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span>即为0长度数组，sizeof<span style="color:#f92672">(</span>test<span style="color:#f92672">)=</span>8,
+</span></span><span style="display:flex;"><span>即ch为一个任意大小内存的指针，但unsigned ch<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>并不占用test结构体变量的内存。
+</span></span><span style="display:flex;"><span>其用法如下：
+</span></span><span style="display:flex;"><span>int main<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>        test *p<span style="color:#f92672">=(</span>test*<span style="color:#f92672">)</span>malloc<span style="color:#f92672">(</span>12<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span>        p-&gt;i<span style="color:#f92672">=</span>1;
+</span></span><span style="display:flex;"><span>        p-&gt;j<span style="color:#f92672">=</span>2;
+</span></span><span style="display:flex;"><span>        *<span style="color:#f92672">((</span>int*<span style="color:#f92672">)(</span>p-&gt;ch<span style="color:#f92672">))=</span>3;
+</span></span><span style="display:flex;"><span>        printf<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;%u\n&#34;</span>,sizeof<span style="color:#f92672">(</span>test<span style="color:#f92672">))</span>;
+</span></span><span style="display:flex;"><span>        printf<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;%d %d %d\n&#34;</span>,p-&gt;i,p-&gt;j,*<span style="color:#f92672">((</span>int*<span style="color:#f92672">)(</span>p-&gt;ch<span style="color:#f92672">)))</span>;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>以上结构体指针p指向的堆上内存布局为：
+<img src="/img/c2-x.png" alt="imgx"></p>
+<h5 id="12静态二维数组和动态二维数组">1.2静态二维数组和动态二维数组</h5>
+<h6 id="121静态二维数组">1.2.1静态二维数组</h6>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>静态二维数组的内存布局即为一维数组，
+</span></span><span style="display:flex;"><span>假设int p<span style="color:#f92672">[</span>3<span style="color:#f92672">][</span>4<span style="color:#f92672">]</span>;int *px; 另px<span style="color:#f92672">=</span>p；
+</span></span><span style="display:flex;"><span>则访问p<span style="color:#f92672">[</span>2<span style="color:#f92672">][</span>1<span style="color:#f92672">]</span>的元素，可以转换为px<span style="color:#f92672">[</span>2*16+1*4<span style="color:#f92672">]</span>元素。
+</span></span><span style="display:flex;"><span>int main<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>    int p<span style="color:#f92672">[</span>3<span style="color:#f92672">][</span>4<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>    p<span style="color:#f92672">[</span>1<span style="color:#f92672">][</span>0<span style="color:#f92672">]=</span>123;
+</span></span><span style="display:flex;"><span>    /*
+</span></span><span style="display:flex;"><span>     1, p+1是二维数组p中序号为1的行的首地址，
+</span></span><span style="display:flex;"><span>     而*<span style="color:#f92672">(</span>p+1<span style="color:#f92672">)</span>并不是p+1单元的内容，*<span style="color:#f92672">(</span>p+1<span style="color:#f92672">)</span>可以
+</span></span><span style="display:flex;"><span>     理解为由行地址的计算转向了列地址的计算。
+</span></span><span style="display:flex;"><span>     如：*<span style="color:#f92672">(</span>p+1<span style="color:#f92672">)</span>表示第1行，第0列的地址。
+</span></span><span style="display:flex;"><span>     2, 不要把&amp;p<span style="color:#f92672">[</span>i<span style="color:#f92672">]</span>简单的理解为p<span style="color:#f92672">[</span>i<span style="color:#f92672">]</span>单元的地址，
+</span></span><span style="display:flex;"><span>     因为并没有给p<span style="color:#f92672">[</span>i<span style="color:#f92672">]</span>分配内存。&amp;p<span style="color:#f92672">[</span>i<span style="color:#f92672">]</span>可以理解为
+</span></span><span style="display:flex;"><span>     由当前的列地址计算转向了行地址计算<span style="color:#f92672">(</span>&amp;<span style="color:#f92672">(</span>*<span style="color:#f92672">(</span>p+i<span style="color:#f92672">))=</span>p+i<span style="color:#f92672">)</span>。
+</span></span><span style="display:flex;"><span>     */
+</span></span><span style="display:flex;"><span>    printf<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;%x\n%x\n%x\n%x\n&#34;</span>,p<span style="color:#f92672">[</span>1<span style="color:#f92672">]</span>,p+1,&amp;p<span style="color:#f92672">[</span>1<span style="color:#f92672">][</span>0<span style="color:#f92672">]</span>,&amp;p<span style="color:#f92672">[</span>1<span style="color:#f92672">])</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> 0;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>以上代码对应的内存布局为：
+<img src="/img/c2-2.png" alt="img2"></p>
+<h6 id="122动态二维数组">1.2.2动态二维数组</h6>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#include&lt;stdio.h&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#include&lt;stdlib.h&gt;</span>
+</span></span><span style="display:flex;"><span>int main<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	int **p<span style="color:#f92672">=</span>NULL;
+</span></span><span style="display:flex;"><span>	p<span style="color:#f92672">=(</span>int**<span style="color:#f92672">)</span>malloc<span style="color:#f92672">(</span>sizeof<span style="color:#f92672">(</span>int*<span style="color:#f92672">)</span>*3<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span>	p<span style="color:#f92672">[</span>0<span style="color:#f92672">]=(</span>int*<span style="color:#f92672">)</span>malloc<span style="color:#f92672">(</span>sizeof<span style="color:#f92672">(</span>int<span style="color:#f92672">)</span>*4<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span>	p<span style="color:#f92672">[</span>1<span style="color:#f92672">]=(</span>int*<span style="color:#f92672">)</span>malloc<span style="color:#f92672">(</span>sizeof<span style="color:#f92672">(</span>int<span style="color:#f92672">)</span>*4<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span>	p<span style="color:#f92672">[</span>2<span style="color:#f92672">]=(</span>int*<span style="color:#f92672">)</span>malloc<span style="color:#f92672">(</span>sizeof<span style="color:#f92672">(</span>int<span style="color:#f92672">)</span>*4<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	printf<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;%x\n%x\n%x\n%x\n&#34;</span>,p<span style="color:#f92672">[</span>1<span style="color:#f92672">]</span>,p+1,&amp;p<span style="color:#f92672">[</span>1<span style="color:#f92672">][</span>0<span style="color:#f92672">]</span>,&amp;p<span style="color:#f92672">[</span>1<span style="color:#f92672">])</span>;
+</span></span><span style="display:flex;"><span>	free<span style="color:#f92672">(</span>p<span style="color:#f92672">[</span>0<span style="color:#f92672">])</span>;
+</span></span><span style="display:flex;"><span>	free<span style="color:#f92672">(</span>p<span style="color:#f92672">[</span>1<span style="color:#f92672">])</span>;
+</span></span><span style="display:flex;"><span>	free<span style="color:#f92672">(</span>p<span style="color:#f92672">[</span>2<span style="color:#f92672">])</span>;
+</span></span><span style="display:flex;"><span>	free<span style="color:#f92672">(</span>p<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span>   /* int **p<span style="color:#f92672">=</span>NULL;
+</span></span><span style="display:flex;"><span>    p<span style="color:#f92672">=</span>new int*<span style="color:#f92672">[</span>3<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>    p<span style="color:#f92672">[</span>0<span style="color:#f92672">]=</span>new int<span style="color:#f92672">[</span>4<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>    p<span style="color:#f92672">[</span>1<span style="color:#f92672">]=</span>new int<span style="color:#f92672">[</span>4<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>    p<span style="color:#f92672">[</span>2<span style="color:#f92672">]=</span>new int<span style="color:#f92672">[</span>4<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>   */ /*
+</span></span><span style="display:flex;"><span>        1, p+1是二维数组p中序号为1的行的首地址，而*<span style="color:#f92672">(</span>p+1<span style="color:#f92672">)</span>是p+1单元的内容。
+</span></span><span style="display:flex;"><span>        2, &amp;p<span style="color:#f92672">[</span>i<span style="color:#f92672">]</span>可以理解为p<span style="color:#f92672">[</span>i<span style="color:#f92672">]</span>单元的地址。
+</span></span><span style="display:flex;"><span>    */
+</span></span><span style="display:flex;"><span>/*
+</span></span><span style="display:flex;"><span>    printf<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;%x\n%x\n%x\n%x\n&#34;</span>,p<span style="color:#f92672">[</span>1<span style="color:#f92672">]</span>,p+1,&amp;p<span style="color:#f92672">[</span>1<span style="color:#f92672">][</span>0<span style="color:#f92672">]</span>,&amp;p<span style="color:#f92672">[</span>1<span style="color:#f92672">])</span>;
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    delete<span style="color:#f92672">[]</span> p<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>    delete<span style="color:#f92672">[]</span> p<span style="color:#f92672">[</span>1<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>    delete<span style="color:#f92672">[]</span> p<span style="color:#f92672">[</span>2<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>    delete<span style="color:#f92672">[]</span> p;
+</span></span><span style="display:flex;"><span>*/
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> 0;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>以上代码对应的内存布局为：
+<img src="/img/c2-3.png" alt="img3"></p>
+    </article>
+
+    
+<ul class="article-share">
+</ul>
+
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer">
+          <a href="/posts/cpp-model-4/" data-toggle="tooltip" data-placement="top" title="基础类型的内存表示">&lt; Newer</a>
+      </li>
+      <li class="pager-older">
+        <a href="/posts/cpp-model-1/" data-toggle="tooltip" data-placement="top" title="函数调用过程: 结构体变量作为函数参数和返回值">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright"></div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-"><a href="" title=""></a></li>
+  </ul>
+  <div class="powerdby">
+    <a href="https://github.com/qinch" rel="me" target="_blank"><i class="fa-brands fa-github" style="font-size: 16px;"></i></a>&nbsp&nbsp
+    <a href="mailto:qinchaowhut@qq.com" target="_blank"><i class="fa-solid fa-envelope" style="font-size: 16px;"></i></a></li><br>
+    ©2015-2024 qinch | Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+      <script async src="https://www.googletagmanager.com/gtag/js?id=Toracking%20ID"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'Toracking ID');
+        }
+      </script>
+
+</body>
+</html>

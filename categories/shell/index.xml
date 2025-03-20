@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Shell on Just For Fun</title>
+    <link>https://qinch.github.io/categories/shell/</link>
+    <description>Recent content in Shell on Just For Fun</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <lastBuildDate>Sun, 21 Jun 2015 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://qinch.github.io/categories/shell/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>scp.exp脚本:scp命令自动输入密码</title>
+      <link>https://qinch.github.io/posts/scp/</link>
+      <pubDate>Sun, 21 Jun 2015 00:00:00 +0000</pubDate>
+      <guid>https://qinch.github.io/posts/scp/</guid>
+      <description>&lt;h4 id=&#34;1scpexp用法以ubuntu为例&#34;&gt;1.scp.exp用法(以ubuntu为例):&lt;/h4&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;sudo apt-get install expect&lt;/li&gt;&#xA;&lt;li&gt;expect scp.exp 127.0.0.1 root passwd srcfile destfile 300&lt;/li&gt;&#xA;&lt;/ul&gt;</description>
+    </item>
+  </channel>
+</rss>

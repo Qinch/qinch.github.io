@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Series on Just For Fun</title>
+    <link>https://qinch.github.io/series/</link>
+    <description>Recent content in Series on Just For Fun</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <atom:link href="https://qinch.github.io/series/index.xml" rel="self" type="application/rss+xml" />
+  </channel>
+</rss>

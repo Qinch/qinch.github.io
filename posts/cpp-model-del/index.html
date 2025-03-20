@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>C&#43;&#43;对象模型_operator delete异常分析 - Just For Fun</title>
+  <meta property="og:title" content="C&#43;&#43;对象模型_operator delete异常分析 - Just For Fun" />
+  <meta name="twitter:title" content="C&#43;&#43;对象模型_operator delete异常分析 - Just For Fun" />
+  <meta name="description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+  <meta property="og:description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+  <meta name="twitter:description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+  <meta name="author" content=""/>
+  <meta property="og:site_name" content="Just For Fun" />
+  <meta property="og:url" content="https://qinch.github.io/posts/cpp-model-del/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.145.0">
+  <link rel="stylesheet" href="/css/style.css" media="all" />
+  <link rel="stylesheet" href="/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
+  <link rel="stylesheet" href="/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/css/custom.css" media="all" />
+
+  <script src="/js/script.js"></script>
+  <script src="/js/custom.js"></script>
+  <script defer src="/fontawesome/all.min.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/">Just For Fun</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-categories"><a href="/categories/" title="Categories">Categories</a></li>
+      <li class="site-navi-item-archives"><a href="/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">C&#43;&#43;对象模型_operator delete异常分析</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>May 10, 2015</time></li>
+        <li class="article-meta-categories">
+        </li>
+      </ul>
+      
+      <h5 id="开发环境">开发环境</h5>
+<ul>
+<li>VC6.0</li>
+<li>编辑器 Cmd Markdown</li>
+</ul>
+<ol>
+<li>
+<p>C++中delete表达式执行的操作是：1，调用析构函数；2，释放对象内存（operator delete(&hellip;)）。</p>
+</li>
+<li>
+<p>如果父类的析构函数没有声明为virtual函数，且子类中至少存在一个virtual函数，此时将子类的对象地址赋值给父类指针。当对父类的指针执行delete操作时,会调用父类析构函数，然后在释放内存时（即delete表达式执行的操作的2，释放对象内存）出现崩溃。然而如果子类中不存在一个virtual函数时，执行上面同样的操作就不会出现崩溃。</p>
+</li>
+</ol>
+<ul>
+<li>原因分析如下：</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>//已知本示例 父类的析构函数应声明为virtual函数。但是由于本程序不需要析构函数执行特殊的操作，所以delete父类指针pB同样可以释放内存，然而引起出乎意料的内//存释放异常。因此对本程序进行如下分析
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#include&lt;iostream&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#include stdio&gt;</span>
+</span></span><span style="display:flex;"><span>using namespace std;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>class Base
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>public:
+</span></span><span style="display:flex;"><span> ~Base<span style="color:#f92672">()</span> <span style="color:#f92672">{</span>printf<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;\nBase::destructor.&#34;</span><span style="color:#f92672">)</span>;<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>class Derived: public Base
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>    virtual void show<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>        cout&lt;&lt;<span style="color:#e6db74">&#34;show&#34;</span>&lt;
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>public:
+</span></span><span style="display:flex;"><span>    ~Derived<span style="color:#f92672">(){</span>printf<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;\nDerived::destructor.&#34;</span><span style="color:#f92672">)</span>;<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>int main<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>    Base* pB<span style="color:#f92672">=</span>NULL;
+</span></span><span style="display:flex;"><span>    Derived *pD<span style="color:#f92672">=</span> new Derived;
+</span></span><span style="display:flex;"><span>    pB<span style="color:#f92672">=</span>pD;//此时pB得到的是<span style="color:#f92672">(</span>unsigned char*<span style="color:#f92672">)</span>pD+4的地址，所以执行operator delete时会发生崩溃（因为此时把vptr的内存当成了待释放的内存块的大小）。
+</span></span><span style="display:flex;"><span>    /*unsigned char *pC<span style="color:#f92672">=(</span>unsigned char*<span style="color:#f92672">)</span>pB;
+</span></span><span style="display:flex;"><span>      pC<span style="color:#f92672">=</span>pC-4;
+</span></span><span style="display:flex;"><span>      delete pC;//这样就可以释放new Derived分配的内存,而不会发生崩溃。
+</span></span><span style="display:flex;"><span>    */
+</span></span><span style="display:flex;"><span>    delete pB;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><ul>
+<li>其main函数对应的汇编代码如下(VC6.0)：</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>int main<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span>23: <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">00401060</span> push ebp
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">00401061</span> mov ebp,esp
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">00401063</span> push 0FFh
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">00401065</span> push offset __ehhandler$_main <span style="color:#f92672">(</span>00416a0b<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>0040106A mov eax,fs:<span style="color:#f92672">[</span>00000000<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">00401070</span> push eax
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">00401071</span> mov dword ptr fs:<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span>,esp
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">00401078</span> sub esp,64h
+</span></span><span style="display:flex;"><span>0040107B push ebx
+</span></span><span style="display:flex;"><span>0040107C push esi
+</span></span><span style="display:flex;"><span>0040107D push edi
+</span></span><span style="display:flex;"><span>0040107E lea edi,<span style="color:#f92672">[</span>ebp-70h<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">00401081</span> mov ecx,19h
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">00401086</span> mov eax,0CCCCCCCCh
+</span></span><span style="display:flex;"><span>0040108B rep stos dword ptr <span style="color:#f92672">[</span>edi<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>24：Base* pB<span style="color:#f92672">=</span>NULL;
+</span></span><span style="display:flex;"><span>0040108D mov dword ptr <span style="color:#f92672">[</span>ebp-10h<span style="color:#f92672">]</span>,0
+</span></span><span style="display:flex;"><span>25: Derived *pD<span style="color:#f92672">=</span> new Derived;
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">00401094</span> push <span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">00401096</span> call operator new <span style="color:#f92672">(</span>00403780<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>0040109B add esp,4
+</span></span><span style="display:flex;"><span>0040109E mov dword ptr <span style="color:#f92672">[</span>ebp-1Ch<span style="color:#f92672">]</span>,eax  //eax保存的是operator new（...）函数分配的内存的首地址。
+</span></span><span style="display:flex;"><span>004010A1 mov dword ptr <span style="color:#f92672">[</span>ebp-4<span style="color:#f92672">]</span>,0
+</span></span><span style="display:flex;"><span>004010A8 cmp dword ptr <span style="color:#f92672">[</span>ebp-1Ch<span style="color:#f92672">]</span>,0    //判断operator new<span style="color:#f92672">(</span>...<span style="color:#f92672">)</span>函数分配内存是否成功。
+</span></span><span style="display:flex;"><span>004010AC je main+5Bh <span style="color:#f92672">(</span>004010bb<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>004010AE mov ecx,dword ptr <span style="color:#f92672">[</span>ebp-1Ch<span style="color:#f92672">]</span>   //调用Derived::Derived（）函数，ecx保存的是内存指针。
+</span></span><span style="display:flex;"><span>004010B1 call @ILT+35<span style="color:#f92672">(</span>Derived::Derived<span style="color:#f92672">)</span> <span style="color:#f92672">(</span>00401028<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>004010B6 mov dword ptr <span style="color:#f92672">[</span>ebp-28h<span style="color:#f92672">]</span>,eax
+</span></span><span style="display:flex;"><span>004010B9 jmp main+62h <span style="color:#f92672">(</span>004010c2<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>004010BB mov dword ptr <span style="color:#f92672">[</span>ebp-28h<span style="color:#f92672">]</span>,0
+</span></span><span style="display:flex;"><span>004010C2 mov eax,dword ptr <span style="color:#f92672">[</span>ebp-28h<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>004010C5 mov dword ptr <span style="color:#f92672">[</span>ebp-18h<span style="color:#f92672">]</span>,eax
+</span></span><span style="display:flex;"><span>004010C8 mov dword ptr <span style="color:#f92672">[</span>ebp-4<span style="color:#f92672">]</span>,0FFFFFFFFh
+</span></span><span style="display:flex;"><span>004010CF mov ecx,dword ptr <span style="color:#f92672">[</span>ebp-18h<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>004010D2 mov dword ptr <span style="color:#f92672">[</span>ebp-14h<span style="color:#f92672">]</span>,ecx
+</span></span><span style="display:flex;"><span>26: pB<span style="color:#f92672">=</span>pD;
+</span></span><span style="display:flex;"><span>004010D5 cmp dword ptr <span style="color:#f92672">[</span>ebp-14h<span style="color:#f92672">]</span>,0
+</span></span><span style="display:flex;"><span>004010D9 je main+86h <span style="color:#f92672">(</span>004010e6<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>004010DB mov edx,dword ptr <span style="color:#f92672">[</span>ebp-14h<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>004010DE add edx,4
+</span></span><span style="display:flex;"><span>004010E1 mov dword ptr <span style="color:#f92672">[</span>ebp-2Ch<span style="color:#f92672">]</span>,edx
+</span></span><span style="display:flex;"><span>004010E4 jmp main+8Dh <span style="color:#f92672">(</span>004010ed<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>004010E6 mov dword ptr <span style="color:#f92672">[</span>ebp-2Ch<span style="color:#f92672">]</span>,0
+</span></span><span style="display:flex;"><span>004010ED mov eax,dword ptr <span style="color:#f92672">[</span>ebp-2Ch<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>004010F0 mov dword ptr <span style="color:#f92672">[</span>ebp-10h<span style="color:#f92672">]</span>,eax   //pB<span style="color:#f92672">=(</span>unsinged char*<span style="color:#f92672">)(</span>pD<span style="color:#f92672">)</span>+4
+</span></span><span style="display:flex;"><span>27:
+</span></span><span style="display:flex;"><span>28: delete pB;
+</span></span><span style="display:flex;"><span>004010F3 mov ecx,dword ptr <span style="color:#f92672">[</span>ebp-10h<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>004010F6 mov dword ptr <span style="color:#f92672">[</span>ebp-24h<span style="color:#f92672">]</span>,ecx
+</span></span><span style="display:flex;"><span>004010F9 mov edx,dword ptr <span style="color:#f92672">[</span>ebp-24h<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>004010FC mov dword ptr <span style="color:#f92672">[</span>ebp-20h<span style="color:#f92672">]</span>,edx
+</span></span><span style="display:flex;"><span>004010FF cmp dword ptr <span style="color:#f92672">[</span>ebp-20h<span style="color:#f92672">]</span>,0
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">00401103</span> je main+0B4h <span style="color:#f92672">(</span>00401114<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">00401105</span> push <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">00401107</span> mov ecx,dword ptr <span style="color:#f92672">[</span>ebp-20h<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>0040110A call @ILT+20<span style="color:#f92672">(</span>Base::<span style="color:#e6db74">`</span>scalar deleting destructor
+</span></span></code></pre></div><ul>
+<li>图示如下</li>
+</ul>
+<p><img src="/img/del.png" alt="cxxmodel"></p>
+    </article>
+
+    
+<ul class="article-share">
+</ul>
+
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer">
+          <a href="/posts/cpp-model-obj/" data-toggle="tooltip" data-placement="top" title="C&#43;&#43;对象模型_Class Obj作为函数参数">&lt; Newer</a>
+      </li>
+      <li class="pager-older">
+        <a href="/posts/ctoy-1/" data-toggle="tooltip" data-placement="top" title="奇怪的死循环">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright"></div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-"><a href="" title=""></a></li>
+  </ul>
+  <div class="powerdby">
+    <a href="https://github.com/qinch" rel="me" target="_blank"><i class="fa-brands fa-github" style="font-size: 16px;"></i></a>&nbsp&nbsp
+    <a href="mailto:qinchaowhut@qq.com" target="_blank"><i class="fa-solid fa-envelope" style="font-size: 16px;"></i></a></li><br>
+    ©2015-2024 qinch | Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+      <script async src="https://www.googletagmanager.com/gtag/js?id=Toracking%20ID"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'Toracking ID');
+        }
+      </script>
+
+</body>
+</html>

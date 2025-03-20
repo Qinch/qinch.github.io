@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>C&#43;&#43;对象模型-引用 - Just For Fun</title>
+  <meta property="og:title" content="C&#43;&#43;对象模型-引用 - Just For Fun" />
+  <meta name="twitter:title" content="C&#43;&#43;对象模型-引用 - Just For Fun" />
+  <meta name="description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+  <meta property="og:description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+  <meta name="twitter:description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+  <meta name="author" content=""/>
+  <meta property="og:site_name" content="Just For Fun" />
+  <meta property="og:url" content="https://qinch.github.io/posts/cpp-model-9/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.145.0">
+  <link rel="stylesheet" href="/css/style.css" media="all" />
+  <link rel="stylesheet" href="/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
+  <link rel="stylesheet" href="/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/css/custom.css" media="all" />
+
+  <script src="/js/script.js"></script>
+  <script src="/js/custom.js"></script>
+  <script defer src="/fontawesome/all.min.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/">Just For Fun</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-categories"><a href="/categories/" title="Categories">Categories</a></li>
+      <li class="site-navi-item-archives"><a href="/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">C&#43;&#43;对象模型-引用</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>Apr 9, 2016</time></li>
+        <li class="article-meta-categories">
+        </li>
+      </ul>
+      
+      <h4 id="0测试环境">0.测试环境</h4>
+<p>gcc version 5.4.0 20160609 (Ubuntu 5.4.0-6ubuntu1~16.04.10)</p>
+<h4 id="1引用">1.引用</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>class Widget<span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>public:
+</span></span><span style="display:flex;"><span>        virtual void show<span style="color:#f92672">()=</span>0;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        int _w;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>class Bell:public Widget<span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>public:
+</span></span><span style="display:flex;"><span>        void show<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>                cout&lt;&lt;<span style="color:#e6db74">&#34;Bell Bell...&#34;</span><span style="color:#e6db74">&lt;&lt;endl;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        }
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">};
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">void te</span>st<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>       
+</span></span><span style="display:flex;"><span>        Bell b;
+</span></span><span style="display:flex;"><span>        Widget &amp;w <span style="color:#f92672">=</span>b;
+</span></span><span style="display:flex;"><span>        w.show<span style="color:#f92672">()</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>test函数对应的汇编代码如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>_Z4testv:
+</span></span><span style="display:flex;"><span>.LFB1022:
+</span></span><span style="display:flex;"><span>        .cfi_startproc
+</span></span><span style="display:flex;"><span>        pushl   %ebp
+</span></span><span style="display:flex;"><span>        .cfi_def_cfa_offset <span style="color:#ae81ff">8</span>
+</span></span><span style="display:flex;"><span>        .cfi_offset 5, -8
+</span></span><span style="display:flex;"><span>        movl    %esp, %ebp
+</span></span><span style="display:flex;"><span>        .cfi_def_cfa_register <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>        subl    $24, %esp
+</span></span><span style="display:flex;"><span>        movl    %gs:20, %eax
+</span></span><span style="display:flex;"><span>        movl    %eax, -12<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>        xorl    %eax, %eax
+</span></span><span style="display:flex;"><span>        subl    $12, %esp
+</span></span><span style="display:flex;"><span>        leal    -20<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %eax  //eax<span style="color:#f92672">=</span>ebp-20,即eax<span style="color:#f92672">=</span>b.this
+</span></span><span style="display:flex;"><span>        pushl   %eax  //b首地址压栈
+</span></span><span style="display:flex;"><span>        call    _ZN4BellC1Ev //Bell::Bell（）
+</span></span><span style="display:flex;"><span>        addl    $16, %esp
+</span></span><span style="display:flex;"><span>        leal    -20<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %eax //eax<span style="color:#f92672">=</span>b.this
+</span></span><span style="display:flex;"><span>        movl    %eax, -24<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>  //Widget &amp;w<span style="color:#f92672">=</span>b
+</span></span><span style="display:flex;"><span>        movl    -24<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %eax  //eax<span style="color:#f92672">=</span>&amp;w
+</span></span><span style="display:flex;"><span>        movl    <span style="color:#f92672">(</span>%eax<span style="color:#f92672">)</span>, %eax  //eax<span style="color:#f92672">=</span>vptr4Bell
+</span></span><span style="display:flex;"><span>        movl    <span style="color:#f92672">(</span>%eax<span style="color:#f92672">)</span>, %eax //eax <span style="color:#f92672">=</span> vptr4Bell<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>        subl    $12, %esp
+</span></span><span style="display:flex;"><span>        pushl   -24<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>  //w.this压栈
+</span></span><span style="display:flex;"><span>        call    *%eax   //virtual机制，w.show<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span>        addl    $16, %esp
+</span></span><span style="display:flex;"><span>        nop
+</span></span><span style="display:flex;"><span>        movl    -12<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %eax
+</span></span><span style="display:flex;"><span>        xorl    %gs:20, %eax
+</span></span><span style="display:flex;"><span>        je      .L5
+</span></span><span style="display:flex;"><span>        call    __stack_chk_fail
+</span></span><span style="display:flex;"><span>.L5:
+</span></span><span style="display:flex;"><span>        leave
+</span></span><span style="display:flex;"><span>        .cfi_restore <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>        .cfi_def_cfa 4, <span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span>        ret
+</span></span><span style="display:flex;"><span>        .cfi_endproc
+</span></span></code></pre></div><p>test函数对应的伪码如下:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>test<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>   Bell::Bell<span style="color:#f92672">(</span>&amp;b<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span>   Widget *w<span style="color:#f92672">=</span>&amp;b;
+</span></span><span style="display:flex;"><span>   <span style="color:#f92672">(</span>w-&gt;vptr<span style="color:#f92672">[</span>0<span style="color:#f92672">])(</span>w<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div>
+    </article>
+
+    
+<ul class="article-share">
+</ul>
+
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer">
+          <a href="/posts/cpp-model-5/" data-toggle="tooltip" data-placement="top" title="C&#43;&#43;对象模型-关于对象">&lt; Newer</a>
+      </li>
+      <li class="pager-older">
+        <a href="/posts/cpp-model-4/" data-toggle="tooltip" data-placement="top" title="基础类型的内存表示">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright"></div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-"><a href="" title=""></a></li>
+  </ul>
+  <div class="powerdby">
+    <a href="https://github.com/qinch" rel="me" target="_blank"><i class="fa-brands fa-github" style="font-size: 16px;"></i></a>&nbsp&nbsp
+    <a href="mailto:qinchaowhut@qq.com" target="_blank"><i class="fa-solid fa-envelope" style="font-size: 16px;"></i></a></li><br>
+    ©2015-2024 qinch | Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+      <script async src="https://www.googletagmanager.com/gtag/js?id=Toracking%20ID"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'Toracking ID');
+        }
+      </script>
+
+</body>
+</html>

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>C&#43;&#43;对象模型-ObjectSliced - Just For Fun</title>
+  <meta property="og:title" content="C&#43;&#43;对象模型-ObjectSliced - Just For Fun" />
+  <meta name="twitter:title" content="C&#43;&#43;对象模型-ObjectSliced - Just For Fun" />
+  <meta name="description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+  <meta property="og:description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+  <meta name="twitter:description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+  <meta name="author" content=""/>
+  <meta property="og:site_name" content="Just For Fun" />
+  <meta property="og:url" content="https://qinch.github.io/posts/cpp-model-7/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.145.0">
+  <link rel="stylesheet" href="/css/style.css" media="all" />
+  <link rel="stylesheet" href="/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
+  <link rel="stylesheet" href="/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/css/custom.css" media="all" />
+
+  <script src="/js/script.js"></script>
+  <script src="/js/custom.js"></script>
+  <script defer src="/fontawesome/all.min.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/">Just For Fun</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-categories"><a href="/categories/" title="Categories">Categories</a></li>
+      <li class="site-navi-item-archives"><a href="/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">C&#43;&#43;对象模型-ObjectSliced</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>Apr 9, 2016</time></li>
+        <li class="article-meta-categories">
+        </li>
+      </ul>
+      
+      <h5 id="开发环境">开发环境</h5>
+<p>gcc version 5.4.0 20160609 (Ubuntu 5.4.0-6ubuntu1~16.04.10)</p>
+<h5 id="1-objectsliced">1, ObjectSliced</h5>
+<p>当一个base class object 被直接初始化（copy ctor）/赋值(operator =)为一个derived class object 时，derived object的base 部分会被切割(sliced)以塞入base type内存中，derived type将没有留下任何蛛丝马迹(即：base class object 的vptr不会被derived class object的vptr替换)</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#include&lt;iostream&gt;</span>
+</span></span><span style="display:flex;"><span>using namespace std;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>class ZooAnimal<span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>        public:
+</span></span><span style="display:flex;"><span>                ZooAnimal<span style="color:#f92672">(</span>int l<span style="color:#f92672">)</span>:loc<span style="color:#f92672">(</span>l<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                virtual void print<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>                        cout&lt;&lt;<span style="color:#e6db74">&#34;ZooAnimal&#34;</span>;
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        private:
+</span></span><span style="display:flex;"><span>                int loc;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>class Bear : public ZooAnimal<span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>        public:
+</span></span><span style="display:flex;"><span>                Bear<span style="color:#f92672">(</span>int c, int l<span style="color:#f92672">)</span>:ZooAnimal<span style="color:#f92672">(</span>l<span style="color:#f92672">)</span>, cell<span style="color:#f92672">(</span>c<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        private:
+</span></span><span style="display:flex;"><span>                void print<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>                        cout&lt;&lt;<span style="color:#e6db74">&#34;Bear&#34;</span>;
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        private:
+</span></span><span style="display:flex;"><span>                int cell;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>int main<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>        Bear b<span style="color:#f92672">(</span>1, 2<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span>        ZooAnimal z <span style="color:#f92672">=</span> b;
+</span></span><span style="display:flex;"><span>        z.print<span style="color:#f92672">()</span>;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>以上代码对应的汇编如下(g++ -S -m32 p27.cc):</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>_ZN9ZooAnimalC2ERKS_: //ZooAnimal默认copy ctor
+</span></span><span style="display:flex;"><span>.LFB1031:
+</span></span><span style="display:flex;"><span>        .cfi_startproc
+</span></span><span style="display:flex;"><span>        pushl   %ebp
+</span></span><span style="display:flex;"><span>        .cfi_def_cfa_offset <span style="color:#ae81ff">8</span>
+</span></span><span style="display:flex;"><span>        .cfi_offset 5, -8
+</span></span><span style="display:flex;"><span>        movl    %esp, %ebp
+</span></span><span style="display:flex;"><span>        .cfi_def_cfa_register <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>        movl    $_ZTV9ZooAnimal+8, %edx //edx<span style="color:#f92672">=</span>ZooAnimal.vptr
+</span></span><span style="display:flex;"><span>        movl    8<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %eax  //eax<span style="color:#f92672">=[</span>ebp+8<span style="color:#f92672">]</span>,即eax<span style="color:#f92672">=</span>z.this
+</span></span><span style="display:flex;"><span>        movl    %edx, <span style="color:#f92672">(</span>%eax<span style="color:#f92672">)</span> //设置z的vptr
+</span></span><span style="display:flex;"><span>        movl    12<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %eax //eax<span style="color:#f92672">=</span>b.this
+</span></span><span style="display:flex;"><span>        movl    4<span style="color:#f92672">(</span>%eax<span style="color:#f92672">)</span>, %edx //edx <span style="color:#f92672">=</span> b.loc
+</span></span><span style="display:flex;"><span>        movl    8<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %eax //eax<span style="color:#f92672">=</span>z.this
+</span></span><span style="display:flex;"><span>        movl    %edx, 4<span style="color:#f92672">(</span>%eax<span style="color:#f92672">)</span> //z.loc <span style="color:#f92672">=</span> b.loc
+</span></span><span style="display:flex;"><span>        nop
+</span></span><span style="display:flex;"><span>        popl    %ebp
+</span></span><span style="display:flex;"><span>        .cfi_restore <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>        .cfi_def_cfa 4, <span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span>        ret
+</span></span><span style="display:flex;"><span>        .cfi_endproc
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>main:
+</span></span><span style="display:flex;"><span>.LFB1029:
+</span></span><span style="display:flex;"><span>        .cfi_startproc
+</span></span><span style="display:flex;"><span>        leal    4<span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span>, %ecx
+</span></span><span style="display:flex;"><span>        .cfi_def_cfa 1, <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>        andl    $-16, %esp
+</span></span><span style="display:flex;"><span>        pushl   -4<span style="color:#f92672">(</span>%ecx<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>        pushl   %ebp
+</span></span><span style="display:flex;"><span>        .cfi_escape 0x10,0x5,0x2,0x75,0
+</span></span><span style="display:flex;"><span>        movl    %esp, %ebp
+</span></span><span style="display:flex;"><span>        pushl   %ecx
+</span></span><span style="display:flex;"><span>        .cfi_escape 0xf,0x3,0x75,0x7c,0x6
+</span></span><span style="display:flex;"><span>        subl    $36, %esp
+</span></span><span style="display:flex;"><span>        movl    %gs:20, %eax
+</span></span><span style="display:flex;"><span>        movl    %eax, -12<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>        xorl    %eax, %eax
+</span></span><span style="display:flex;"><span>        subl    $4, %esp
+</span></span><span style="display:flex;"><span>        pushl   $2
+</span></span><span style="display:flex;"><span>        pushl   $1
+</span></span><span style="display:flex;"><span>        leal    -24<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %eax  //eax<span style="color:#f92672">=</span>ebp-24, b对象首地址
+</span></span><span style="display:flex;"><span>        pushl   %eax  //b的首地址压栈，即b.this压栈
+</span></span><span style="display:flex;"><span>        call    _ZN4BearC1Eii //Bear::Bear<span style="color:#f92672">(</span>b.this, 1, 2<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>        addl    $16, %esp
+</span></span><span style="display:flex;"><span>        subl    $8, %esp
+</span></span><span style="display:flex;"><span>        leal    -24<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %eax //eax <span style="color:#f92672">=</span> ebps-24, 即eax<span style="color:#f92672">=</span>b.this
+</span></span><span style="display:flex;"><span>        pushl   %eax //b.this压栈
+</span></span><span style="display:flex;"><span>        leal    -32<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %eax //eax<span style="color:#f92672">=</span>ebp-32,即eax<span style="color:#f92672">=</span>z.this
+</span></span><span style="display:flex;"><span>        pushl   %eax //z.this压栈
+</span></span><span style="display:flex;"><span>        call    _ZN9ZooAnimalC1ERKS_ //ZooAnimal::ZooAnimal<span style="color:#f92672">(</span>ZooAnimal const&amp;<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>        addl    $16, %esp
+</span></span><span style="display:flex;"><span>        subl    $12, %esp
+</span></span><span style="display:flex;"><span>        leal    -32<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %eax //eax<span style="color:#f92672">=</span>z.this
+</span></span><span style="display:flex;"><span>        pushl   %eax //z.this压栈
+</span></span><span style="display:flex;"><span>        call    _ZN9ZooAnimal5printEv  //ZooAnimal::print<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span>        addl    $16, %esp
+</span></span><span style="display:flex;"><span>        movl    $0, %eax
+</span></span><span style="display:flex;"><span>        movl    -12<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %edx
+</span></span><span style="display:flex;"><span>        xorl    %gs:20, %edx
+</span></span><span style="display:flex;"><span>        je      .L8
+</span></span><span style="display:flex;"><span>        call    __stack_chk_fail
+</span></span><span style="display:flex;"><span>.L8:
+</span></span><span style="display:flex;"><span>        movl    -4<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %ecx
+</span></span><span style="display:flex;"><span>        .cfi_def_cfa 1, <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>        leave
+</span></span><span style="display:flex;"><span>        .cfi_restore <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>        leal    -4<span style="color:#f92672">(</span>%ecx<span style="color:#f92672">)</span>, %esp
+</span></span><span style="display:flex;"><span>        .cfi_def_cfa 4, <span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span>        ret
+</span></span><span style="display:flex;"><span>        .cfi_endproc
+</span></span></code></pre></div><h4 id="2图示">2.图示</h4>
+<p><img src="/img/cppos.png" alt="ObjectSliced"></p>
+<h4 id="3参考">3.参考</h4>
+<p>《深度探索C++对象模型》</p>
+    </article>
+
+    
+<ul class="article-share">
+</ul>
+
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer">
+          <a href="/posts/cpp-model-6/" data-toggle="tooltip" data-placement="top" title="C&#43;&#43;对象模型-Non-Staitc成员函数">&lt; Newer</a>
+      </li>
+      <li class="pager-older">
+        <a href="/posts/cpp-model-10/" data-toggle="tooltip" data-placement="top" title="C&#43;&#43;对象模型-virtual继承">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright"></div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-"><a href="" title=""></a></li>
+  </ul>
+  <div class="powerdby">
+    <a href="https://github.com/qinch" rel="me" target="_blank"><i class="fa-brands fa-github" style="font-size: 16px;"></i></a>&nbsp&nbsp
+    <a href="mailto:qinchaowhut@qq.com" target="_blank"><i class="fa-solid fa-envelope" style="font-size: 16px;"></i></a></li><br>
+    ©2015-2024 qinch | Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+      <script async src="https://www.googletagmanager.com/gtag/js?id=Toracking%20ID"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'Toracking ID');
+        }
+      </script>
+
+</body>
+</html>

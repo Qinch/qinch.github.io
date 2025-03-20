@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>跟着xv6学习OS Kernel - Just For Fun</title>
+  <meta property="og:title" content="跟着xv6学习OS Kernel - Just For Fun" />
+  <meta name="twitter:title" content="跟着xv6学习OS Kernel - Just For Fun" />
+  <meta name="description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+  <meta property="og:description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+  <meta name="twitter:description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+  <meta name="author" content=""/>
+  <meta property="og:site_name" content="Just For Fun" />
+  <meta property="og:url" content="https://qinch.github.io/posts/xv6/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.145.0">
+  <link rel="stylesheet" href="/css/style.css" media="all" />
+  <link rel="stylesheet" href="/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
+  <link rel="stylesheet" href="/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/css/custom.css" media="all" />
+
+  <script src="/js/script.js"></script>
+  <script src="/js/custom.js"></script>
+  <script defer src="/fontawesome/all.min.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/">Just For Fun</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-categories"><a href="/categories/" title="Categories">Categories</a></li>
+      <li class="site-navi-item-archives"><a href="/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">跟着xv6学习OS Kernel</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>May 5, 2024</time></li>
+        <li class="article-meta-categories">
+        </li>
+      </ul>
+      
+      <h3 id="1-xv6-book">1. xv6 book</h3>
+<h4 id="1-chapter1-os-interfaces">1 chapter1: os interfaces</h4>
+<p>0, The system call <code>exec</code> replaces the calling process&rsquo;s memory but perserves its file table.</p>
+<p>1, It should be clear why it is a good idea that fork and exec are separate calls. Beacuse if they are separate, the shell can fork a child, use open, close, dup in the child to change the standard input and output file descriptors and then exec.
+Two file descriptors share an offset if they were derived from the same original file descriptor by a sequence of fork and dup calls. Otherwise file descriptors do not share offsets, even if they resulted from open calls for the same file. （其实结合APUE看效果更好^-^）</p>
+<p>2, The <code>unlink</code> system call removes a name from the file system. The file&rsquo;s inode and the disk space holding its content are only freed when the file&rsquo;s link count is zero and no file descrptors refer to it.</p>
+<h4 id="2-os-organization">2 os organization</h4>
+<p>0, Similarly, Unix transparently switches hardware CPUs among processes, saving and restoring register state as necessary, so that applications don&rsquo;t have to be aware of time sharing. This transparency allows the operating system to share CPUs even if some applications are in infinite loops.</p>
+<p>1, If an application in user mode attempts to execute a priviliged instruction, then the CPU doesn&rsquo;t execute the instruction, but switches to supervisor mode so that supervisort-mode code can terminate the application.</p>
+<p>2, Each process has two stacks: a user stack and a kernel stack. While a process in the kernel, its user stack still contains saved data, but isn&rsquo;t actively used.</p>
+
+    </article>
+
+    
+<ul class="article-share">
+</ul>
+
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer pager-noitem">&lt; Newer</li>
+      <li class="pager-older">
+        <a href="/posts/kss/" data-toggle="tooltip" data-placement="top" title="kubernetes快速入门（上）">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright"></div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-"><a href="" title=""></a></li>
+  </ul>
+  <div class="powerdby">
+    <a href="https://github.com/qinch" rel="me" target="_blank"><i class="fa-brands fa-github" style="font-size: 16px;"></i></a>&nbsp&nbsp
+    <a href="mailto:qinchaowhut@qq.com" target="_blank"><i class="fa-solid fa-envelope" style="font-size: 16px;"></i></a></li><br>
+    ©2015-2024 qinch | Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+      <script async src="https://www.googletagmanager.com/gtag/js?id=Toracking%20ID"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'Toracking ID');
+        }
+      </script>
+
+</body>
+</html>

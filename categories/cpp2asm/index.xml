@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Cpp2asm on Just For Fun</title>
+    <link>https://qinch.github.io/categories/cpp2asm/</link>
+    <description>Recent content in Cpp2asm on Just For Fun</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <lastBuildDate>Sat, 09 Apr 2016 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://qinch.github.io/categories/cpp2asm/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>C&#43;&#43;对象模型-Default Constructor</title>
+      <link>https://qinch.github.io/posts/cpp-model-8/</link>
+      <pubDate>Sat, 09 Apr 2016 00:00:00 +0000</pubDate>
+      <guid>https://qinch.github.io/posts/cpp-model-8/</guid>
+      <description>&lt;h4 id=&#34;0测试环境&#34;&gt;0.测试环境&lt;/h4&gt;&#xA;&lt;p&gt;gcc version 5.4.0 20160609 (Ubuntu 5.4.0-6ubuntu1~16.04.10)&lt;/p&gt;&#xA;&lt;h4 id=&#34;1-默认构造函数在编译器需要的时产生出来&#34;&gt;1, 默认构造函数在编译器需要的时产生出来&lt;/h4&gt;&#xA;&lt;p&gt;在如下片段的代码中, 通过分析汇编代码，发现并不会合成出来一个Default Constructor函数，因为如下代码是代码逻辑需要一个默认构造函数来初始化val和pnext数据成员。而不是编译器需要合成一个Default Constructor.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>C&#43;&#43;对象模型-Non-Staitc成员函数</title>
+      <link>https://qinch.github.io/posts/cpp-model-6/</link>
+      <pubDate>Sat, 09 Apr 2016 00:00:00 +0000</pubDate>
+      <guid>https://qinch.github.io/posts/cpp-model-6/</guid>
+      <description>&lt;h5 id=&#34;开发环境&#34;&gt;开发环境&lt;/h5&gt;&#xA;&lt;p&gt;gcc version 5.4.0 20160609 (Ubuntu 5.4.0-6ubuntu1~16.04.10)&lt;/p&gt;&#xA;&lt;h5 id=&#34;1-non-static成员函数调用过程&#34;&gt;1, non-static成员函数调用过程&lt;/h5&gt;&#xA;&lt;p&gt;class X定义了一个virtual function foo:函数调用过程(栈帧)class X定义了一个virtual function foo:&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>C&#43;&#43;对象模型-ObjectSliced</title>
+      <link>https://qinch.github.io/posts/cpp-model-7/</link>
+      <pubDate>Sat, 09 Apr 2016 00:00:00 +0000</pubDate>
+      <guid>https://qinch.github.io/posts/cpp-model-7/</guid>
+      <description>&lt;h5 id=&#34;开发环境&#34;&gt;开发环境&lt;/h5&gt;&#xA;&lt;p&gt;gcc version 5.4.0 20160609 (Ubuntu 5.4.0-6ubuntu1~16.04.10)&lt;/p&gt;&#xA;&lt;h5 id=&#34;1-objectsliced&#34;&gt;1, ObjectSliced&lt;/h5&gt;&#xA;&lt;p&gt;当一个base class object 被直接初始化（copy ctor）/赋值(operator =)为一个derived class object 时，derived object的base 部分会被切割(sliced)以塞入base type内存中，derived type将没有留下任何蛛丝马迹(即：base class object 的vptr不会被derived class object的vptr替换)&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>C&#43;&#43;对象模型-virtual继承</title>
+      <link>https://qinch.github.io/posts/cpp-model-10/</link>
+      <pubDate>Sat, 09 Apr 2016 00:00:00 +0000</pubDate>
+      <guid>https://qinch.github.io/posts/cpp-model-10/</guid>
+      <description>&lt;h4 id=&#34;0测试环境&#34;&gt;0.测试环境&lt;/h4&gt;&#xA;&lt;p&gt;gcc version 5.4.0 20160609 (Ubuntu 5.4.0-6ubuntu1~16.04.10)&lt;/p&gt;&#xA;&lt;h4 id=&#34;1虚继承&#34;&gt;1.虚继承&lt;/h4&gt;</description>
+    </item>
+    <item>
+      <title>C&#43;&#43;对象模型-关于对象</title>
+      <link>https://qinch.github.io/posts/cpp-model-5/</link>
+      <pubDate>Sat, 09 Apr 2016 00:00:00 +0000</pubDate>
+      <guid>https://qinch.github.io/posts/cpp-model-5/</guid>
+      <description>&lt;h5 id=&#34;开发环境&#34;&gt;开发环境&lt;/h5&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;Ubuntu 14.04(32bits)&lt;/li&gt;&#xA;&lt;li&gt;GCC&lt;/li&gt;&#xA;&lt;li&gt;编辑器 Cmd Markdown&lt;/li&gt;&#xA;&lt;li&gt;画图工具 Processon&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;h5 id=&#34;1关于对象&#34;&gt;1,关于对象&lt;/h5&gt;&#xA;&lt;p&gt;从这篇博客开始真正介绍C++对象模型，前边BB了那么多没用的，终于开始了C++对模型的分析。关于C++对象模型的介绍，我将根据《深度探索C++对象模型》这本书，其书中的每一章，对应一篇博客，博客内容为自己对这本书的理解和补充吧。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>C&#43;&#43;对象模型-引用</title>
+      <link>https://qinch.github.io/posts/cpp-model-9/</link>
+      <pubDate>Sat, 09 Apr 2016 00:00:00 +0000</pubDate>
+      <guid>https://qinch.github.io/posts/cpp-model-9/</guid>
+      <description>&lt;h4 id=&#34;0测试环境&#34;&gt;0.测试环境&lt;/h4&gt;&#xA;&lt;p&gt;gcc version 5.4.0 20160609 (Ubuntu 5.4.0-6ubuntu1~16.04.10)&lt;/p&gt;&#xA;&lt;h4 id=&#34;1引用&#34;&gt;1.引用&lt;/h4&gt;</description>
+    </item>
+    <item>
+      <title>基础类型的内存表示</title>
+      <link>https://qinch.github.io/posts/cpp-model-4/</link>
+      <pubDate>Fri, 08 Apr 2016 00:00:00 +0000</pubDate>
+      <guid>https://qinch.github.io/posts/cpp-model-4/</guid>
+      <description>&lt;h5 id=&#34;开发环境&#34;&gt;开发环境&lt;/h5&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;Ubuntu 14.04(32bits)&lt;/li&gt;&#xA;&lt;li&gt;GCC&lt;/li&gt;&#xA;&lt;li&gt;编辑器 Cmd Markdown&lt;/li&gt;&#xA;&lt;li&gt;画图工具 Processon&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;h5 id=&#34;1基础类型内存表示&#34;&gt;1,基础类型内存表示&lt;/h5&gt;&#xA;&lt;p&gt;&lt;a href=&#34;http://chinchao.xyz/2016/04/07/cpp-model-2/&#34;&gt;上一节&lt;/a&gt; 介绍了swich/if-else的实现机制。本文准备介绍一下基础类型的内存表示。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>动态/静态数组内存布局</title>
+      <link>https://qinch.github.io/posts/cpp-model-2/</link>
+      <pubDate>Thu, 07 Apr 2016 00:00:00 +0000</pubDate>
+      <guid>https://qinch.github.io/posts/cpp-model-2/</guid>
+      <description>&lt;h5 id=&#34;开发环境&#34;&gt;开发环境&lt;/h5&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;Ubuntu 14.04(32bits)&lt;/li&gt;&#xA;&lt;li&gt;GCC&lt;/li&gt;&#xA;&lt;li&gt;编辑器 Cmd Markdown&lt;/li&gt;&#xA;&lt;li&gt;画图工具 Processon&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;h5 id=&#34;1数组内存布局&#34;&gt;1,数组内存布局&lt;/h5&gt;&#xA;&lt;p&gt;&lt;a href=&#34;http://chinchao.xyz/2016/04/06/cpp-model-1/&#34;&gt;上一节&lt;/a&gt; 简单介绍了结构体作为函数参数和返回值的情况。本文准备介绍一下数组的内存布局，即静态数组/动态数组和一维数组/二维数组，顺便介绍一下0长度数组的妙用。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>函数调用过程: 结构体变量作为函数参数和返回值</title>
+      <link>https://qinch.github.io/posts/cpp-model-1/</link>
+      <pubDate>Wed, 06 Apr 2016 00:00:00 +0000</pubDate>
+      <guid>https://qinch.github.io/posts/cpp-model-1/</guid>
+      <description>&lt;h5 id=&#34;开发环境&#34;&gt;开发环境&lt;/h5&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;Ubuntu 14.04(32bits)&lt;/li&gt;&#xA;&lt;li&gt;GCC&lt;/li&gt;&#xA;&lt;li&gt;编辑器 Cmd Markdown&lt;/li&gt;&#xA;&lt;li&gt;画图工具 Processon&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;h5 id=&#34;1结构体类型作为函数参数和返回值&#34;&gt;1,结构体类型作为函数参数和返回值&lt;/h5&gt;&#xA;&lt;p&gt;&lt;a href=&#34;http://chinchao.xyz/2016/04/05/cpp-model-0/&#34;&gt;上一节&lt;/a&gt; 简单介绍了基本的函数调用过程，即栈帧。本节介绍结构体类型作为函数参数和返回值的情况。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>函数调用过程(栈帧)</title>
+      <link>https://qinch.github.io/posts/cpp-model-0/</link>
+      <pubDate>Tue, 05 Apr 2016 00:00:00 +0000</pubDate>
+      <guid>https://qinch.github.io/posts/cpp-model-0/</guid>
+      <description>&lt;h5 id=&#34;开发环境&#34;&gt;开发环境&lt;/h5&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;Ubuntu 14.04(32bits)&lt;/li&gt;&#xA;&lt;li&gt;GCC&lt;/li&gt;&#xA;&lt;li&gt;编辑器 Cmd Markdown&lt;/li&gt;&#xA;&lt;li&gt;画图工具 Processon&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;h5 id=&#34;1函数调用过程&#34;&gt;1,函数调用过程&lt;/h5&gt;&#xA;&lt;p&gt;今天先介绍下基本的函数调用过程，即栈帧。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>C&#43;&#43;对象模型_Class Obj作为函数参数</title>
+      <link>https://qinch.github.io/posts/cpp-model-obj/</link>
+      <pubDate>Sun, 10 May 2015 00:00:00 +0000</pubDate>
+      <guid>https://qinch.github.io/posts/cpp-model-obj/</guid>
+      <description>&lt;h5 id=&#34;开发环境&#34;&gt;开发环境&lt;/h5&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;VC6.0&lt;/li&gt;&#xA;&lt;li&gt;编辑器 Cmd Markdown&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;ol&gt;&#xA;&lt;li&gt;&#xA;&lt;p&gt;关于C/C++中基本类型（如：int,int*等）作为函数参数时，是通过将该变量的值压栈来进行参数传递；本文通过C++反汇编代码分析了当对象作为函数参数时（该形参非引用或指针），参数如何传递以及此时栈帧的结构。&lt;/p&gt;&#xA;&lt;/li&gt;&#xA;&lt;li&gt;&#xA;&lt;p&gt;对象作为函数参数时，参数传递过程(如：函数的声明为：void show(class Object obj);该函数的调用的为show(arg);其中实参arg的类型为class Object)：1,在栈顶上为obj对象分配内存空间，然后将对象arg的首地址压栈;2,调用拷贝构造函数（此为C++中三种调用拷贝构造函数情况之一），将arg的数据成员拷贝至obj;3,执行show()函数体（此时，ebp+8即为obj的首地址）。&lt;/p&gt;&#xA;&lt;/li&gt;&#xA;&lt;/ol&gt;</description>
+    </item>
+    <item>
+      <title>C&#43;&#43;对象模型_operator delete异常分析</title>
+      <link>https://qinch.github.io/posts/cpp-model-del/</link>
+      <pubDate>Sun, 10 May 2015 00:00:00 +0000</pubDate>
+      <guid>https://qinch.github.io/posts/cpp-model-del/</guid>
+      <description>&lt;h5 id=&#34;开发环境&#34;&gt;开发环境&lt;/h5&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;VC6.0&lt;/li&gt;&#xA;&lt;li&gt;编辑器 Cmd Markdown&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;ol&gt;&#xA;&lt;li&gt;&#xA;&lt;p&gt;C++中delete表达式执行的操作是：1，调用析构函数；2，释放对象内存（operator delete(&amp;hellip;)）。&lt;/p&gt;&#xA;&lt;/li&gt;&#xA;&lt;li&gt;&#xA;&lt;p&gt;如果父类的析构函数没有声明为virtual函数，且子类中至少存在一个virtual函数，此时将子类的对象地址赋值给父类指针。当对父类的指针执行delete操作时,会调用父类析构函数，然后在释放内存时（即delete表达式执行的操作的2，释放对象内存）出现崩溃。然而如果子类中不存在一个virtual函数时，执行上面同样的操作就不会出现崩溃。&lt;/p&gt;&#xA;&lt;/li&gt;&#xA;&lt;/ol&gt;</description>
+    </item>
+    <item>
+      <title>奇怪的死循环</title>
+      <link>https://qinch.github.io/posts/ctoy-1/</link>
+      <pubDate>Sun, 10 May 2015 00:00:00 +0000</pubDate>
+      <guid>https://qinch.github.io/posts/ctoy-1/</guid>
+      <description>&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;#include&amp;lt;stdio.h&amp;gt;&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;int main&lt;span style=&#34;color:#f92672&#34;&gt;()&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;{&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    int i;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    int a&lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;10&lt;span style=&#34;color:#f92672&#34;&gt;]&lt;/span&gt;;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;for&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;(&lt;/span&gt;i&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;0;i&amp;lt;&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;10;++i&lt;span style=&#34;color:#f92672&#34;&gt;)&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#f92672&#34;&gt;{&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        a&lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;i&lt;span style=&#34;color:#f92672&#34;&gt;]=&lt;/span&gt;0;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        printf&lt;span style=&#34;color:#f92672&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;%d\n&amp;#34;&lt;/span&gt;,a&lt;span style=&#34;color:#f92672&#34;&gt;[&lt;/span&gt;i&lt;span style=&#34;color:#f92672&#34;&gt;])&lt;/span&gt;;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#f92672&#34;&gt;}&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; 0;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;}&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;该程序对应的汇编代码见如下代码:&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

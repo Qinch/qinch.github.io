@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>函数调用过程(栈帧) - Just For Fun</title>
+  <meta property="og:title" content="函数调用过程(栈帧) - Just For Fun" />
+  <meta name="twitter:title" content="函数调用过程(栈帧) - Just For Fun" />
+  <meta name="description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+  <meta property="og:description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+  <meta name="twitter:description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+  <meta name="author" content=""/>
+  <meta property="og:site_name" content="Just For Fun" />
+  <meta property="og:url" content="https://qinch.github.io/posts/cpp-model-0/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.145.0">
+  <link rel="stylesheet" href="/css/style.css" media="all" />
+  <link rel="stylesheet" href="/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
+  <link rel="stylesheet" href="/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/css/custom.css" media="all" />
+
+  <script src="/js/script.js"></script>
+  <script src="/js/custom.js"></script>
+  <script defer src="/fontawesome/all.min.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/">Just For Fun</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-categories"><a href="/categories/" title="Categories">Categories</a></li>
+      <li class="site-navi-item-archives"><a href="/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">函数调用过程(栈帧)</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>Apr 5, 2016</time></li>
+        <li class="article-meta-categories">
+        </li>
+      </ul>
+      
+      <h5 id="开发环境">开发环境</h5>
+<ul>
+<li>Ubuntu 14.04(32bits)</li>
+<li>GCC</li>
+<li>编辑器 Cmd Markdown</li>
+<li>画图工具 Processon</li>
+</ul>
+<h5 id="1函数调用过程">1,函数调用过程</h5>
+<p>今天先介绍下基本的函数调用过程，即栈帧。</p>
+<h6 id="11栈帧">1.1栈帧</h6>
+<p>每个函数调用都对应一个栈帧。每个栈帧由ESP和EBP寄存器来确定。每个函数执行时，其局部变量都是在自己对应的栈帧内分配内存。假设A函数调用B函数，此时正在执行B函数，需要指出的是，当执行完当前函数B后，返回调用函数A，此时执行函数B时，为B函数的局部变量分配的的内存空间也就不存在了。也就是说，函数返回值不能是函数体内局部变量的地址，也不能是局部变量的引用。即如不能出现如下两种形式之一：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>int *test<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>　　int i<span style="color:#f92672">=</span>123;
+</span></span><span style="display:flex;"><span>　　<span style="color:#66d9ef">return</span> &amp;i;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>或者
+</span></span><span style="display:flex;"><span>int &amp;test<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>　　int i<span style="color:#f92672">=</span>123;
+</span></span><span style="display:flex;"><span>　　<span style="color:#66d9ef">return</span> i;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>1.2函数调用过程对应的汇编代码</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#include&lt;stdio.h&gt;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>int main<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>	int i<span style="color:#f92672">=</span>10;
+</span></span><span style="display:flex;"><span>	int j<span style="color:#f92672">=</span>11;
+</span></span><span style="display:flex;"><span>	int k<span style="color:#f92672">=</span>test<span style="color:#f92672">(</span>i,j<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span>	k-<span style="color:#f92672">=</span>1;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> 0;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>int test<span style="color:#f92672">(</span>int a,int b<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>	int sum<span style="color:#f92672">=</span>a+b;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> sum;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>以上C程序对应的汇编代码如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>	.file	<span style="color:#e6db74">&#34;c0.c&#34;</span>
+</span></span><span style="display:flex;"><span>	.text
+</span></span><span style="display:flex;"><span>	.globl	main
+</span></span><span style="display:flex;"><span>	.type	main, @function
+</span></span><span style="display:flex;"><span>main:
+</span></span><span style="display:flex;"><span>.LFB0:
+</span></span><span style="display:flex;"><span>	.cfi_startproc
+</span></span><span style="display:flex;"><span>	pushl	%ebp //将ebp压栈，即old ebp
+</span></span><span style="display:flex;"><span>	.cfi_def_cfa_offset <span style="color:#ae81ff">8</span>
+</span></span><span style="display:flex;"><span>	.cfi_offset 5, -8
+</span></span><span style="display:flex;"><span>	movl	%esp, %ebp   //ebp<span style="color:#f92672">=</span>esp
+</span></span><span style="display:flex;"><span>	.cfi_def_cfa_register <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>	andl	$-16, %esp  //esp<span style="color:#f92672">=</span>esp&amp;0xFFFFFFF0,即保证esp的最低4位为0
+</span></span><span style="display:flex;"><span>	subl	$32, %esp   //栈向低地址生长，esp-<span style="color:#f92672">=</span><span style="color:#ae81ff">32</span>
+</span></span><span style="display:flex;"><span>	movl	$10, 20<span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span> //esp+20即局部变量i的地址
+</span></span><span style="display:flex;"><span>	movl	$11, 24<span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span>//esp+24即局部变量j的地址
+</span></span><span style="display:flex;"><span>	movl	24<span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span>, %eax //将j变量的值赋给eax寄存器
+</span></span><span style="display:flex;"><span>	movl	%eax, 4<span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span> //j为test函数的实参，此处将j的值压栈
+</span></span><span style="display:flex;"><span>	movl	20<span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span>, %eax //将变量i的值赋给eax寄存器
+</span></span><span style="display:flex;"><span>	movl	%eax, <span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span> //将变量i的值压栈
+</span></span><span style="display:flex;"><span>	call	test  //调用test函数,其中将下条指令<span style="color:#f92672">(</span>即movl %eax, 28<span style="color:#f92672">(</span>%esp<span style="color:#f92672">))</span><span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>	的地址压栈,即ret addr,然后转到test函数执行,即eip<span style="color:#f92672">=</span>test
+</span></span><span style="display:flex;"><span>	movl	%eax, 28<span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span> //eax即为test函数的返回值，<span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>	将它赋给k，esp+28级为变量k的地址
+</span></span><span style="display:flex;"><span>	subl	$1, 28<span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span> //k<span style="color:#f92672">=</span>k-1
+</span></span><span style="display:flex;"><span>	movl	$0, %eax //eax寄存器保存函数的返回值
+</span></span><span style="display:flex;"><span>	leave
+</span></span><span style="display:flex;"><span>	.cfi_restore <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>	.cfi_def_cfa 4, <span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span>	ret
+</span></span><span style="display:flex;"><span>	.cfi_endproc
+</span></span><span style="display:flex;"><span>.LFE0:
+</span></span><span style="display:flex;"><span>	.size	main, .-main
+</span></span><span style="display:flex;"><span>	.globl	test
+</span></span><span style="display:flex;"><span>	.type	test, @function
+</span></span><span style="display:flex;"><span>test:
+</span></span><span style="display:flex;"><span>.LFB1:
+</span></span><span style="display:flex;"><span>	.cfi_startproc
+</span></span><span style="display:flex;"><span>	pushl	%ebp //ebp压栈，即old ebp
+</span></span><span style="display:flex;"><span>	.cfi_def_cfa_offset <span style="color:#ae81ff">8</span>
+</span></span><span style="display:flex;"><span>	.cfi_offset 5, -8
+</span></span><span style="display:flex;"><span>	movl	%esp, %ebp //ebp<span style="color:#f92672">=</span>esp
+</span></span><span style="display:flex;"><span>	.cfi_def_cfa_register <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>	subl	$16, %esp //esp-<span style="color:#f92672">=</span><span style="color:#ae81ff">16</span>
+</span></span><span style="display:flex;"><span>	movl	12<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %eax  //形参b的值赋给eax寄存器，即eax<span style="color:#f92672">=</span><span style="color:#ae81ff">11</span>
+</span></span><span style="display:flex;"><span>	movl	8<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %edx //形参a的值赋给edx寄存器，edx<span style="color:#f92672">=</span><span style="color:#ae81ff">10</span>
+</span></span><span style="display:flex;"><span>	addl	%edx, %eax   //将a和b相加,结果赋给eax寄存器
+</span></span><span style="display:flex;"><span>	movl	%eax, -4<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span> //ebp-4为局部变量sum的地址，sum<span style="color:#f92672">=</span>eax
+</span></span><span style="display:flex;"><span>	movl	-4<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %eax //eax来保存函数的返回值
+</span></span><span style="display:flex;"><span>	leave //等价于 esp<span style="color:#f92672">=</span>ebp,pop ebp.其中pop ebp即ebp<span style="color:#f92672">=</span>old ebp
+</span></span><span style="display:flex;"><span>	.cfi_restore <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>	.cfi_def_cfa 4, <span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span>	ret //等价于pop eip，即eip<span style="color:#f92672">=</span>ret addr,esp-<span style="color:#f92672">=</span><span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span>	.cfi_endproc
+</span></span><span style="display:flex;"><span>.LFE1:
+</span></span><span style="display:flex;"><span>	.size	test, .-test
+</span></span><span style="display:flex;"><span>	.ident	<span style="color:#e6db74">&#34;GCC: (Ubuntu 4.8.2-19ubuntu1) 4.8.2&#34;</span>
+</span></span><span style="display:flex;"><span>	.section	.note.GNU-stack,<span style="color:#e6db74">&#34;&#34;</span>,@progbits
+</span></span></code></pre></div><p>当main函数调用test函数时，对应的栈帧见下图
+<img src="/img/c0-0.png" alt="stack1"> <br>
+当函数test返回后，main函数的栈帧如下图
+<img src="/img/c0-1.png" alt="stack2"></p>
+    </article>
+
+    
+<ul class="article-share">
+</ul>
+
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer">
+          <a href="/posts/cpp-model-1/" data-toggle="tooltip" data-placement="top" title="函数调用过程: 结构体变量作为函数参数和返回值">&lt; Newer</a>
+      </li>
+      <li class="pager-older">
+        <a href="/posts/linux-io/" data-toggle="tooltip" data-placement="top" title="Linux内存流">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright"></div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-"><a href="" title=""></a></li>
+  </ul>
+  <div class="powerdby">
+    <a href="https://github.com/qinch" rel="me" target="_blank"><i class="fa-brands fa-github" style="font-size: 16px;"></i></a>&nbsp&nbsp
+    <a href="mailto:qinchaowhut@qq.com" target="_blank"><i class="fa-solid fa-envelope" style="font-size: 16px;"></i></a></li><br>
+    ©2015-2024 qinch | Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+      <script async src="https://www.googletagmanager.com/gtag/js?id=Toracking%20ID"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'Toracking ID');
+        }
+      </script>
+
+</body>
+</html>

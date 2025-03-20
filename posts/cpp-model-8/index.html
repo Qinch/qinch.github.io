@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>C&#43;&#43;对象模型-Default Constructor - Just For Fun</title>
+  <meta property="og:title" content="C&#43;&#43;对象模型-Default Constructor - Just For Fun" />
+  <meta name="twitter:title" content="C&#43;&#43;对象模型-Default Constructor - Just For Fun" />
+  <meta name="description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+  <meta property="og:description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+  <meta name="twitter:description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+  <meta name="author" content=""/>
+  <meta property="og:site_name" content="Just For Fun" />
+  <meta property="og:url" content="https://qinch.github.io/posts/cpp-model-8/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.145.0">
+  <link rel="stylesheet" href="/css/style.css" media="all" />
+  <link rel="stylesheet" href="/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
+  <link rel="stylesheet" href="/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/css/custom.css" media="all" />
+
+  <script src="/js/script.js"></script>
+  <script src="/js/custom.js"></script>
+  <script defer src="/fontawesome/all.min.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/">Just For Fun</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-categories"><a href="/categories/" title="Categories">Categories</a></li>
+      <li class="site-navi-item-archives"><a href="/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">C&#43;&#43;对象模型-Default Constructor</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>Apr 9, 2016</time></li>
+        <li class="article-meta-categories">
+        </li>
+      </ul>
+      
+      <h4 id="0测试环境">0.测试环境</h4>
+<p>gcc version 5.4.0 20160609 (Ubuntu 5.4.0-6ubuntu1~16.04.10)</p>
+<h4 id="1-默认构造函数在编译器需要的时产生出来">1, 默认构造函数在编译器需要的时产生出来</h4>
+<p>在如下片段的代码中, 通过分析汇编代码，发现并不会合成出来一个Default Constructor函数，因为如下代码是代码逻辑需要一个默认构造函数来初始化val和pnext数据成员。而不是编译器需要合成一个Default Constructor.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#include&lt;iostream&gt;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>using namespace std;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>class Foo<span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>        public:
+</span></span><span style="display:flex;"><span>                int val;
+</span></span><span style="display:flex;"><span>        Foo *pnext;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>void foobar<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>        Foo bar;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span><span style="color:#f92672">(</span>bar.val <span style="color:#f92672">||</span> bar.pnext<span style="color:#f92672">)</span> //代码逻辑需要一个Default Constructor来初始化val和pnext数据成员
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>                cout&lt;&lt;bar.val&lt;&lt;endl;
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>以上代码对应的汇编代码如下(g++ -S -m32 p39.cc):</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>_Z6foobarv: //foobar<span style="color:#f92672">()</span>, c++filt _Z6foobarv
+</span></span><span style="display:flex;"><span>.LFB1021:
+</span></span><span style="display:flex;"><span>        .cfi_startproc
+</span></span><span style="display:flex;"><span>        pushl   %ebp
+</span></span><span style="display:flex;"><span>        .cfi_def_cfa_offset <span style="color:#ae81ff">8</span>
+</span></span><span style="display:flex;"><span>        .cfi_offset 5, -8
+</span></span><span style="display:flex;"><span>        movl    %esp, %ebp
+</span></span><span style="display:flex;"><span>        .cfi_def_cfa_register <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>        subl    $24, %esp
+</span></span><span style="display:flex;"><span>        movl    -16<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %eax  //eax<span style="color:#f92672">=[</span>ebp-16<span style="color:#f92672">]</span>,即eax <span style="color:#f92672">=</span> bar.val  ,NOTICE:NO Default Constructor is Called
+</span></span><span style="display:flex;"><span>        testl   %eax, %eax //eax&amp;eax
+</span></span><span style="display:flex;"><span>        jne     .L2 // 如果testl的结果非0，jmp .L2 ,jne means jmp <span style="color:#66d9ef">if</span> not equal
+</span></span><span style="display:flex;"><span>        movl    -12<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %eax //eax<span style="color:#f92672">=[</span>ebp-12<span style="color:#f92672">]</span>, 即eax<span style="color:#f92672">=</span>bra.pnext
+</span></span><span style="display:flex;"><span>        testl   %eax, %eax
+</span></span><span style="display:flex;"><span>        je      .L4  //如果testl的结果为0, jmp .L4
+</span></span><span style="display:flex;"><span>.L2:
+</span></span><span style="display:flex;"><span>        movl    -16<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %eax  //eax<span style="color:#f92672">=[</span>ebp-16<span style="color:#f92672">]</span>, 即bar.val
+</span></span><span style="display:flex;"><span>        subl    $8, %esp
+</span></span><span style="display:flex;"><span>        pushl   %eax
+</span></span><span style="display:flex;"><span>        pushl   $_ZSt4cout
+</span></span><span style="display:flex;"><span>        call    _ZNSolsEi
+</span></span><span style="display:flex;"><span>        addl    $16, %esp
+</span></span><span style="display:flex;"><span>        subl    $8, %esp
+</span></span><span style="display:flex;"><span>        pushl   $_ZSt4endlIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_
+</span></span><span style="display:flex;"><span>        pushl   %eax
+</span></span><span style="display:flex;"><span>        call    _ZNSolsEPFRSoS_E
+</span></span><span style="display:flex;"><span>        addl    $16, %esp
+</span></span><span style="display:flex;"><span>.L4:
+</span></span><span style="display:flex;"><span>        nop
+</span></span><span style="display:flex;"><span>        leave
+</span></span><span style="display:flex;"><span>        .cfi_restore <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>        .cfi_def_cfa 4, <span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span>        ret
+</span></span><span style="display:flex;"><span>        .cfi_endproc
+</span></span></code></pre></div><h4 id="2-nontrivial-default-constructor">2. nontrivial Default Constructor</h4>
+<p>nontrivial Default Constrctor 即编译器所需要的默认构造函数，必要时候会由编译器合成出一个。</p>
+<h5 id="21-带有default-constructor的member-class-object">2.1 “带有Default Constructor&quot;的Member Class Object</h5>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>                                                                                                                                                                                        1,1           All
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#include&lt;iostream&gt;</span>
+</span></span><span style="display:flex;"><span>using namespace std;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>class Foo<span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>        public:
+</span></span><span style="display:flex;"><span>                Foo<span style="color:#f92672">()</span>:_f<span style="color:#f92672">(</span>0<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>        private:
+</span></span><span style="display:flex;"><span>                int _f;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>class Bar<span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>        public:
+</span></span><span style="display:flex;"><span>                char *str;
+</span></span><span style="display:flex;"><span>                Foo foo;
+</span></span><span style="display:flex;"><span>		/*
+</span></span><span style="display:flex;"><span>		  NOTICE:即使写了默认构造函数，Bar的数据成员的初始化顺序也是:按数据成员的声明顺序初始化，即
+</span></span><span style="display:flex;"><span>			先初始化str，然后调用foo的默认构造函数
+</span></span><span style="display:flex;"><span>			Bar<span style="color:#f92672">()</span>:foo<span style="color:#f92672">()</span>, str<span style="color:#f92672">(</span>NULL<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>		*/
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>void test<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>        Bar bar;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span><span style="color:#f92672">(</span>bar.str<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>                cout&lt;&lt;bar.str&lt;&lt;endl;
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>test函数对应的汇编代码如下:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>_Z4testv:
+</span></span><span style="display:flex;"><span>.LFB1024:
+</span></span><span style="display:flex;"><span>        .cfi_startproc
+</span></span><span style="display:flex;"><span>        pushl   %ebp
+</span></span><span style="display:flex;"><span>        .cfi_def_cfa_offset <span style="color:#ae81ff">8</span>
+</span></span><span style="display:flex;"><span>        .cfi_offset 5, -8
+</span></span><span style="display:flex;"><span>        movl    %esp, %ebp
+</span></span><span style="display:flex;"><span>        .cfi_def_cfa_register <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>        subl    $24, %esp
+</span></span><span style="display:flex;"><span>        movl    %gs:20, %eax
+</span></span><span style="display:flex;"><span>        movl    %eax, -12<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>        xorl    %eax, %eax
+</span></span><span style="display:flex;"><span>        subl    $12, %esp
+</span></span><span style="display:flex;"><span>        leal    -20<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %eax  //eax<span style="color:#f92672">=</span>bar的首地址
+</span></span><span style="display:flex;"><span>        pushl   %eax   //bar对象首地址压栈
+</span></span><span style="display:flex;"><span>        call    _ZN3BarC1Ev  //Bar::Bar<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span>        addl    $16, %esp
+</span></span><span style="display:flex;"><span>        movl    -20<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %eax
+</span></span><span style="display:flex;"><span>        testl   %eax, %eax
+</span></span><span style="display:flex;"><span>        je      .L6
+</span></span><span style="display:flex;"><span>        movl    -20<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %eax
+</span></span><span style="display:flex;"><span>        subl    $8, %esp
+</span></span><span style="display:flex;"><span>        pushl   %eax
+</span></span><span style="display:flex;"><span>        pushl   $_ZSt4cout
+</span></span><span style="display:flex;"><span>        call    _ZStlsISt11char_traitsIcEERSt13basic_ostreamIcT_ES5_PKc
+</span></span><span style="display:flex;"><span>        addl    $16, %esp
+</span></span><span style="display:flex;"><span>        subl    $8, %esp
+</span></span><span style="display:flex;"><span>        pushl   $_ZSt4endlIcSt11char_traitsIcEERSt13basic_ostreamIT_T0_ES6_
+</span></span><span style="display:flex;"><span>        pushl   %eax
+</span></span><span style="display:flex;"><span>        call    _ZNSolsEPFRSoS_E
+</span></span><span style="display:flex;"><span>        addl    $16, %esp
+</span></span><span style="display:flex;"><span>.L6:
+</span></span><span style="display:flex;"><span>        nop
+</span></span><span style="display:flex;"><span>        movl    -12<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %eax
+</span></span><span style="display:flex;"><span>        xorl    %gs:20, %eax
+</span></span><span style="display:flex;"><span>        je      .L5
+</span></span><span style="display:flex;"><span>        call    __stack_chk_fail
+</span></span><span style="display:flex;"><span>.L5:
+</span></span><span style="display:flex;"><span>        leave
+</span></span><span style="display:flex;"><span>        .cfi_restore <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>        .cfi_def_cfa 4, <span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span>        ret
+</span></span><span style="display:flex;"><span>        .cfi_endproc
+</span></span></code></pre></div><p>Bar构造函数对应的汇编代码如下:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>_ZN3BarC2Ev:  //Bar::Bar<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span>.LFB1026:
+</span></span><span style="display:flex;"><span>        .cfi_startproc
+</span></span><span style="display:flex;"><span>        pushl   %ebp
+</span></span><span style="display:flex;"><span>        .cfi_def_cfa_offset <span style="color:#ae81ff">8</span>
+</span></span><span style="display:flex;"><span>        .cfi_offset 5, -8
+</span></span><span style="display:flex;"><span>        movl    %esp, %ebp
+</span></span><span style="display:flex;"><span>        .cfi_def_cfa_register <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>        subl    $8, %esp
+</span></span><span style="display:flex;"><span>        movl    8<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %eax  //eax<span style="color:#f92672">=</span>this
+</span></span><span style="display:flex;"><span>        addl    $4, %eax  //eax<span style="color:#f92672">=</span>eax+4,即foo的首地址
+</span></span><span style="display:flex;"><span>        subl    $12, %esp
+</span></span><span style="display:flex;"><span>        pushl   %eax  //foo对象的this指针压栈
+</span></span><span style="display:flex;"><span>        call    _ZN3FooC1Ev //Foo:Foo<span style="color:#f92672">()</span>, NOTICE：初始化Bar::foo时编译器的责任，初始化Bar::str时代码逻辑的责任
+</span></span><span style="display:flex;"><span>        addl    $16, %esp
+</span></span><span style="display:flex;"><span>        nop
+</span></span><span style="display:flex;"><span>        leave
+</span></span><span style="display:flex;"><span>        .cfi_restore <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>        .cfi_def_cfa 4, <span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span>        ret
+</span></span><span style="display:flex;"><span>        .cfi_endproc
+</span></span></code></pre></div><p>Bar::Bar()函数伪码如下:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>Bar的default construtor合成如下:
+</span></span><span style="display:flex;"><span>	Bar::Bar<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>		Foo::Foo<span style="color:#f92672">(</span>&amp;foo<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>通过分析以上代码，发现: 如果一个class没有任何Constructor，但他的数据成员含有member object(该object有默认构造函数)，那么
+该class的implicit default  constructor 就是nontrivial的，编译器会为该class合成一个default contrutor.</p>
+<h4 id="3带有default-construtor的base-class">3.”带有Default Construtor“的Base Class</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>nclude&lt;iostream&gt;
+</span></span><span style="display:flex;"><span>using namespace std;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>class Foo<span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>        public:
+</span></span><span style="display:flex;"><span>                Foo<span style="color:#f92672">()</span>:_f<span style="color:#f92672">(</span>0<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>        private:
+</span></span><span style="display:flex;"><span>                int _f;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>class Bar :public Foo<span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>        public:
+</span></span><span style="display:flex;"><span>                char *str;
+</span></span><span style="display:flex;"><span>                Foo foo;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>void test<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>        Bar bar;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span><span style="color:#f92672">(</span>bar.str<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>                cout&lt;&lt;bar.str&lt;&lt;endl;
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>对应的汇编代码如下(g++ -S -m32 p44.cc):</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>_ZN3BarC2Ev:  //Bar::Bar<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span>.LFB1026:
+</span></span><span style="display:flex;"><span>        .cfi_startproc
+</span></span><span style="display:flex;"><span>        pushl   %ebp
+</span></span><span style="display:flex;"><span>        .cfi_def_cfa_offset <span style="color:#ae81ff">8</span>
+</span></span><span style="display:flex;"><span>        .cfi_offset 5, -8
+</span></span><span style="display:flex;"><span>        movl    %esp, %ebp
+</span></span><span style="display:flex;"><span>        .cfi_def_cfa_register <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>        subl    $8, %esp
+</span></span><span style="display:flex;"><span>        movl    8<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %eax  //eax<span style="color:#f92672">=[</span>ebp+8<span style="color:#f92672">]</span>, eax<span style="color:#f92672">=</span>this
+</span></span><span style="display:flex;"><span>        subl    $12, %esp
+</span></span><span style="display:flex;"><span>        pushl   %eax //this指针压栈
+</span></span><span style="display:flex;"><span>        call    _ZN3FooC2Ev  //Foo:Foo<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span>        addl    $16, %esp
+</span></span><span style="display:flex;"><span>        nop
+</span></span><span style="display:flex;"><span>        leave
+</span></span><span style="display:flex;"><span>        .cfi_restore <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>        .cfi_def_cfa 4, <span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span>        ret
+</span></span><span style="display:flex;"><span>        .cfi_endproc
+</span></span><span style="display:flex;"><span>.LFE1026:
+</span></span><span style="display:flex;"><span>        .size   _ZN3BarC2Ev, .-_ZN3BarC2Ev
+</span></span><span style="display:flex;"><span>        .weak   _ZN3BarC1Ev
+</span></span><span style="display:flex;"><span>        .set    _ZN3BarC1Ev,_ZN3BarC2Ev
+</span></span><span style="display:flex;"><span>        .text
+</span></span><span style="display:flex;"><span>        .globl  _Z4testv
+</span></span><span style="display:flex;"><span>        .type   _Z4testv, @function
+</span></span><span style="display:flex;"><span>_Z4testv:
+</span></span><span style="display:flex;"><span>.LFB1024:
+</span></span><span style="display:flex;"><span>        .cfi_startproc
+</span></span><span style="display:flex;"><span>        pushl   %ebp
+</span></span><span style="display:flex;"><span>        .cfi_def_cfa_offset <span style="color:#ae81ff">8</span>
+</span></span><span style="display:flex;"><span>        .cfi_offset 5, -8
+</span></span><span style="display:flex;"><span>        movl    %esp, %ebp
+</span></span><span style="display:flex;"><span>        .cfi_def_cfa_register <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>        subl    $24, %esp
+</span></span><span style="display:flex;"><span>        movl    %gs:20, %eax
+</span></span><span style="display:flex;"><span>        movl    %eax, -12<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>        xorl    %eax, %eax
+</span></span><span style="display:flex;"><span>        subl    $12, %esp
+</span></span><span style="display:flex;"><span>        leal    -20<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %eax  //eax<span style="color:#f92672">=</span>bar的首地址
+</span></span><span style="display:flex;"><span>        pushl   %eax  //bar.this压栈
+</span></span><span style="display:flex;"><span>        call    _ZN3BarC1Ev //call Bar::Bar<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span>        addl    $16, %esp
+</span></span><span style="display:flex;"><span>        movl    -16<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %eax
+</span></span><span style="display:flex;"><span>        testl   %eax, %eax
+</span></span><span style="display:flex;"><span>        je      .L6
+</span></span><span style="display:flex;"><span>        movl    -16<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %eax
+</span></span><span style="display:flex;"><span>        subl    $8, %esp
+</span></span><span style="display:flex;"><span>        pushl   %eax
+</span></span><span style="display:flex;"><span>        pushl   $_ZSt4cout
+</span></span><span style="display:flex;"><span>	//略
+</span></span></code></pre></div><p>Bar::Bar()的伪码如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>	Bar::Bar<span style="color:#f92672">(</span>&amp;bar<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>		Foo:Foo<span style="color:#f92672">(</span>&amp;bar<span style="color:#f92672">)</span>:
+</span></span><span style="display:flex;"><span>	<span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>通过分析代码，发现:如果一个没有任何construtor的class继承了一个带有default construtor的base class, 那么该derived class的cdefualt constrtor会被编译器合成出来，该defaulut constructor为nontrivial</p>
+<h4 id="4-带有virtual-function的class">4. &ldquo;带有virtual function&quot;的class</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#include&lt;iostream&gt;</span>
+</span></span><span style="display:flex;"><span>using namespace std;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>class Widget<span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>public:
+</span></span><span style="display:flex;"><span>        virtual void show<span style="color:#f92672">()=</span>0;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        int _w;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>class Bell:public Widget<span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>public:
+</span></span><span style="display:flex;"><span>        void show<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>                cout&lt;&lt;<span style="color:#e6db74">&#34;Bell Bell...&#34;</span><span style="color:#e6db74">&lt;&lt;endl;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        }
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">};
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">void te</span>st<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>        Bell b;
+</span></span><span style="display:flex;"><span>        Widget &amp;w <span style="color:#f92672">=</span>b;
+</span></span><span style="display:flex;"><span>        w.show<span style="color:#f92672">()</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>对应的汇编代码如下:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>_ZN6WidgetC2Ev:  //Widget::Widget<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span>.LFB1025:
+</span></span><span style="display:flex;"><span>        .cfi_startproc
+</span></span><span style="display:flex;"><span>        pushl   %ebp
+</span></span><span style="display:flex;"><span>        .cfi_def_cfa_offset <span style="color:#ae81ff">8</span>
+</span></span><span style="display:flex;"><span>        .cfi_offset 5, -8
+</span></span><span style="display:flex;"><span>        movl    %esp, %ebp
+</span></span><span style="display:flex;"><span>        .cfi_def_cfa_register <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>        movl    $_ZTV6Widget+8, %edx  //edx <span style="color:#f92672">=</span> vptr
+</span></span><span style="display:flex;"><span>        movl    8<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %eax  //eax<span style="color:#f92672">=</span>this
+</span></span><span style="display:flex;"><span>        movl    %edx, <span style="color:#f92672">(</span>%eax<span style="color:#f92672">)</span>  //<span style="color:#f92672">[</span>this<span style="color:#f92672">]=</span>vptr
+</span></span><span style="display:flex;"><span>        nop
+</span></span><span style="display:flex;"><span>        popl    %ebp
+</span></span><span style="display:flex;"><span>        .cfi_restore <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>        .cfi_def_cfa 4, <span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span>        ret
+</span></span><span style="display:flex;"><span>        .cfi_endproc
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>_ZN4BellC2Ev:  //Bell:Bell<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span>.LFB1027:
+</span></span><span style="display:flex;"><span>        .cfi_startproc
+</span></span><span style="display:flex;"><span>        pushl   %ebp
+</span></span><span style="display:flex;"><span>        .cfi_def_cfa_offset <span style="color:#ae81ff">8</span>
+</span></span><span style="display:flex;"><span>        .cfi_offset 5, -8
+</span></span><span style="display:flex;"><span>        movl    %esp, %ebp
+</span></span><span style="display:flex;"><span>        .cfi_def_cfa_register <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>        subl    $8, %esp
+</span></span><span style="display:flex;"><span>        movl    8<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %eax  //eax<span style="color:#f92672">=</span>this
+</span></span><span style="display:flex;"><span>        subl    $12, %esp //esp<span style="color:#f92672">=</span>esp-12
+</span></span><span style="display:flex;"><span>        pushl   %eax //this压栈
+</span></span><span style="display:flex;"><span>        call    _ZN6WidgetC2Ev  //调用base class的默认构造函数, Widget:Widget<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span>        addl    $16, %esp
+</span></span><span style="display:flex;"><span>        movl    $_ZTV4Bell+8, %edx //edx<span style="color:#f92672">=</span>vptr4Bell
+</span></span><span style="display:flex;"><span>        movl    8<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %eax //eax<span style="color:#f92672">=</span>this
+</span></span><span style="display:flex;"><span>        movl    %edx, <span style="color:#f92672">(</span>%eax<span style="color:#f92672">)</span> //<span style="color:#f92672">[</span>this<span style="color:#f92672">]=</span>vptr4Bell
+</span></span><span style="display:flex;"><span>        nop
+</span></span><span style="display:flex;"><span>        leave
+</span></span><span style="display:flex;"><span>        .cfi_restore <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>        .cfi_def_cfa 4, <span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span>        ret
+</span></span><span style="display:flex;"><span>        .cfi_endproc
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>_Z4testv:
+</span></span><span style="display:flex;"><span>.LFB1022:
+</span></span><span style="display:flex;"><span>        .cfi_startproc
+</span></span><span style="display:flex;"><span>        pushl   %ebp
+</span></span><span style="display:flex;"><span>        .cfi_def_cfa_offset <span style="color:#ae81ff">8</span>
+</span></span><span style="display:flex;"><span>        .cfi_offset 5, -8
+</span></span><span style="display:flex;"><span>        movl    %esp, %ebp
+</span></span><span style="display:flex;"><span>        .cfi_def_cfa_register <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>        subl    $24, %esp
+</span></span><span style="display:flex;"><span>        movl    %gs:20, %eax
+</span></span><span style="display:flex;"><span>        movl    %eax, -12<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>        xorl    %eax, %eax
+</span></span><span style="display:flex;"><span>        subl    $12, %esp
+</span></span><span style="display:flex;"><span>        leal    -20<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %eax  //eax<span style="color:#f92672">=</span>ebp-20,即eax<span style="color:#f92672">=</span>b.this
+</span></span><span style="display:flex;"><span>        pushl   %eax  //b首地址压栈
+</span></span><span style="display:flex;"><span>        call    _ZN4BellC1Ev //Bell::Bell（）
+</span></span><span style="display:flex;"><span>        addl    $16, %esp
+</span></span><span style="display:flex;"><span>        leal    -20<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %eax //eax<span style="color:#f92672">=</span>b.this
+</span></span><span style="display:flex;"><span>        movl    %eax, -24<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>  //Widget &amp;w<span style="color:#f92672">=</span>b
+</span></span><span style="display:flex;"><span>        movl    -24<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %eax  //eax<span style="color:#f92672">=</span>&amp;w
+</span></span><span style="display:flex;"><span>        movl    <span style="color:#f92672">(</span>%eax<span style="color:#f92672">)</span>, %eax  //eax<span style="color:#f92672">=</span>vptr4Bell
+</span></span><span style="display:flex;"><span>        movl    <span style="color:#f92672">(</span>%eax<span style="color:#f92672">)</span>, %eax //eax <span style="color:#f92672">=</span> vptr4Bell<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>        subl    $12, %esp
+</span></span><span style="display:flex;"><span>        pushl   -24<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>  //w.this压栈
+</span></span><span style="display:flex;"><span>        call    *%eax   //virtual机制，w.show<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span>        addl    $16, %esp
+</span></span><span style="display:flex;"><span>        nop
+</span></span><span style="display:flex;"><span>        movl    -12<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %eax
+</span></span><span style="display:flex;"><span>        xorl    %gs:20, %eax
+</span></span><span style="display:flex;"><span>        je      .L5
+</span></span><span style="display:flex;"><span>        call    __stack_chk_fail
+</span></span><span style="display:flex;"><span>.L5:
+</span></span><span style="display:flex;"><span>        leave
+</span></span><span style="display:flex;"><span>        .cfi_restore <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>        .cfi_def_cfa 4, <span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span>        ret
+</span></span><span style="display:flex;"><span>        .cfi_endproc
+</span></span></code></pre></div>
+    </article>
+
+    
+<ul class="article-share">
+</ul>
+
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer">
+          <a href="/posts/unpv2-p25/" data-toggle="tooltip" data-placement="top" title="IPC-标识符重用">&lt; Newer</a>
+      </li>
+      <li class="pager-older">
+        <a href="/posts/cpp-model-6/" data-toggle="tooltip" data-placement="top" title="C&#43;&#43;对象模型-Non-Staitc成员函数">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright"></div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-"><a href="" title=""></a></li>
+  </ul>
+  <div class="powerdby">
+    <a href="https://github.com/qinch" rel="me" target="_blank"><i class="fa-brands fa-github" style="font-size: 16px;"></i></a>&nbsp&nbsp
+    <a href="mailto:qinchaowhut@qq.com" target="_blank"><i class="fa-solid fa-envelope" style="font-size: 16px;"></i></a></li><br>
+    ©2015-2024 qinch | Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+      <script async src="https://www.googletagmanager.com/gtag/js?id=Toracking%20ID"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'Toracking ID');
+        }
+      </script>
+
+</body>
+</html>

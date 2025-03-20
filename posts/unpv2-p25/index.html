@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>IPC-标识符重用 - Just For Fun</title>
+  <meta property="og:title" content="IPC-标识符重用 - Just For Fun" />
+  <meta name="twitter:title" content="IPC-标识符重用 - Just For Fun" />
+  <meta name="description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+  <meta property="og:description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+  <meta name="twitter:description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+  <meta name="author" content=""/>
+  <meta property="og:site_name" content="Just For Fun" />
+  <meta property="og:url" content="https://qinch.github.io/posts/unpv2-p25/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.145.0">
+  <link rel="stylesheet" href="/css/style.css" media="all" />
+  <link rel="stylesheet" href="/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
+  <link rel="stylesheet" href="/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/css/custom.css" media="all" />
+
+  <script src="/js/script.js"></script>
+  <script src="/js/custom.js"></script>
+  <script defer src="/fontawesome/all.min.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/">Just For Fun</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-categories"><a href="/categories/" title="Categories">Categories</a></li>
+      <li class="site-navi-item-archives"><a href="/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">IPC-标识符重用</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>Apr 7, 2017</time></li>
+        <li class="article-meta-categories">
+        </li>
+      </ul>
+      
+      <h5 id="1槽位使用情况序列号">1,槽位使用情况序列号</h5>
+<p>ipc_perm结构中含有一个名为seq的变量，是一个槽位使用情况序列号。该变量是一个由内核为系统中每个潜在的IPC对象维持的计数器。每当删除一个IPC对象时，内核就递增相应槽位的使用情况序列号，若溢出则循环回0.</p>
+<p>简单理解就是: 存在ipc_perm[max]，当创建ipc对象时，在ipc_perm数组中查找第一个ipc_perm元素为空，记为ipc_perm[i].当删除ipc_perm[i]对应的ipc时，ipc_perm[i].seq++,下次再次创建ipc对象时，假设ipc_perm[i]元素为空，则返回ipc id为i+ipc_perm[i].seq*max.
+注：槽位使用情况序列号是一个跨进程保持的内核变量。</p>
+<h4 id="2示例代码">2，示例代码</h4>
+<h5 id="21-创建ipc然后立即删除该ipc">2.1 创建ipc，然后立即删除该ipc</h5>
+<p>对应的源码：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>/*************************************************************************
+</span></span><span style="display:flex;"><span> &gt; File Name: p26_1.c
+</span></span><span style="display:flex;"><span> &gt; Author: qinchao
+</span></span><span style="display:flex;"><span> &gt; Mail: 1187620726@qq.com
+</span></span><span style="display:flex;"><span> &gt; Created Date:2017-04-07 Time:11:02:25.
+</span></span><span style="display:flex;"><span> ************************************************************************/
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#include&lt;stdio.h&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#include&lt;sys/msg.h&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#include&lt;sys/types.h&gt;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>int main<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>        int i,msgid;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span><span style="color:#f92672">(</span>i<span style="color:#f92672">=</span>0;i&lt;10;i++<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>                msgid<span style="color:#f92672">=</span>msgget<span style="color:#f92672">(</span>IPC_PRIVATE,0666|IPC_CREAT<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span>                printf<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;msgid=%d\n&#34;</span>,msgid<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span>                msgctl<span style="color:#f92672">(</span>msgid,IPC_RMID,NULL<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> 0;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>对应的结果：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>bogon:unp qinchao$ gcc p26_1.c  -o p26_1
+</span></span><span style="display:flex;"><span>bogon:unp qinchao$ ./p26_1 
+</span></span><span style="display:flex;"><span>msgid<span style="color:#f92672">=</span><span style="color:#ae81ff">196608</span>
+</span></span><span style="display:flex;"><span>msgid<span style="color:#f92672">=</span><span style="color:#ae81ff">262144</span>
+</span></span><span style="display:flex;"><span>msgid<span style="color:#f92672">=</span><span style="color:#ae81ff">327680</span>
+</span></span><span style="display:flex;"><span>msgid<span style="color:#f92672">=</span><span style="color:#ae81ff">393216</span>
+</span></span><span style="display:flex;"><span>msgid<span style="color:#f92672">=</span><span style="color:#ae81ff">458752</span>
+</span></span><span style="display:flex;"><span>msgid<span style="color:#f92672">=</span><span style="color:#ae81ff">524288</span>
+</span></span><span style="display:flex;"><span>msgid<span style="color:#f92672">=</span><span style="color:#ae81ff">589824</span>
+</span></span><span style="display:flex;"><span>msgid<span style="color:#f92672">=</span><span style="color:#ae81ff">655360</span>
+</span></span><span style="display:flex;"><span>msgid<span style="color:#f92672">=</span><span style="color:#ae81ff">720896</span>
+</span></span><span style="display:flex;"><span>msgid<span style="color:#f92672">=</span><span style="color:#ae81ff">786432</span>
+</span></span><span style="display:flex;"><span>bogon:unp qinchao$ 
+</span></span></code></pre></div><p>即：创建ipc1之后，ipc_perm[0]维护该ipc对象的相关信息，然后删除ipc1，ipc_perm[0].seq++;当创建ipc2时，仍然是ipc_perm[0]维护ipc2相关信息。</p>
+<h5 id="22创建ipc之后最后统一删除ipc">2.2创建ipc之后，最后统一删除ipc</h5>
+<p>对应源码：即创建10个ipc，最后统一删除，每个ipc对应ipc_perm[0],ipc_perm[1],&hellip;,ipc_perm[9].</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>/*************************************************************************
+</span></span><span style="display:flex;"><span> &gt; File Name: p26.c
+</span></span><span style="display:flex;"><span> &gt; Author: qinchao
+</span></span><span style="display:flex;"><span> &gt; Mail: 1187620726@qq.com
+</span></span><span style="display:flex;"><span> &gt; Created Date:2017-04-07 Time:11:02:25.
+</span></span><span style="display:flex;"><span> ************************************************************************/
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#include&lt;stdio.h&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#include&lt;sys/msg.h&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#include&lt;sys/types.h&gt;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>int main<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>        int i,msgid<span style="color:#f92672">[</span>10<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span><span style="color:#f92672">(</span>i<span style="color:#f92672">=</span>0;i&lt;10;i++<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>                msgid<span style="color:#f92672">[</span>i<span style="color:#f92672">]=</span>msgget<span style="color:#f92672">(</span>IPC_PRIVATE,0666|IPC_CREAT<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span>                printf<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;msgid=%d\n&#34;</span>,msgid<span style="color:#f92672">[</span>i<span style="color:#f92672">])</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span><span style="color:#f92672">(</span>i<span style="color:#f92672">=</span>0;i&lt;10;i++<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>                msgctl<span style="color:#f92672">(</span>msgid<span style="color:#f92672">[</span>i<span style="color:#f92672">]</span>,IPC_RMID,NULL<span style="color:#f92672">)</span>;//ipc_perm<span style="color:#f92672">[</span>i<span style="color:#f92672">]</span>.seq++;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> 0;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>对应结果（为了便于观察，在2.1执行完之后，sudo rebot系统）:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>bogon:unp qinchao$ ./p26
+</span></span><span style="display:flex;"><span>msgid<span style="color:#f92672">=</span><span style="color:#ae81ff">65536</span>
+</span></span><span style="display:flex;"><span>msgid<span style="color:#f92672">=</span><span style="color:#ae81ff">65537</span>
+</span></span><span style="display:flex;"><span>msgid<span style="color:#f92672">=</span><span style="color:#ae81ff">65538</span>
+</span></span><span style="display:flex;"><span>msgid<span style="color:#f92672">=</span><span style="color:#ae81ff">65539</span>
+</span></span><span style="display:flex;"><span>msgid<span style="color:#f92672">=</span><span style="color:#ae81ff">65540</span>
+</span></span><span style="display:flex;"><span>msgid<span style="color:#f92672">=</span><span style="color:#ae81ff">65541</span>
+</span></span><span style="display:flex;"><span>msgid<span style="color:#f92672">=</span><span style="color:#ae81ff">65542</span>
+</span></span><span style="display:flex;"><span>msgid<span style="color:#f92672">=</span><span style="color:#ae81ff">65543</span>
+</span></span><span style="display:flex;"><span>msgid<span style="color:#f92672">=</span><span style="color:#ae81ff">65544</span>
+</span></span><span style="display:flex;"><span>msgid<span style="color:#f92672">=</span><span style="color:#ae81ff">65545</span>
+</span></span><span style="display:flex;"><span>bogon:unp qinchao$ ./p26
+</span></span><span style="display:flex;"><span>msgid<span style="color:#f92672">=</span><span style="color:#ae81ff">131072</span>
+</span></span><span style="display:flex;"><span>msgid<span style="color:#f92672">=</span><span style="color:#ae81ff">131073</span>
+</span></span><span style="display:flex;"><span>msgid<span style="color:#f92672">=</span><span style="color:#ae81ff">131074</span>
+</span></span><span style="display:flex;"><span>msgid<span style="color:#f92672">=</span><span style="color:#ae81ff">131075</span>
+</span></span><span style="display:flex;"><span>msgid<span style="color:#f92672">=</span><span style="color:#ae81ff">131076</span>
+</span></span><span style="display:flex;"><span>msgid<span style="color:#f92672">=</span><span style="color:#ae81ff">131077</span>
+</span></span><span style="display:flex;"><span>msgid<span style="color:#f92672">=</span><span style="color:#ae81ff">131078</span>
+</span></span><span style="display:flex;"><span>msgid<span style="color:#f92672">=</span><span style="color:#ae81ff">131079</span>
+</span></span><span style="display:flex;"><span>msgid<span style="color:#f92672">=</span><span style="color:#ae81ff">131080</span>
+</span></span><span style="display:flex;"><span>msgid<span style="color:#f92672">=</span><span style="color:#ae81ff">131081</span>
+</span></span><span style="display:flex;"><span>bogon:unp qinchao$ 
+</span></span></code></pre></div><h5 id="23-创建ipc1立即删除然后创建ipc2和ipc3">2.3 创建ipc1,立即删除，然后创建ipc2,和ipc3</h5>
+<p>对应源码（sudo reboot）：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>/*************************************************************************
+</span></span><span style="display:flex;"><span> &gt; File Name: p26_2.c
+</span></span><span style="display:flex;"><span> &gt; Author: qinchao
+</span></span><span style="display:flex;"><span> &gt; Mail: 1187620726@qq.com
+</span></span><span style="display:flex;"><span> &gt; Created Date:2017-04-07 Time:11:02:25.
+</span></span><span style="display:flex;"><span> ************************************************************************/
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#include&lt;stdio.h&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#include&lt;sys/msg.h&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#include&lt;sys/types.h&gt;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>int main<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>        int i,msgid<span style="color:#f92672">[</span>2<span style="color:#f92672">]</span>;
+</span></span><span style="display:flex;"><span>        msgid<span style="color:#f92672">[</span>0<span style="color:#f92672">]=</span>msgget<span style="color:#f92672">(</span>IPC_PRIVATE,0666|IPC_CREAT<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span>        printf<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;msgid=%d\n&#34;</span>,msgid<span style="color:#f92672">[</span>0<span style="color:#f92672">])</span>;
+</span></span><span style="display:flex;"><span>        msgctl<span style="color:#f92672">(</span>msgid<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span>,IPC_RMID,NULL<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span>        ／／ipc_perm<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span>.seq++;
+</span></span><span style="display:flex;"><span>        //再次创建ipc1,ipc2
+</span></span><span style="display:flex;"><span>        msgid<span style="color:#f92672">[</span>0<span style="color:#f92672">]=</span>msgget<span style="color:#f92672">(</span>IPC_PRIVATE,0666|IPC_CREAT<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span>        msgid<span style="color:#f92672">[</span>1<span style="color:#f92672">]=</span>msgget<span style="color:#f92672">(</span>IPC_PRIVATE,0666|IPC_CREAT<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span>        printf<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;msgid=%d\n&#34;</span>,msgid<span style="color:#f92672">[</span>0<span style="color:#f92672">])</span>;
+</span></span><span style="display:flex;"><span>        printf<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;msgid=%d\n&#34;</span>,msgid<span style="color:#f92672">[</span>1<span style="color:#f92672">])</span>;
+</span></span><span style="display:flex;"><span>        msgctl<span style="color:#f92672">(</span>msgid<span style="color:#f92672">[</span>0<span style="color:#f92672">]</span>,IPC_RMID,NULL<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span>        msgctl<span style="color:#f92672">(</span>msgid<span style="color:#f92672">[</span>1<span style="color:#f92672">]</span>,IPC_RMID,NULL<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> 0;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>对应结果：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>bogon:unp qinchao$ ./p26_2 
+</span></span><span style="display:flex;"><span>msgid<span style="color:#f92672">=</span><span style="color:#ae81ff">65536</span>
+</span></span><span style="display:flex;"><span>msgid<span style="color:#f92672">=</span><span style="color:#ae81ff">131072</span>
+</span></span><span style="display:flex;"><span>msgid<span style="color:#f92672">=</span><span style="color:#ae81ff">65537</span>
+</span></span><span style="display:flex;"><span>bogon:unp qinchao$  
+</span></span></code></pre></div><h5 id="参考文献">,参考文献</h5>
+<p>《UNIX网络编程 卷2:进程间通信》</p>
+    </article>
+
+    
+<ul class="article-share">
+</ul>
+
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer">
+          <a href="/posts/civetweb/" data-toggle="tooltip" data-placement="top" title="civetweb支持mbedtls">&lt; Newer</a>
+      </li>
+      <li class="pager-older">
+        <a href="/posts/cpp-model-8/" data-toggle="tooltip" data-placement="top" title="C&#43;&#43;对象模型-Default Constructor">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright"></div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-"><a href="" title=""></a></li>
+  </ul>
+  <div class="powerdby">
+    <a href="https://github.com/qinch" rel="me" target="_blank"><i class="fa-brands fa-github" style="font-size: 16px;"></i></a>&nbsp&nbsp
+    <a href="mailto:qinchaowhut@qq.com" target="_blank"><i class="fa-solid fa-envelope" style="font-size: 16px;"></i></a></li><br>
+    ©2015-2024 qinch | Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+      <script async src="https://www.googletagmanager.com/gtag/js?id=Toracking%20ID"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'Toracking ID');
+        }
+      </script>
+
+</body>
+</html>

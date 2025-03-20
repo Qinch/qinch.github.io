@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Categories on Just For Fun</title>
+    <link>https://qinch.github.io/categories/</link>
+    <description>Recent content in Categories on Just For Fun</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <lastBuildDate>Sun, 05 May 2024 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://qinch.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Linux Kernel</title>
+      <link>https://qinch.github.io/categories/linux-kernel/</link>
+      <pubDate>Sun, 05 May 2024 00:00:00 +0000</pubDate>
+      <guid>https://qinch.github.io/categories/linux-kernel/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>K8s</title>
+      <link>https://qinch.github.io/categories/k8s/</link>
+      <pubDate>Fri, 01 Oct 2021 00:00:00 +0000</pubDate>
+      <guid>https://qinch.github.io/categories/k8s/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Civetweb</title>
+      <link>https://qinch.github.io/categories/civetweb/</link>
+      <pubDate>Fri, 31 Jan 2020 00:00:00 +0000</pubDate>
+      <guid>https://qinch.github.io/categories/civetweb/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Unpv2</title>
+      <link>https://qinch.github.io/categories/unpv2/</link>
+      <pubDate>Fri, 07 Apr 2017 00:00:00 +0000</pubDate>
+      <guid>https://qinch.github.io/categories/unpv2/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Cpp2asm</title>
+      <link>https://qinch.github.io/categories/cpp2asm/</link>
+      <pubDate>Sat, 09 Apr 2016 00:00:00 +0000</pubDate>
+      <guid>https://qinch.github.io/categories/cpp2asm/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Apue</title>
+      <link>https://qinch.github.io/categories/apue/</link>
+      <pubDate>Wed, 23 Dec 2015 00:00:00 +0000</pubDate>
+      <guid>https://qinch.github.io/categories/apue/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Cpp</title>
+      <link>https://qinch.github.io/categories/cpp/</link>
+      <pubDate>Sun, 01 Nov 2015 00:00:00 +0000</pubDate>
+      <guid>https://qinch.github.io/categories/cpp/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Shell</title>
+      <link>https://qinch.github.io/categories/shell/</link>
+      <pubDate>Sun, 21 Jun 2015 00:00:00 +0000</pubDate>
+      <guid>https://qinch.github.io/categories/shell/</guid>
+      <description></description>
+    </item>
+  </channel>
+</rss>

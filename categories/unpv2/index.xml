@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Unpv2 on Just For Fun</title>
+    <link>https://qinch.github.io/categories/unpv2/</link>
+    <description>Recent content in Unpv2 on Just For Fun</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <lastBuildDate>Fri, 07 Apr 2017 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://qinch.github.io/categories/unpv2/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>IPC-标识符重用</title>
+      <link>https://qinch.github.io/posts/unpv2-p25/</link>
+      <pubDate>Fri, 07 Apr 2017 00:00:00 +0000</pubDate>
+      <guid>https://qinch.github.io/posts/unpv2-p25/</guid>
+      <description>&lt;h5 id=&#34;1槽位使用情况序列号&#34;&gt;1,槽位使用情况序列号&lt;/h5&gt;&#xA;&lt;p&gt;ipc_perm结构中含有一个名为seq的变量，是一个槽位使用情况序列号。该变量是一个由内核为系统中每个潜在的IPC对象维持的计数器。每当删除一个IPC对象时，内核就递增相应槽位的使用情况序列号，若溢出则循环回0.&lt;/p&gt;&#xA;&lt;p&gt;简单理解就是: 存在ipc_perm[max]，当创建ipc对象时，在ipc_perm数组中查找第一个ipc_perm元素为空，记为ipc_perm[i].当删除ipc_perm[i]对应的ipc时，ipc_perm[i].seq++,下次再次创建ipc对象时，假设ipc_perm[i]元素为空，则返回ipc id为i+ipc_perm[i].seq*max.&#xA;注：槽位使用情况序列号是一个跨进程保持的内核变量。&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>函数调用过程: 结构体变量作为函数参数和返回值 - Just For Fun</title>
+  <meta property="og:title" content="函数调用过程: 结构体变量作为函数参数和返回值 - Just For Fun" />
+  <meta name="twitter:title" content="函数调用过程: 结构体变量作为函数参数和返回值 - Just For Fun" />
+  <meta name="description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+  <meta property="og:description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+  <meta name="twitter:description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+  <meta name="author" content=""/>
+  <meta property="og:site_name" content="Just For Fun" />
+  <meta property="og:url" content="https://qinch.github.io/posts/cpp-model-1/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.145.0">
+  <link rel="stylesheet" href="/css/style.css" media="all" />
+  <link rel="stylesheet" href="/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
+  <link rel="stylesheet" href="/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/css/custom.css" media="all" />
+
+  <script src="/js/script.js"></script>
+  <script src="/js/custom.js"></script>
+  <script defer src="/fontawesome/all.min.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/">Just For Fun</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-categories"><a href="/categories/" title="Categories">Categories</a></li>
+      <li class="site-navi-item-archives"><a href="/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">函数调用过程: 结构体变量作为函数参数和返回值</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>Apr 6, 2016</time></li>
+        <li class="article-meta-categories">
+        </li>
+      </ul>
+      
+      <h5 id="开发环境">开发环境</h5>
+<ul>
+<li>Ubuntu 14.04(32bits)</li>
+<li>GCC</li>
+<li>编辑器 Cmd Markdown</li>
+<li>画图工具 Processon</li>
+</ul>
+<h5 id="1结构体类型作为函数参数和返回值">1,结构体类型作为函数参数和返回值</h5>
+<p><a href="http://chinchao.xyz/2016/04/05/cpp-model-0/">上一节</a> 简单介绍了基本的函数调用过程，即栈帧。本节介绍结构体类型作为函数参数和返回值的情况。</p>
+<h6 id="11结构体变量的内存布局">1.1结构体变量的内存布局</h6>
+<p>结构体变量的数据成员之间的内存空间是连续的，结构体中的每个成员都是通过相对于结构体变量首地址的偏移量来访问。假设有如下结构体：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>struct test<span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>	char k;
+</span></span><span style="display:flex;"><span>	int i;
+</span></span><span style="display:flex;"><span>	short j;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>;
+</span></span><span style="display:flex;"><span>如果想获得k变量的偏移量可以通过如下方式：
+</span></span><span style="display:flex;"><span>struct test* p<span style="color:#f92672">=</span>NULL;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">(</span>unsigned int<span style="color:#f92672">)</span>&amp;<span style="color:#f92672">(</span>p-&gt;k<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span>等价于： <span style="color:#f92672">(</span>unsigned<span style="color:#f92672">)(</span>&amp;<span style="color:#f92672">(((</span>struct test*<span style="color:#f92672">)</span>0<span style="color:#f92672">)</span>-&gt;k<span style="color:#f92672">))</span>;
+</span></span><span style="display:flex;"><span>或者等价于:
+</span></span><span style="display:flex;"><span>struct test x;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">(</span>unsigned int<span style="color:#f92672">)((</span>unsigned char<span style="color:#f92672">)</span>&amp;<span style="color:#f92672">(</span>x.k<span style="color:#f92672">)</span>-<span style="color:#f92672">(</span>unsigned char<span style="color:#f92672">)</span>&amp;<span style="color:#f92672">(</span>x<span style="color:#f92672">))</span>;
+</span></span></code></pre></div><p>struct test x;其中x结构体变量的内存布局为：
+其中空白表示该字节为对齐字节，即没有用到；i0表示i变量的第一个字节，以此类推。
+<img src="/img/c1-0.png" alt="struct"></p>
+<h5 id="12结构体作为函数参数和返回值">1.2结构体作为函数参数和返回值</h5>
+<p>简单的说，当结构体变量作为函数参数时，将实参t的内存复制“一份”，即x，然后压栈。当结构体作为函数返回值时，是将函数返回值赋给的结构体变量tx的首地址压栈,然后执行fun函数时，对tx进行赋值。
+C语言代码如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#include&lt;stdio.h&gt;</span>
+</span></span><span style="display:flex;"><span>typedef struct test<span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>	char k;
+</span></span><span style="display:flex;"><span>	int i;
+</span></span><span style="display:flex;"><span>	short j;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>test;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>test fun<span style="color:#f92672">(</span>test x<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>	x.k<span style="color:#f92672">=</span>1;
+</span></span><span style="display:flex;"><span>	x.i<span style="color:#f92672">=</span>2;
+</span></span><span style="display:flex;"><span>	x.j<span style="color:#f92672">=</span>3;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> x;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>int main<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>	test t;
+</span></span><span style="display:flex;"><span>	t.k<span style="color:#f92672">=</span>3;
+</span></span><span style="display:flex;"><span>	t.i<span style="color:#f92672">=</span>2;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	t.j<span style="color:#f92672">=</span>1;
+</span></span><span style="display:flex;"><span>	test tx<span style="color:#f92672">=</span>fun<span style="color:#f92672">(</span>t<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span>	printf<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;%d,%d,%d;%d,%d,%d\n&#34;</span>,t.k,t.i,t.j,tx.k,tx.i,tx.j<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>对应的汇编代码如下：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>	.file	<span style="color:#e6db74">&#34;test.c&#34;</span>
+</span></span><span style="display:flex;"><span>	.text
+</span></span><span style="display:flex;"><span>	.globl	fun
+</span></span><span style="display:flex;"><span>	.type	fun, @function
+</span></span><span style="display:flex;"><span>fun:
+</span></span><span style="display:flex;"><span>.LFB0:
+</span></span><span style="display:flex;"><span>	.cfi_startproc
+</span></span><span style="display:flex;"><span>	pushl	%ebp //ebp压栈，即old ebp
+</span></span><span style="display:flex;"><span>	.cfi_def_cfa_offset <span style="color:#ae81ff">8</span>
+</span></span><span style="display:flex;"><span>	.cfi_offset 5, -8
+</span></span><span style="display:flex;"><span>	movl	%esp, %ebp  //ebp<span style="color:#f92672">=</span>esp
+</span></span><span style="display:flex;"><span>	.cfi_def_cfa_register <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>	movb	$1, 12<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>  //ebp+12即为形参x的首地址,然后对x.k<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>	movl	$2, 16<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span> //ebp+16即为x。i的首地址，即为x.i<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>
+</span></span><span style="display:flex;"><span>	movw	$3, 20<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span> //ebp+20即为x.j的首地址，即为x.j<span style="color:#f92672">=</span><span style="color:#ae81ff">3</span>
+</span></span><span style="display:flex;"><span>	movl	8<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %eax //tx变量的首地址赋给eax
+</span></span><span style="display:flex;"><span>	movl	12<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %edx //ebp+12为形参x的首地址
+</span></span><span style="display:flex;"><span>	movl	%edx, <span style="color:#f92672">(</span>%eax<span style="color:#f92672">)</span> //将x<span style="color:#f92672">[</span>0,3<span style="color:#f92672">]</span>的四个字节赋给tx变量的tx<span style="color:#f92672">[</span>0,3<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>	movl	16<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %edx 
+</span></span><span style="display:flex;"><span>	movl	%edx, 4<span style="color:#f92672">(</span>%eax<span style="color:#f92672">)</span> //将x<span style="color:#f92672">[</span>4,7<span style="color:#f92672">]</span>的四个字节赋给tx变量的tx<span style="color:#f92672">[</span>4,7<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>	movl	20<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %edx
+</span></span><span style="display:flex;"><span>	movl	%edx, 8<span style="color:#f92672">(</span>%eax<span style="color:#f92672">)</span> //将x<span style="color:#f92672">[</span>8,11<span style="color:#f92672">]</span>的四个字节赋给tx变量的tx<span style="color:#f92672">[</span>8,11<span style="color:#f92672">]</span>，<span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>	至此，已经将x的12个bytes全部赋值给tx
+</span></span><span style="display:flex;"><span>	movl	8<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %eax //fun函数的返回值，即为tx变量的首地址
+</span></span><span style="display:flex;"><span>	popl	%ebp //ebp<span style="color:#f92672">=</span>old ebp;esp-<span style="color:#f92672">=</span><span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span>	.cfi_restore <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>	.cfi_def_cfa 4, <span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span>	ret	$4 //pop eip; esp<span style="color:#f92672">+=</span><span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span>	.cfi_endproc
+</span></span><span style="display:flex;"><span>.LFE0:
+</span></span><span style="display:flex;"><span>	.size	fun, .-fun
+</span></span><span style="display:flex;"><span>	.section	.rodata
+</span></span><span style="display:flex;"><span>.LC0:
+</span></span><span style="display:flex;"><span>	.string	<span style="color:#e6db74">&#34;%d,%d,%d;%d,%d,%d\n&#34;</span>
+</span></span><span style="display:flex;"><span>	.text
+</span></span><span style="display:flex;"><span>	.globl	main
+</span></span><span style="display:flex;"><span>	.type	main, @function
+</span></span><span style="display:flex;"><span>main:
+</span></span><span style="display:flex;"><span>.LFB1:
+</span></span><span style="display:flex;"><span>	.cfi_startproc
+</span></span><span style="display:flex;"><span>	leal	4<span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span>, %ecx
+</span></span><span style="display:flex;"><span>	.cfi_def_cfa 1, <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>	andl	$-16, %esp
+</span></span><span style="display:flex;"><span>	pushl	-4<span style="color:#f92672">(</span>%ecx<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>	pushl	%ebp
+</span></span><span style="display:flex;"><span>	.cfi_escape 0x10,0x5,0x2,0x75,0
+</span></span><span style="display:flex;"><span>	movl	%esp, %ebp
+</span></span><span style="display:flex;"><span>	pushl	%edi
+</span></span><span style="display:flex;"><span>	pushl	%esi
+</span></span><span style="display:flex;"><span>	pushl	%ebx
+</span></span><span style="display:flex;"><span>	pushl	%ecx
+</span></span><span style="display:flex;"><span>	.cfi_escape 0xf,0x3,0x75,0x70,0x6
+</span></span><span style="display:flex;"><span>	.cfi_escape 0x10,0x7,0x2,0x75,0x7c
+</span></span><span style="display:flex;"><span>	.cfi_escape 0x10,0x6,0x2,0x75,0x78
+</span></span><span style="display:flex;"><span>	.cfi_escape 0x10,0x3,0x2,0x75,0x74
+</span></span><span style="display:flex;"><span>	subl	$72, %esp
+</span></span><span style="display:flex;"><span>	movb	$3, -48<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>  // ebp-48为t.k变量的首地址
+</span></span><span style="display:flex;"><span>	movl	$2, -44<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>  //ebp-44为t.i变量的首地址
+</span></span><span style="display:flex;"><span>	movw	$1, -40<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span> //ebp-40为t.j变量的首地址
+</span></span><span style="display:flex;"><span>	leal	-36<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %eax  //eax<span style="color:#f92672">=</span>ebp-36  为tx变量的首地址
+</span></span><span style="display:flex;"><span>	movl	-48<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %edx  //edx<span style="color:#f92672">=[</span>ebp-48<span style="color:#f92672">]</span> 即取ebp-48为首地址的4个bytes
+</span></span><span style="display:flex;"><span>	movl	%edx, 4<span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span>  //<span style="color:#f92672">[</span>esp+4<span style="color:#f92672">]=</span>edx
+</span></span><span style="display:flex;"><span>	movl	-44<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %edx //edx<span style="color:#f92672">=[</span>ebp-44<span style="color:#f92672">]</span> 即取ebp-44为首地址的4个bytes
+</span></span><span style="display:flex;"><span>	movl	%edx, 8<span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span>  //<span style="color:#f92672">[</span>esp+8<span style="color:#f92672">]=</span>edx
+</span></span><span style="display:flex;"><span>	movl	-40<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %edx //edx<span style="color:#f92672">=[</span>ebp-40<span style="color:#f92672">]</span> 即取ebp-40为首地址的4个bytes
+</span></span><span style="display:flex;"><span>	movl	%edx, 12<span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span> //<span style="color:#f92672">[</span>esp+12<span style="color:#f92672">]=</span>edx;至此，t变量的12个bytes作为函数实参均已压栈
+</span></span><span style="display:flex;"><span>	movl	%eax, <span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span> //将tx变量的首地址压栈，然后直接将返回值存入该地址
+</span></span><span style="display:flex;"><span>	call	fun
+</span></span><span style="display:flex;"><span>	subl	$4, %esp //esp-<span style="color:#f92672">=</span><span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span>	movzwl	-28<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %eax //0扩展的字<span style="color:#f92672">(</span>即t.j<span style="color:#f92672">)</span>mov到双字，即4bytes,
+</span></span><span style="display:flex;"><span>	movswl	%ax, %edi //低地址的两个bytes赋值给edi,做有符号扩展
+</span></span><span style="display:flex;"><span>	movl	-32<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %esi //esi<span style="color:#f92672">=</span>t.i
+</span></span><span style="display:flex;"><span>	movzbl	-36<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %eax //t.k 从1个字节0扩展至双字，即四个字节
+</span></span><span style="display:flex;"><span>	movsbl	%al, %ebx //eax寄存器的第一个字节有符号扩展至ebx四个字节，后边tx的类似，略
+</span></span><span style="display:flex;"><span>	movzwl	-40<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %eax 
+</span></span><span style="display:flex;"><span>	movswl	%ax, %ecx
+</span></span><span style="display:flex;"><span>	movl	-44<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %edx
+</span></span><span style="display:flex;"><span>	movzbl	-48<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %eax
+</span></span><span style="display:flex;"><span>	movsbl	%al, %eax
+</span></span><span style="display:flex;"><span>	movl	%edi, 24<span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>	movl	%esi, 20<span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>	movl	%ebx, 16<span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>	movl	%ecx, 12<span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>	movl	%edx, 8<span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>	movl	%eax, 4<span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>	movl	$.LC0, <span style="color:#f92672">(</span>%esp<span style="color:#f92672">)</span> // printf中类似于<span style="color:#e6db74">&#34;%d%d&#34;</span>的字符串的首地址压栈
+</span></span><span style="display:flex;"><span>	call	printf //调用printf函数
+</span></span><span style="display:flex;"><span>	leal	-16<span style="color:#f92672">(</span>%ebp<span style="color:#f92672">)</span>, %esp
+</span></span><span style="display:flex;"><span>	popl	%ecx
+</span></span><span style="display:flex;"><span>	.cfi_restore <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>	.cfi_def_cfa 1, <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>	popl	%ebx
+</span></span><span style="display:flex;"><span>	.cfi_restore <span style="color:#ae81ff">3</span>
+</span></span><span style="display:flex;"><span>	popl	%esi
+</span></span><span style="display:flex;"><span>	.cfi_restore <span style="color:#ae81ff">6</span>
+</span></span><span style="display:flex;"><span>	popl	%edi
+</span></span><span style="display:flex;"><span>	.cfi_restore <span style="color:#ae81ff">7</span>
+</span></span><span style="display:flex;"><span>	popl	%ebp
+</span></span><span style="display:flex;"><span>	.cfi_restore <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>	leal	-4<span style="color:#f92672">(</span>%ecx<span style="color:#f92672">)</span>, %esp
+</span></span><span style="display:flex;"><span>	.cfi_def_cfa 4, <span style="color:#ae81ff">4</span>
+</span></span><span style="display:flex;"><span>	ret
+</span></span><span style="display:flex;"><span>	.cfi_endproc
+</span></span><span style="display:flex;"><span>.LFE1:
+</span></span><span style="display:flex;"><span>	.size	main, .-main
+</span></span><span style="display:flex;"><span>	.ident	<span style="color:#e6db74">&#34;GCC: (Ubuntu 4.8.2-19ubuntu1) 4.8.2&#34;</span>
+</span></span><span style="display:flex;"><span>	.section	.note.GNU-stack,<span style="color:#e6db74">&#34;&#34;</span>,@progbits
+</span></span></code></pre></div><p>通过阅读以上汇编代码，我们知道，当结构体作为函数返回值时，其等价形式为(即将返回值赋给的变量的首地址作为函数参数传递给函数):</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#include&lt;stdio.h&gt;</span>
+</span></span><span style="display:flex;"><span>typedef struct test<span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>	char k;
+</span></span><span style="display:flex;"><span>	int i;
+</span></span><span style="display:flex;"><span>	short j;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>test;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>void fun<span style="color:#f92672">(</span>test x,test* p<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>	x.k<span style="color:#f92672">=</span>1;
+</span></span><span style="display:flex;"><span>	x.i<span style="color:#f92672">=</span>2;
+</span></span><span style="display:flex;"><span>	x.j<span style="color:#f92672">=</span>3;
+</span></span><span style="display:flex;"><span>	
+</span></span><span style="display:flex;"><span>	p-&gt;k<span style="color:#f92672">=</span>x.k;
+</span></span><span style="display:flex;"><span>	p-&gt;i<span style="color:#f92672">=</span>x.i;
+</span></span><span style="display:flex;"><span>	p-&gt;j<span style="color:#f92672">=</span>x.j;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>int main<span style="color:#f92672">()</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>	test t;
+</span></span><span style="display:flex;"><span>	t.k<span style="color:#f92672">=</span>3;
+</span></span><span style="display:flex;"><span>	t.i<span style="color:#f92672">=</span>2;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	t.j<span style="color:#f92672">=</span>1;
+</span></span><span style="display:flex;"><span>	test tx;
+</span></span><span style="display:flex;"><span>	fun<span style="color:#f92672">(</span>t,&amp;tx<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span>	printf<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;%d,%d,%d;%d,%d,%d\n&#34;</span>,t.k,t.i,t.j,tx.k,tx.i,tx.j<span style="color:#f92672">)</span>;
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>当执行fun函数时，其栈帧结构如下：
+<img src="/img/c1-1.png" alt="stack"></p>
+    </article>
+
+    
+<ul class="article-share">
+</ul>
+
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer">
+          <a href="/posts/cpp-model-2/" data-toggle="tooltip" data-placement="top" title="动态/静态数组内存布局">&lt; Newer</a>
+      </li>
+      <li class="pager-older">
+        <a href="/posts/cpp-model-0/" data-toggle="tooltip" data-placement="top" title="函数调用过程(栈帧)">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright"></div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-"><a href="" title=""></a></li>
+  </ul>
+  <div class="powerdby">
+    <a href="https://github.com/qinch" rel="me" target="_blank"><i class="fa-brands fa-github" style="font-size: 16px;"></i></a>&nbsp&nbsp
+    <a href="mailto:qinchaowhut@qq.com" target="_blank"><i class="fa-solid fa-envelope" style="font-size: 16px;"></i></a></li><br>
+    ©2015-2024 qinch | Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+      <script async src="https://www.googletagmanager.com/gtag/js?id=Toracking%20ID"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'Toracking ID');
+        }
+      </script>
+
+</body>
+</html>

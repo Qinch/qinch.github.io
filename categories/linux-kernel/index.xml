@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Linux Kernel on Just For Fun</title>
+    <link>https://qinch.github.io/categories/linux-kernel/</link>
+    <description>Recent content in Linux Kernel on Just For Fun</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <lastBuildDate>Sun, 05 May 2024 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://qinch.github.io/categories/linux-kernel/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>跟着xv6学习OS Kernel</title>
+      <link>https://qinch.github.io/posts/xv6/</link>
+      <pubDate>Sun, 05 May 2024 00:00:00 +0000</pubDate>
+      <guid>https://qinch.github.io/posts/xv6/</guid>
+      <description>&lt;h3 id=&#34;1-xv6-book&#34;&gt;1. xv6 book&lt;/h3&gt;&#xA;&lt;h4 id=&#34;1-chapter1-os-interfaces&#34;&gt;1 chapter1: os interfaces&lt;/h4&gt;&#xA;&lt;p&gt;0, The system call &lt;code&gt;exec&lt;/code&gt; replaces the calling process&amp;rsquo;s memory but perserves its file table.&lt;/p&gt;&#xA;&lt;p&gt;1, It should be clear why it is a good idea that fork and exec are separate calls. Beacuse if they are separate, the shell can fork a child, use open, close, dup in the child to change the standard input and output file descriptors and then exec.&#xA;Two file descriptors share an offset if they were derived from the same original file descriptor by a sequence of fork and dup calls. Otherwise file descriptors do not share offsets, even if they resulted from open calls for the same file. （其实结合APUE看效果更好^-^）&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>
