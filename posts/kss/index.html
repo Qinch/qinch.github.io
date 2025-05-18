@@ -57,9 +57,9 @@
 <h2 id="11-虚拟机和容器的区别">1.1 虚拟机和容器的区别</h2>
 <ul>
 <li>每个虚拟机可以运行自己独立的操作系统(如下图所示：其中VM1 可以运行Ubuntu 24.04(Linux 6.8 内核)，另一个VM2可以运行CentOS 7（Linux 3.10.0 内核））。</li>
-<li>而所有容器都共享同一个宿主机内核（即：Host OS），容器镜像仅包含用户空间（比如库、工具），不包含Linux内核(即：如果一个容器化的应用依赖Linux 6.8内核的功能，则宿主机Linux内核必须≥6.8，否则无法运行；此外，一个x86_64架构编译的应用容器化之后，也无法直接在ARM机器上运行)。
-<img src="/img/kss_pic1.jpg" alt="图1"></li>
+<li>而所有容器都共享同一个宿主机内核（即：Host OS），容器镜像仅包含用户空间（比如库、工具），不包含Linux内核(即：如果一个容器化的应用依赖Linux 6.8内核的功能，则宿主机Linux内核必须≥6.8，否则无法运行；此外，一个x86_64架构编译的应用容器化之后，也无法直接在ARM机器上运行)。</li>
 </ul>
+<p><img src="/img/kss_pic1.jpg" alt="图1"></p>
 <h2 id="12-容器技术和docker的关系">1.2 容器技术和docker的关系</h2>
 <ul>
 <li>Docker只是容器技术的一个分支，Containerd也是一个运行容器的平台，可以作为docker的替代方案。</li>
@@ -145,11 +145,11 @@
 <li>运行allen镜像
 <ul>
 <li>docker run &ndash;name allen-container -p 8080:8080 -d qinchaowhut/allen:v1</li>
-<li>curl http://localhost:8080
-<img src="/img/kss_pic4.jpg" alt="图4"></li>
+<li>curl http://localhost:8080</li>
 </ul>
 </li>
 </ul>
+<p><img src="/img/kss_pic4.jpg" alt="图4"></p>
 <p>到这里我们已经介绍了容器/k8s相关的基本知识，接下来介绍k8s中的相关概念。</p>
 <h1 id="2-pod">2 Pod</h1>
 <h2 id="21-什么是pod">2.1 什么是Pod</h2>
@@ -182,9 +182,9 @@
 </span></span><span style="display:flex;"><span>   name: dnsutil         <span style="color:#75715e"># 容器的名称</span>
 </span></span><span style="display:flex;"><span>   command: <span style="color:#f92672">[</span><span style="color:#e6db74">&#34;sleep&#34;</span>, <span style="color:#e6db74">&#34;infinity&#34;</span><span style="color:#f92672">]</span>
 </span></span></code></pre></div><ul>
-<li>kubectl create -f dnsutils.yaml
-<img src="/img/kss_pic5.jpg" alt="图5"></li>
+<li>kubectl create -f dnsutils.yaml</li>
 </ul>
+<p><img src="/img/kss_pic5.jpg" alt="图5"></p>
 <h1 id="3-label">3 Label</h1>
 <h2 id="31-什么是label">3.1 什么是Label</h2>
 <p>Label（标签）是一个可以附加到K8s对象（比如Pod，Woker Node等）上的任意key-value对（一个Label就是一个key/value对，每个资源可以拥有多个Label, 并且可以随时进行添加和修改）， 然后通过Selector(标签选择器)来选择具有相应Label的K8s对象。</p>
@@ -248,8 +248,8 @@
 <li>在K8s集群中，可能多个Pod副本运行着相同的容器，此时客户端可能并不关心每个Pod的IP，而是期望通过一个单一不变的IP地址进行访问这些Pod（最终由Service后端的某一个Pod来提供服务）。</li>
 </ul>
 <h2 id="53-集群内部pod间通信">5.3 集群内部Pod间通信</h2>
-<p>Service通过标签选择器来指定哪些Pod属于同一个组（图中Service（test-svc）选择所有贴着“紫色的标签“的Pod），然后将连接到该Service的客户端链接通过负载均衡路由到某一个后端Pod。
-<img src="/img/kss_pic11.jpg" alt="图11"></p>
+<p>Service通过标签选择器来指定哪些Pod属于同一个组（图中Service（test-svc）选择所有贴着“紫色的标签“的Pod），然后将连接到该Service的客户端链接通过负载均衡路由到某一个后端Pod。</p>
+<p><img src="/img/kss_pic11.jpg" alt="图11"></p>
 <h3 id="531-创建一个service">5.3.1 创建一个Service</h3>
 <ul>
 <li>在测试环境，我们创建一个Service，svc.yaml文件对应的内容为：</li>
@@ -289,10 +289,10 @@
 <p>在创建了Service之后，我们并不需要查询该Service的IP, 然后再把IP配置给客户端pod。客户端Pod可以通过Service名称（FQDN）来访问服务。在下图中，我们登录之前创建dnsutils pod中的容器，可以通过通过nslookup查看test-svc.default.svc.cluster.local域名对应的IP(即：test-svc的Cluster IP)）。</p>
 </li>
 <li>
-<p>由于都在同一个namespace，我们可以在dnsutils容器中执行nslookup testsvc，查看Service的Cluster IP。
-<img src="/img/pic12.jpg" alt="图12"></p>
+<p>由于都在同一个namespace，我们可以在dnsutils容器中执行nslookup testsvc，查看Service的Cluster IP。</p>
 </li>
 </ul>
+<p><img src="/img/kss_pic12.jpg" alt="图12"></p>
 <h2 id="54-集群内部pod暴露给外部客户端">5.4 集群内部Pod暴露给外部客户端</h2>
 <p>接下来我们介绍一下集群外部客户端通过NodePort和LoadBalancer Service访问集群内部的服务。</p>
 <h3 id="541-nodeport-service">5.4.1 NodePort Service</h3>
@@ -319,9 +319,9 @@
 </span></span><span style="display:flex;"><span>    app: testing
 </span></span></code></pre></div><p><img src="/img/kss_pic15.jpg" alt="图15"></p>
 <ul>
-<li>通过nslookup查询test-svc-headless Service：
-<img src="/img/kss_pic16.jpg" alt="图16"></li>
+<li>通过nslookup查询test-svc-headless Service：</li>
 </ul>
+<p><img src="/img/kss_pic16.jpg" alt="图16"></p>
 <h1 id="6-deployment">6 Deployment</h1>
 <h2 id="61-什么是deployment">6.1 什么是Deployment</h2>
 <p>Deployment用于声明式地定义、部署和更新应用程序（Deployment由ReplicaSet组成（1:N），并且由ReplicaSet来创建和管理Pod）。</p>
@@ -375,9 +375,9 @@
 </ul>
 <p><img src="/img/kss_pic18.jpg" alt="图18"></p>
 <ul>
-<li>curl http://127.0.0.1:80
-<img src="/img/kss_pic19.jpg" alt="图19"></li>
+<li>curl http://127.0.0.1:80</li>
 </ul>
+<p><img src="/img/kss_pic19.jpg" alt="图19"></p>
 <h2 id="62-deployment的升级策略">6.2 Deployment的升级策略</h2>
 <ul>
 <li>RollingUpdate（默认的升级策略），即滚动更新，该策略会逐步创建新 Pod 并终止旧 Pod ，使应用程序在整个升级过程中都处于可用状态（注意：在升级过程中，会同时运行应用程序的多个版本）。</li>
@@ -389,18 +389,16 @@
 <li>可以通过修改Deployment中pod模板的镜像，来触发升级。</li>
 <li>通过kubectl set image deployment testqc nodejs=qinchaowhut/allen:v2 来修改Deployment的pod模板内的镜像(其中deployment的name为testqc, nodejs为容器name, qinchaowhut/allen:v2为镜像版本)</li>
 </ul>
-<p><img src="/img/kss_pic20.jpg" alt="图20">
-<img src="/img/kss_pic21.jpg" alt="图21"></p>
+<p><img src="/img/kss_pic20.jpg" alt="图20"></p>
+<p><img src="/img/kss_pic21.jpg" alt="图21"></p>
 <ul>
-<li>
-<p>升级完成之后，发送curl请求:
-<img src="/img/kss_pic22.jpg" alt="图22"></p>
-</li>
-<li>
-<p>查看升级前后ReplicaSet（通过下图, 可以看出旧的ReplicaSet仍然在保留）
-<img src="/img/kss_pic23.jpg" alt="图23"></p>
-</li>
+<li>升级完成之后，发送curl请求:</li>
 </ul>
+<p><img src="/img/kss_pic22.jpg" alt="图22"></p>
+<ul>
+<li>查看升级前后ReplicaSet（通过下图, 可以看出旧的ReplicaSet仍然在保留）</li>
+</ul>
+<p><img src="/img/kss_pic23.jpg" alt="图23"></p>
 <h2 id="65-控制rollingupdate速率">6.5 控制RollingUpdate速率</h2>
 <p>在Deployment的滚动升级期间，我门可以通过指定maxUnavailable和maxSurge来控制滚动更新过程。</p>
 <ul>
@@ -444,29 +442,29 @@
 </span></span><span style="display:flex;"><span>      app: testing
 </span></span></code></pre></div><p>具体的升级过程如下：</p>
 <ul>
-<li>Step0：在触发升级之前，存在3(replicas)个老的Pod同时运行，然后触发升级（执行命令kubectl set image deployment testqc nodejs=qinchaowhut/allen:v2 ）。</li>
+<li><code>Step0</code>：在触发升级之前，存在3(replicas)个老的Pod同时运行，然后触发升级（执行命令kubectl set image deployment testqc nodejs=qinchaowhut/allen:v2 ）。</li>
 </ul>
 <p><img src="/img/kss_pic24.jpg" alt="图24"></p>
 <ul>
-<li>Step1：当前存在3个的Pod正在运行（其中3个老的Pod），由于要求至少有3个Pod同时运行，所以不能删除任何一个老的Pod；由于要求最多可以有4个Pod同时运行，所以可以创建一个新的Pod，直到新的Pod创建完成（并且新的Pod可用），然后继续执行滚动升级。</li>
+<li><code>Step1</code>：当前存在3个的Pod正在运行（其中3个老的Pod），由于要求至少有3个Pod同时运行，所以不能删除任何一个老的Pod；由于要求最多可以有4个Pod同时运行，所以可以创建一个新的Pod，直到新的Pod创建完成（并且新的Pod可用），然后继续执行滚动升级。</li>
 </ul>
 <p><img src="/img/kss_pic25.jpg" alt="图25"></p>
 <ul>
-<li>Step2：当前存在4个Pod正在运行（其中3个老的Pod，一个新的Pod），由于要求至少3个Pod同时运行，所以我门可以删除一个老的Pod；由于要求最多可以4个Pod同时运行，所以再创建一个新的Pod，直到新的Pod创建完成（并且新的Pod可用），然后继续执行滚动升级。</li>
+<li><code>Step2</code>：当前存在4个Pod正在运行（其中3个老的Pod，一个新的Pod），由于要求至少3个Pod同时运行，所以我门可以删除一个老的Pod；由于要求最多可以4个Pod同时运行，所以再创建一个新的Pod，直到新的Pod创建完成（并且新的Pod可用），然后继续执行滚动升级。</li>
 </ul>
 <p><img src="/img/kss_pic26.jpg" alt="图26"></p>
 <ul>
-<li>Step3：当前存在4个Pod正在芸晴（其中2个老的Pod，两个新的Pod），由于要求至少3个Pod同时运行，所以可以删除一个老的Pod；由于要求最多可以可以4个Pod同时运行，所以可以再创建一个新的Pod，直到新的Pod创建完成（并且新的Pod可用），然后继续执行滚动升级。</li>
+<li><code>Step3</code>：当前存在4个Pod正在芸晴（其中2个老的Pod，两个新的Pod），由于要求至少3个Pod同时运行，所以可以删除一个老的Pod；由于要求最多可以可以4个Pod同时运行，所以可以再创建一个新的Pod，直到新的Pod创建完成（并且新的Pod可用），然后继续执行滚动升级。</li>
 </ul>
 <p><img src="/img/kss_pic27.jpg" alt="图27"></p>
 <ul>
-<li>Step4：当前存在4个Pod正在运行（其中1个老的Pod，3个新的Pod），由于要求至少3个Pod同时运行，所以可以删除一个老的Pod；当前存在3个新的Pod，已经满足期望的副本数量，这时候不再创建新的Pod。</li>
+<li><code>Step4</code>：当前存在4个Pod正在运行（其中1个老的Pod，3个新的Pod），由于要求至少3个Pod同时运行，所以可以删除一个老的Pod；当前存在3个新的Pod，已经满足期望的副本数量，这时候不再创建新的Pod。</li>
 </ul>
 <p><img src="/img/kss_pic28.jpg" alt="图28"></p>
 <ul>
-<li>Step5：滚动升级完成。
-<img src="/img/kss_pic29.jpg" alt="图29"></li>
+<li><code>Step5</code>：滚动升级完成。</li>
 </ul>
+<p><img src="/img/kss_pic29.jpg" alt="图29"></p>
 <h1 id="7-参考资料">7 参考资料</h1>
 <ul>
 <li>《kubernetes in action》</li>

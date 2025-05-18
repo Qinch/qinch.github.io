@@ -13,7 +13,7 @@
       <link>https://qinch.github.io/posts/kss/</link>
       <pubDate>Fri, 01 Oct 2021 00:00:00 +0000</pubDate>
       <guid>https://qinch.github.io/posts/kss/</guid>
-      <description>&lt;h1 id=&#34;1-简介&#34;&gt;1 简介&lt;/h1&gt;&#xA;&lt;h2 id=&#34;11-虚拟机和容器的区别&#34;&gt;1.1 虚拟机和容器的区别&lt;/h2&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;每个虚拟机可以运行自己独立的操作系统(如下图所示：其中VM1 可以运行Ubuntu 24.04(Linux 6.8 内核)，另一个VM2可以运行CentOS 7（Linux 3.10.0 内核））。&lt;/li&gt;&#xA;&lt;li&gt;而所有容器都共享同一个宿主机内核（即：Host OS），容器镜像仅包含用户空间（比如库、工具），不包含Linux内核(即：如果一个容器化的应用依赖Linux 6.8内核的功能，则宿主机Linux内核必须≥6.8，否则无法运行；此外，一个x86_64架构编译的应用容器化之后，也无法直接在ARM机器上运行)。&#xA;&lt;img src=&#34;https://qinch.github.io/img/kss_pic1.jpg&#34; alt=&#34;图1&#34;&gt;&lt;/li&gt;&#xA;&lt;/ul&gt;</description>
+      <description>&lt;h1 id=&#34;1-简介&#34;&gt;1 简介&lt;/h1&gt;&#xA;&lt;h2 id=&#34;11-虚拟机和容器的区别&#34;&gt;1.1 虚拟机和容器的区别&lt;/h2&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;每个虚拟机可以运行自己独立的操作系统(如下图所示：其中VM1 可以运行Ubuntu 24.04(Linux 6.8 内核)，另一个VM2可以运行CentOS 7（Linux 3.10.0 内核））。&lt;/li&gt;&#xA;&lt;li&gt;而所有容器都共享同一个宿主机内核（即：Host OS），容器镜像仅包含用户空间（比如库、工具），不包含Linux内核(即：如果一个容器化的应用依赖Linux 6.8内核的功能，则宿主机Linux内核必须≥6.8，否则无法运行；此外，一个x86_64架构编译的应用容器化之后，也无法直接在ARM机器上运行)。&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://qinch.github.io/img/kss_pic1.jpg&#34; alt=&#34;图1&#34;&gt;&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>
