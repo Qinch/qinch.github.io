@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>kubernetes快速入门（中） - Just For Fun</title>
+  <meta property="og:title" content="kubernetes快速入门（中） - Just For Fun" />
+  <meta name="twitter:title" content="kubernetes快速入门（中） - Just For Fun" />
+  <meta name="description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+  <meta property="og:description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+  <meta name="twitter:description" content="Sample article showcasing basic Markdown syntax and formatting for HTML elements.">
+  <meta name="author" content=""/>
+  <meta property="og:site_name" content="Just For Fun" />
+  <meta property="og:url" content="https://qinch.github.io/posts/kss2/" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.162.1">
+  <link rel="stylesheet" href="/css/style.css" media="all" />
+  <link rel="stylesheet" href="/css/style-dark.css" media="all and (prefers-color-scheme: dark)" />
+
+  <link rel="stylesheet" href="/css/syntax.css" media="all" />
+  <link rel="stylesheet" href="/css/custom.css" media="all" />
+
+  <script src="/js/script.js"></script>
+  <script src="/js/custom.js"></script>
+  <script defer src="/fontawesome/all.min.js"></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <nav class="site-navi">
+    <h1 class="site-title"><a href="/">Just For Fun</a></h1>
+    <ul class="site-navi-items">
+      <li class="site-navi-item-archives"><a href="/archives/" title="Archives">Archives</a></li>
+      <li class="site-navi-item-about"><a href="/about/" title="About">About</a></li>
+    </ul>
+  </nav>
+</header>
+<hr class="site-header-bottom">
+
+  <div class="main" role="main">
+    <article class="article">
+      
+      
+      <h1 class="article-title">kubernetes快速入门（中）</h1>
+      
+      <hr class="article-title-bottom">
+      <ul class="article-meta">
+        <li class="article-meta-date"><time>Jun 3, 2026</time></li>
+      </ul>
+      
+      <p>本文是《Kubernetes(k8s)快速入门》系列的中篇，延续了上篇的内容，旨在通过一个具体的微服务Demo项目，手把手地引导读者掌握Kubernetes的核心实践操作。文章以“app”和“app-gateway”两个无状态服务(即：微服务中的单个模块，区别于K8s Service)为例，详细讲解了从代码编译、镜像制作到K8s集群部署、配置管理、服务发现及优雅终止的完整流程。Demo项目代码，见https://github.com/Qinch/k8s-manifests/tree/master</p>
+<h4 id="0-minikube工具简介">0 Minikube工具简介</h4>
+<ul>
+<li>在(深入Kubernetes：从零开始的进阶之路（上）)以及本文中，我们都是采用minikube工具在个人机器启动K8s集群。</li>
+<li>Minikube是一个构建本地K8s集群的工具，专注于让学习和开发 Kubernetes 变得容易。为了运行我们本文中的demo项目，我们只需要通过执行minikube start命令就可以在个人机器上启动K8s集群。Minikube的安装以及用法，见https://minikube.cn/docs/start 。</li>
+</ul>
+<h4 id="1-demo项目简介">1 Demo项目简介</h4>
+<ul>
+<li>本文中的微服务demo项目，包含网关服务 app-gateway 和业务服务 app，两个组件均为无状态服务（即：服务本身不本地持久化运行数据与会话信息），相关的代码见 <a href="https://github.com/Qinch/k8s-manifests/tree/master/part2">https://github.com/Qinch/k8s-manifests/tree/master/part2</a>。</li>
+<li>Demo项目的请求链路:
+<ul>
+<li>外部客户端 → app-gateway（转发） → app服务（业务）
+<img src="/img/kss2/1.jpg" alt="图1-1"></li>
+</ul>
+</li>
+</ul>
+<h5 id="11-demo构建">1.1 Demo构建</h5>
+<ul>
+<li>我们以demo项目中的app服务的代码为例，先看一下其目录结构（注：编译相关脚本在./build目录）：</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>ubuntu@VM-0-15-ubuntu:~/k8s-manifests/part2/app$ tree -L <span style="color:#ae81ff">2</span>
+</span></span><span style="display:flex;"><span>.
+</span></span><span style="display:flex;"><span>├── build // 编译相关脚本
+</span></span><span style="display:flex;"><span>│   ├── build.sh // go build
+</span></span><span style="display:flex;"><span>│   ├── image.sh // docker build
+</span></span><span style="display:flex;"><span>│   └── kustomize.sh // kustomize build
+</span></span><span style="display:flex;"><span>├── cmd
+</span></span><span style="display:flex;"><span>│   └── main.go
+</span></span><span style="display:flex;"><span>├── configs // app-conf镜像相关
+</span></span><span style="display:flex;"><span>│   ├── Dockerfile // 用于制作app-conf镜像
+</span></span><span style="display:flex;"><span>│   └── sparse.txt
+</span></span><span style="display:flex;"><span>├── deployments // K8s manifests
+</span></span><span style="display:flex;"><span>│   ├── base
+</span></span><span style="display:flex;"><span>│   ├── manifests
+</span></span><span style="display:flex;"><span>│   └── overlays
+</span></span><span style="display:flex;"><span>├── Dockerfile // 用于制作app镜像
+</span></span><span style="display:flex;"><span>├── go.mod
+</span></span><span style="display:flex;"><span>├── go.sum
+</span></span><span style="display:flex;"><span>├── internal
+</span></span><span style="display:flex;"><span>│   └── service
+</span></span><span style="display:flex;"><span>├── Makefile // make 入口
+</span></span><span style="display:flex;"><span>├── target // go build的结构
+</span></span><span style="display:flex;"><span>│   └── bin
+</span></span><span style="display:flex;"><span>└── vendor // 省略展示
+</span></span></code></pre></div><ul>
+<li>以test环境为例，我们先大概来看下app服务在个人机器上怎么进行代码编译/docker镜像制作，以及k8s manifest生成。
+<img src="/img/kss2/11.jpg" alt="图1-2">
+<ul>
+<li>1 生成docker镜像
+<ul>
+<li>1.1 go build 代码编译</li>
+<li>1.2 docker build生成docker镜像（注：在app项目中生成两个docker镜像，其中一个是app镜像，另一个是app-conf镜像, 详见第4节）。</li>
+</ul>
+</li>
+<li>2 生成k8s manifests
+<ul>
+<li>2.1 kustomize build生成k8s manifests</li>
+</ul>
+</li>
+<li>3 执行命令: make DOCKER_USER=qinchaowhut DOCKER_PWD=Dockerhub密码 VERSION=v0.1.1
+<ul>
+<li>3.1 在Dockerhub中查看生成的镜像：
+<img src="/img/kss2/131.jpg" alt="图1-3"></li>
+<li>3.2 在./app/deployments/manifests目录查看生成的k8s配置清单：
+<img src="/img/kss2/132.jpg" alt="图1-4"></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>在实际项目中，docker镜像的大概制作流程：
+<img src="/img/kss2/133.jpg" alt="图1-5">
+到这里，我们已经对demo项目进行了简单介绍，接下来我们将对其进行详细的介绍。</li>
+</ul>
+<h4 id="2-namespace">2 Namespace</h4>
+<ul>
+<li>以app服务为例，在实际的团队开发过程中，可能有多人需要同时在同一个K8s集群（比如 test集群）中对自己的app服务进行代码修改/测试，这时候如果所有人都部署app到该集群就会报错，因为在同一个K8s集群中Deployment的名字存在重复（Deployment的名字都是app，我们不可能给每个人分配一个独立的K8s集群）。或者是我们为了降低成本，希望将test和prod环境的app服务都部署在同一个k8s集群中，这时候将test和prod的app服务部署到同一K8s集群，会产生同样的报错。</li>
+<li>此时，我们可以通过Namespace（类似于golang中的package, 不同的package 可以定义相同名字的function）来对同一个K8s集群中的资源(比如 Deployment，Service, Pod等)进行分组，从而划分为相互隔离的组（即：两个不同的Namespace中可以包含相同名字的资源）。</li>
+<li>当然在实际项目中，可以将test和prod环境分别部署到不同的K8s集群，从而做到物理隔离。在dev环境中根据Namespace隔离，多人可以同时在同一个K8s集群中部署自己的业务服务。</li>
+</ul>
+<h5 id="21-创建namespace">2.1 创建Namespace</h5>
+<ul>
+<li>在本文中，以test环境和prod环境部署在同一个K8s集群中为例，所以我们需要执行如下命令来分别创建test和prod Namespace：
+<ul>
+<li>kubectl create -f v1_namespace_test.yaml</li>
+<li>kubectl create -f v1_namespace_prod.yaml</li>
+<li>查看创建的Namespace
+<img src="/img/kss2/21.jpg" alt="图2-1"></li>
+</ul>
+</li>
+</ul>
+<h4 id="3-k8s-manifests">3 K8s manifests</h4>
+<ul>
+<li>在app服务中，存在test和prod环境，如果每个环境都需要配置自己的K8s yamls, 其中必然有很多重复的配置。为了简化配置，我们通过kustomize工具来解决多环境k8s yamls配置问题。
+<ul>
+<li>kustomize是一个用来定制K8s配置的工具，可以用于分别管理不同开发环境（比如：dev/test/pre/prod环境）下的K8s yaml。</li>
+<li>kustomize工具引入了Overlay模式：先定义一套通用的基础资源清单（即：Base Layer），再在其上叠加各环境专属的配置变更（即：Patch Layer）；该模式类似于类的继承，父类定义公共方法，每个子类可以继承父类的方法，也可以新增自己的方法，也可以对父类中的某个方法进行重新实现。
+<ul>
+<li>Base Layer（也就是app中的deployments/base）: Specifies the most common resources</li>
+<li>Patch Layers（也就是app中的overlays）: Specifies use case specific resources</li>
+</ul>
+</li>
+<li>在app服务中，其相关yaml目录结构如下:</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>/k8s-manifests/part2/app/deployments <span style="color:#75715e"># tree</span>
+</span></span><span style="display:flex;"><span>.
+</span></span><span style="display:flex;"><span>├── base // base layer
+</span></span><span style="display:flex;"><span>│   ├── deployment.yaml
+</span></span><span style="display:flex;"><span>│   ├── kustomization.yaml
+</span></span><span style="display:flex;"><span>│   └── service.yaml
+</span></span><span style="display:flex;"><span>├── manifests // kustomize build生成的结构
+</span></span><span style="display:flex;"><span>│   ├── app-prod // 省略展示
+</span></span><span style="display:flex;"><span>│   └── app-test // 测试环境
+</span></span><span style="display:flex;"><span>│       ├── apps_v1_deployment_app.yaml
+</span></span><span style="display:flex;"><span>│       └── v1_service_app.yaml
+</span></span><span style="display:flex;"><span>│       └── v1_namespace_test.yaml
+</span></span><span style="display:flex;"><span>└── overlays // patch layer
+</span></span><span style="display:flex;"><span>    ├── app-prod // prod环境，省略展示
+</span></span><span style="display:flex;"><span>    └── app-test // test环境
+</span></span><span style="display:flex;"><span>        ├── container_env.yaml
+</span></span><span style="display:flex;"><span>        ├── container_probe.yaml
+</span></span><span style="display:flex;"><span>        ├── ns.yaml
+</span></span><span style="display:flex;"><span>        └── kustomization.yaml
+</span></span></code></pre></div><h5 id="31-环境变量">3.1 环境变量</h5>
+<ul>
+<li>在2.1节中，我们在K8s集群中分别创建了test和prod Namespace, 我们怎么将相关的K8s mainifests在对应的Nameapce中创建？我们可以在deployments/overlays/app-test（Patch Layer)进行显式设置：</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>cat ./app/deployments/overlays/app-test/kustomization.yaml
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>apiVersion: kustomize.config.k8s.io/v1beta1
+</span></span><span style="display:flex;"><span>kind: Kustomization
+</span></span><span style="display:flex;"><span>namespace: test     <span style="color:#75715e"># 显式指定test Namespace</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>resources:
+</span></span><span style="display:flex;"><span>- ../../base
+</span></span><span style="display:flex;"><span>- ./ns.yaml
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>patches:
+</span></span><span style="display:flex;"><span>- path: ./container_env.yaml
+</span></span><span style="display:flex;"><span>  target:
+</span></span><span style="display:flex;"><span>    kind: Deployment
+</span></span></code></pre></div><ul>
+<li>现在我们可以在test环境部署app服务了，但是这时候还有个问题：我们的代码在运行的时候，怎么知道自己运行在test还是prod环境中？K8s允许为pod中的每个容器指定自定义的环境变量，所以我们可以通过在deployments/overlays/app-test（Patch Layer)设置环境变量ENV=test，然后在app服务运行的时候，读取ENV环境变量就可以确定自己运行在哪个环境中了。</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>cat ./app/deployments/overlays/app-test/container_env.yaml 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>apiVersion: apps/v1
+</span></span><span style="display:flex;"><span>kind: Deployment
+</span></span><span style="display:flex;"><span>metadata:
+</span></span><span style="display:flex;"><span>  name: app  
+</span></span><span style="display:flex;"><span>spec:
+</span></span><span style="display:flex;"><span>  template:
+</span></span><span style="display:flex;"><span>    spec:
+</span></span><span style="display:flex;"><span>      containers:
+</span></span><span style="display:flex;"><span>        - name: app  
+</span></span><span style="display:flex;"><span>          env:
+</span></span><span style="display:flex;"><span>            - name: ENV <span style="color:#75715e"># 设置环境变量，在app-prod中则value=&#34;prod&#34;</span>
+</span></span><span style="display:flex;"><span>              value: <span style="color:#e6db74">&#34;test&#34;</span>
+</span></span></code></pre></div><ul>
+<li>登录Pod中的app容器，查看ENV环境变量：
+<img src="/img/kss2/31.jpg" alt="图3-1"></li>
+</ul>
+<h4 id="4-应用配置同步">4 应用配置同步</h4>
+<ul>
+<li>几乎所有服务都需要读取配置信息，例如数据库连接地址、端口等参数。这类配置应当与应用二进制文件解耦，不建议将配置硬编码在代码中。在我们的 app 服务中，通过引入 Sidecar 容器（即 app-conf容器，运行 git-sync程序）实现配置同步，并通过 emptyDir 卷将配置文件共享给同一 Pod 内的 app 容器。
+<img src="/img/kss2/4.jpg" alt="图4-1"></li>
+</ul>
+<h5 id="41-sidecar容器">4.1 Sidecar容器</h5>
+<ul>
+<li>Sidecar容器是与主容器在同一个 Pod 中运行的辅助容器。 Sidecar容器通过提供额外的服务或功能（如日志记录、数据同步等）来增强或扩展主应用容器的功能， 而无需直接修改主应用代码。</li>
+<li>在我们的app服务中，app-conf容器即为Sidecar容器，app容器即为主容器，app-conf容器通过emptyDir卷将app-conf同步下来的配置文件共享给app容器。这时候有一问题，那么怎么保证app-conf容器在app容器之前启动（如果app容器先启动，那么去读取配置文件，是不存在的）？答案是：init容器。
+<ul>
+<li>app-conf镜像的Dockerfile如下（注：启动命令在K8s的Deployment中）：</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>cat ./app/configs/Dockerfile 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>FROM registry.k8s.io/git-sync/git-sync:v4.6.0
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>WORKDIR /configs
+</span></span><span style="display:flex;"><span>COPY ./sparse.txt ./
+</span></span><span style="display:flex;"><span>- K8s Deployment中部分相关配置，如下:
+</span></span><span style="display:flex;"><span>cat ./app/deployments/base/deployment.yaml 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>apiVersion: apps/v1
+</span></span><span style="display:flex;"><span>kind: Deployment
+</span></span><span style="display:flex;"><span>metadata:
+</span></span><span style="display:flex;"><span>  name: app
+</span></span><span style="display:flex;"><span>spec:
+</span></span><span style="display:flex;"><span>  template:
+</span></span><span style="display:flex;"><span>    metadata:
+</span></span><span style="display:flex;"><span>      labels:
+</span></span><span style="display:flex;"><span>        app: app
+</span></span><span style="display:flex;"><span>    spec:
+</span></span><span style="display:flex;"><span>      containers:
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># placeholder, 通过kustomize edit set image来注入real image:tag。</span>
+</span></span><span style="display:flex;"><span>        - image: mock-image 
+</span></span><span style="display:flex;"><span>          name: app
+</span></span><span style="display:flex;"><span>          imagePullPolicy: IfNotPresent
+</span></span><span style="display:flex;"><span>          volumeMounts:
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 名为config-vol的卷挂载在app容器的/k8s-manifests/part2/app/configs目录上</span>
+</span></span><span style="display:flex;"><span>            - mountPath: /k8s-manifests/part2/app/configs 
+</span></span><span style="display:flex;"><span>              name: config-vol
+</span></span><span style="display:flex;"><span>              readOnly: true
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># placeholder, 通过kustomize edit set image来注入real image:tag。</span>
+</span></span><span style="display:flex;"><span>        - image: mock-conf-image <span style="color:#75715e"># app-conf容器</span>
+</span></span><span style="display:flex;"><span>          name: app-conf
+</span></span><span style="display:flex;"><span>          imagePullPolicy: IfNotPresent
+</span></span><span style="display:flex;"><span>          volumeMounts:
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 名为config-vol的卷挂载在app-conf容器的/configs/git_configs目录上</span>
+</span></span><span style="display:flex;"><span>            - mountPath: /configs/git_configs
+</span></span><span style="display:flex;"><span>              name: config-vol
+</span></span><span style="display:flex;"><span>          command: <span style="color:#f92672">[</span><span style="color:#e6db74">&#34;/git-sync&#34;</span><span style="color:#f92672">]</span> <span style="color:#75715e"># app-conf容器的启动命令</span>
+</span></span><span style="display:flex;"><span>          args:
+</span></span><span style="display:flex;"><span>                 - --repo<span style="color:#f92672">=</span>https://github.com/Qinch/k8s-manifests.git
+</span></span><span style="display:flex;"><span>                 - --ref<span style="color:#f92672">=</span>master
+</span></span><span style="display:flex;"><span>                 - --root<span style="color:#f92672">=</span>/configs/git_configs
+</span></span><span style="display:flex;"><span>                 - --link<span style="color:#f92672">=</span>latest
+</span></span><span style="display:flex;"><span>                 - --sparse-checkout-file<span style="color:#f92672">=</span>/configs/sparse.txt
+</span></span><span style="display:flex;"><span>                 - --depth<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>                 - --period<span style="color:#f92672">=</span>60s
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># init容器，所有Init容器必须全部执行成功（即：退出码为 0）之后，</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Pod 内的业务容器才会启动。</span>
+</span></span><span style="display:flex;"><span>      initContainers:
+</span></span><span style="display:flex;"><span>        - name: init-config
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># placeholder, 通过kustomize edit set image来注入real image:tag。</span>
+</span></span><span style="display:flex;"><span>          image: mock-conf-image
+</span></span><span style="display:flex;"><span>          imagePullPolicy: IfNotPresent
+</span></span><span style="display:flex;"><span>          volumeMounts:
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 名为config-vol的卷挂载init容器的/configs/git_configs目录上</span>
+</span></span><span style="display:flex;"><span>            - mountPath: /configs/git_configs
+</span></span><span style="display:flex;"><span>              name: config-vol
+</span></span><span style="display:flex;"><span>          command: <span style="color:#f92672">[</span><span style="color:#e6db74">&#34;/git-sync&#34;</span><span style="color:#f92672">]</span> <span style="color:#75715e"># init容器的启动命令</span>
+</span></span><span style="display:flex;"><span>          args:
+</span></span><span style="display:flex;"><span>             - --repo<span style="color:#f92672">=</span>https://github.com/Qinch/k8s-manifests.git
+</span></span><span style="display:flex;"><span>             - --ref<span style="color:#f92672">=</span>master
+</span></span><span style="display:flex;"><span>             - --root<span style="color:#f92672">=</span>/configs/git_configs
+</span></span><span style="display:flex;"><span>             - --link<span style="color:#f92672">=</span>latest
+</span></span><span style="display:flex;"><span>             - --sparse-checkout-file<span style="color:#f92672">=</span>/configs/sparse.txt
+</span></span><span style="display:flex;"><span>             - --depth<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 只运行一次，然后退出。如果一直运行，会阻塞后续业务容器的启动。</span>
+</span></span><span style="display:flex;"><span>             - --one-time 
+</span></span><span style="display:flex;"><span>      volumes:
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># emptyDir卷没有独立的生命周期，而是和Pod的生命周期关联（</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 即：当Pod删除时，卷就会被删除，卷的内容也就丢失。）</span>
+</span></span><span style="display:flex;"><span>        - name: config-vol
+</span></span><span style="display:flex;"><span>          emptyDir: <span style="color:#f92672">{}</span>
+</span></span></code></pre></div><pre><code>- 登陆Pod中app容器查看同步下来的config.yaml
+</code></pre>
+<p><img src="/img/kss2/41.jpg" alt="图4-1"></p>
+<h4 id="5-容器资源限制">5 容器资源限制</h4>
+<ul>
+<li>同一 K8s 集群通常部署多项业务服务，如果不对 Pod 内容器配置资源限制，容器会无节制消耗 CPU、内存，侵占其他业务资源；同时，K8s 调度器若无法获知 Pod 资源需求（Pod 内所有容器资源需求总和），就无法筛选出满足资源条件的worker node来完成调度。因此需要为 Pod 配置 CPU、内存资源配额requests与limits。
+<ul>
+<li>requests：针对Pod中的容器单独指定（Pod中所有的容器requests之和即为该Pod的requests），指定了Pod对资源需求的最小值，K8s会利用该信息决定将 Pod 调度到哪个节点上（即：worker node上可分配资源量是否满足Pod的requests），它代表容器对资源需求的最小值（注：某个worker node是否满足该Pod的request，并不是根据此时的worker node是资源实际使用量， 而是根据worker node的可分配资源量= worker node上节点总可分配资源 减去 已经部署的所有Pod的request之和，来判断是否满足该Pod的requests）。</li>
+<li>limits：针对Pod中的容器单独指定（Pod中所有的容器limits之和即为该Pod的limits），用于保证运行的容器不会使用超出所设限制的资源，也就是容器可以消耗的最大量。</li>
+</ul>
+</li>
+<li>我们以app服务为例，其CPU/内存的requests和limits如下：</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>at ./app/deployments/overlays/app-test/container_resources.yaml 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>apiVersion: apps/v1
+</span></span><span style="display:flex;"><span>kind: Deployment
+</span></span><span style="display:flex;"><span>metadata:
+</span></span><span style="display:flex;"><span>  name: app
+</span></span><span style="display:flex;"><span>spec:
+</span></span><span style="display:flex;"><span>  template:
+</span></span><span style="display:flex;"><span>    spec:
+</span></span><span style="display:flex;"><span>      containers:
+</span></span><span style="display:flex;"><span>        - name: app
+</span></span><span style="display:flex;"><span>          resources:
+</span></span><span style="display:flex;"><span>            requests:  <span style="color:#75715e"># app容器的资源请求量</span>
+</span></span><span style="display:flex;"><span>              cpu: 500m
+</span></span><span style="display:flex;"><span>              memory: 128Mi
+</span></span><span style="display:flex;"><span>            limits:     <span style="color:#75715e"># app容器的资源limits</span>
+</span></span><span style="display:flex;"><span>              cpu: <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>              memory: 256Mi
+</span></span></code></pre></div><h4 id="6-pod健康检查">6 Pod健康检查</h4>
+<ul>
+<li>在上篇2.1节提到，Pod的生命周期是短暂的，其生命周期可能因调度、故障或升级而随时终止。那么我们怎么判断一个Pod是否就绪（可以接受业务请求）？是否存活（是否需要重启容器）？答案就是Readiness Probe和Liveness Probe。</li>
+<li>Startup Probe:
+<ul>
+<li>Startup Probe（即：启动探针， 可以为Pod中的每个容器分别设置启动探针）：指示容器中的应用是否已经启动。如果提供了启动探针，则在启动探针探测成功之前不会执行ReadinessProbe和LivenessProbe，直到此探针成功ReadinessProbe和LivenessProbe才会运行。如果启动探针探测失败，K8s将重启容器。 如果容器没有提供启动探测，则默认状态为Success。</li>
+</ul>
+</li>
+<li>Readiness Probe:
+<ul>
+<li>Readiness Probe（即：就绪探针，可以为Pod中的每个容器分别设置就绪探针）：用于周期性的检查容器是否准备就绪，如果某个pod没有准备就绪，则会从Service中删除该pod, 如果pod再次准备就绪，则重新将该pod添加到Service；换句话说也就是，就绪探针决定了容器什么时候就绪，可以接受业务请求。</li>
+</ul>
+</li>
+<li>Liveness Probe:
+<ul>
+<li>Liveness Probe（即： 存活探针，可以为Pod中的每个容器分别设置存活探针）：用于周期性的检查容器是否还在运行，如果探测失败，k8s将重启容器（容器重启过程中 Pod 会变为 NotReady，自动从 Service 摘除流，容器重启成功并通过 Readiness Probe探测后，Pod 恢复 Ready，重新接入 Service）；换句话说也就是，存活探针决定了何时重启容器（重启容器：创建一个新的容器，而不是重启原来的容器）。</li>
+</ul>
+</li>
+<li>我们以app服务为例，来看一下以上探针的配置（需要指出的是，StartupProbe探测成功之后，就会停止探测，但是LivenessProbe和ReadinessProbe则会一直周期性探测）：</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>cat app/deployments/overlays/app-test/container_probe.yaml
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>apiVersion: apps/v1
+</span></span><span style="display:flex;"><span>kind: Deployment
+</span></span><span style="display:flex;"><span>metadata:
+</span></span><span style="display:flex;"><span>  name: app
+</span></span><span style="display:flex;"><span>spec:
+</span></span><span style="display:flex;"><span>  template:
+</span></span><span style="display:flex;"><span>    spec:
+</span></span><span style="display:flex;"><span>      containers:
+</span></span><span style="display:flex;"><span>      - name: app <span style="color:#75715e"># app容器的健康检查</span>
+</span></span><span style="display:flex;"><span>	  startupProbe: <span style="color:#75715e"># 启动探针</span>
+</span></span><span style="display:flex;"><span>            httpGet:
+</span></span><span style="display:flex;"><span>              path: /health
+</span></span><span style="display:flex;"><span>              port: <span style="color:#ae81ff">8080</span>
+</span></span><span style="display:flex;"><span>            periodSeconds: <span style="color:#ae81ff">5</span>           <span style="color:#75715e"># 每5秒检查一次</span>
+</span></span><span style="display:flex;"><span>            failureThreshold: <span style="color:#ae81ff">10</span>       <span style="color:#75715e"># 最多失败10次</span>
+</span></span><span style="display:flex;"><span>            successThreshold: <span style="color:#ae81ff">1</span>       <span style="color:#75715e"># 1次成功即通过</span>
+</span></span><span style="display:flex;"><span>          livenessProbe: <span style="color:#75715e"># 存活探针</span>
+</span></span><span style="display:flex;"><span>            httpGet:
+</span></span><span style="display:flex;"><span>              path: /health
+</span></span><span style="display:flex;"><span>              port: <span style="color:#ae81ff">8080</span>
+</span></span><span style="display:flex;"><span>            periodSeconds: <span style="color:#ae81ff">10</span>          <span style="color:#75715e"># 每10秒检查一次</span>
+</span></span><span style="display:flex;"><span>            failureThreshold: <span style="color:#ae81ff">3</span>        <span style="color:#75715e"># 最多失败3次</span>
+</span></span><span style="display:flex;"><span>            successThreshold: <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>          readinessProbe: <span style="color:#75715e"># 就绪探针</span>
+</span></span><span style="display:flex;"><span>            httpGet:
+</span></span><span style="display:flex;"><span>              path: /health    
+</span></span><span style="display:flex;"><span>              port: <span style="color:#ae81ff">8080</span>
+</span></span><span style="display:flex;"><span>            periodSeconds: <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>            failureThreshold: <span style="color:#ae81ff">2</span>
+</span></span><span style="display:flex;"><span>            successThreshold: <span style="color:#ae81ff">1</span>
+</span></span></code></pre></div><h4 id="7-service服务访问">7 Service服务访问</h4>
+<ul>
+<li>在前面的章节，我们以 Demo 项目 app 服务为例，介绍了服务构建、K8s 清单、Sidecar 容器、Pod 健康探针；本节开始讲解 app-gateway 基于 gRPC 调用 app 服务、对外提供 HTTP 接口的实现（在上篇5.2节介绍了为什么需要Service，本文不再重复介绍），请求链路如下图所示：
+<ul>
+<li>外部访问 → app-gateway（转发） → app服务（业务）
+<a href="/img/kss2/7.jpg">图7-1</a></li>
+</ul>
+</li>
+</ul>
+<h5 id="71-集群内部app-gateway服务访问app服务">7.1 集群内部app-gateway服务访问app服务</h5>
+<ul>
+<li>app-gateway服务调用app服务属于集群内部Pod间的通信，所以app服务需要创建Service的类型为ClusterIP：</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>cat ./app/deployments/base/service.yaml 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>apiVersion: v1
+</span></span><span style="display:flex;"><span>kind: Service
+</span></span><span style="display:flex;"><span>metadata:
+</span></span><span style="display:flex;"><span>  name: app
+</span></span><span style="display:flex;"><span>spec:
+</span></span><span style="display:flex;"><span>  type: ClusterIP <span style="color:#75715e"># Service类型</span>
+</span></span><span style="display:flex;"><span>  ports:
+</span></span><span style="display:flex;"><span>    - port: <span style="color:#ae81ff">80</span> <span style="color:#75715e"># # 该Service的HTTP监听端口</span>
+</span></span><span style="display:flex;"><span>        targetPort: <span style="color:#ae81ff">8080</span>
+</span></span><span style="display:flex;"><span>    - port: <span style="color:#ae81ff">50051</span> <span style="color:#75715e"># 该Service的gRPC监听端口</span>
+</span></span><span style="display:flex;"><span>        targetPort: <span style="color:#ae81ff">50051</span>
+</span></span><span style="display:flex;"><span>  selector:
+</span></span><span style="display:flex;"><span>    app: app
+</span></span></code></pre></div><ul>
+<li>在我们的app-gateway代码中通过Service名称（FQDN，即app.test.svc.cluster.local:50051）来访问app服务。</li>
+</ul>
+<h5 id="72-集群外部访问app-gateway服务">7.2 集群外部访问app-gateway服务</h5>
+<ul>
+<li>app-gateway服务队集群外部提供服务，属于集群内部Pod暴露给集群外部客户端。在我们的demo中给app-gateway服务创建一个NodePort类型的Service。</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>apiVersion: v1
+</span></span><span style="display:flex;"><span>kind: Service
+</span></span><span style="display:flex;"><span>metadata:
+</span></span><span style="display:flex;"><span>  name: app-gateway
+</span></span><span style="display:flex;"><span>spec:
+</span></span><span style="display:flex;"><span>  type: NodePort     <span style="color:#75715e"># Service类型</span>
+</span></span><span style="display:flex;"><span>  ports:
+</span></span><span style="display:flex;"><span>  - port: <span style="color:#ae81ff">80</span>               <span style="color:#75715e"># ClusterIP的端口号</span>
+</span></span><span style="display:flex;"><span>    targetPort: <span style="color:#ae81ff">8080</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 指定worker node的端口号，通过worker node的30123端口可以访问该Service</span>
+</span></span><span style="display:flex;"><span>    nodePort: <span style="color:#ae81ff">30123</span> 
+</span></span><span style="display:flex;"><span>  selector:
+</span></span><span style="display:flex;"><span>    app: app-gateway
+</span></span></code></pre></div><h4 id="8-pod优雅终止">8 Pod优雅终止</h4>
+<ul>
+<li>Pre-stop 钩子是 K8s 提供的在容器被正式终止前执行的一段自定义逻辑。当 Pod 中一个容器需要终止运行的时候，Kubelet 在配置了 Pre-stop 钩子时会立即执行这个停止前钩子，并且仅在执行完钩子程序之后，才会向容器进程发送 SIGTERM 信号；程序代码中捕捉到 SIGTERM 信号后，可执行关闭外部连接等优雅退出处理。</li>
+<li>Pod 删除过程如下：
+<ul>
+<li>1 Pod 被删除，状态被设置为 Terminating。</li>
+<li>2 Endpoint 控制器 将 Pod 从 Service 的 Endpoint 列表中摘除（新流量不再纳入调度）；kube-proxy 异步监听 Endpoint 变化，更新节点转发规则（注意：本网络更新流程（步骤2），与后续容器终止流程(步骤3/4)是并行的）。</li>
+<li>3 如果 Pod 设置了 Pre-stop 钩子，则执行该Pre-stop钩子，然后等待它执行完毕（terminationGracePeriodSeconds开始计时）。</li>
+<li>4 Kubelet 向 Pod 中的各个容器发送 SIGTERM 信号，通知容器进程开始优雅停止。</li>
+<li>5 等待容器进程完全停止；如果在 terminationGracePeriodSeconds（终止宽限期）内进程未退出，Kubelet 会发送 SIGKILL 信号强制杀死进程。</li>
+<li>6 所有容器进程终止后，Kubelet 清理 Pod 资源。</li>
+</ul>
+</li>
+<li>在 Pod 删除过程中，因为网络规则同步（kube-proxy） 和容器终止流程是并行的，会存在：Endpoint 已摘除，但外部网关还没同步完成，仍有流量转发到即将停止的 Pod 上，导致请求被拒绝。 所以我们可以在 Pre-stop 钩子中执行 sleep 等待几秒，等待网络规则完全同步后，再发送 SIGTERM 停止容器，避免请求报错。</li>
+<li>app服务中，Prs-stop钩子设置如下：</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>cat ./app/deployments/overlays/app-test/container_lifecycle.yaml 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>apiVersion: apps/v1
+</span></span><span style="display:flex;"><span>kind: Deployment
+</span></span><span style="display:flex;"><span>metadata:
+</span></span><span style="display:flex;"><span>  name: app
+</span></span><span style="display:flex;"><span>spec:
+</span></span><span style="display:flex;"><span>  template:
+</span></span><span style="display:flex;"><span>    spec:
+</span></span><span style="display:flex;"><span>      terminationGracePeriodSeconds: <span style="color:#ae81ff">60</span>
+</span></span><span style="display:flex;"><span>      containers:
+</span></span><span style="display:flex;"><span>        - name: app
+</span></span><span style="display:flex;"><span>          lifecycle:
+</span></span><span style="display:flex;"><span>            preStop:
+</span></span><span style="display:flex;"><span>              exec:
+</span></span><span style="display:flex;"><span>                command:
+</span></span><span style="display:flex;"><span>                  - sh
+</span></span><span style="display:flex;"><span>                  - c
+</span></span><span style="display:flex;"><span>                  - <span style="color:#e6db74">&#34;sleep 30&#34;</span>
+</span></span></code></pre></div><h4 id="9-附录">9 附录</h4>
+<ul>
+<li>Demo项目具体的执行过程请查看 <a href="https://github.com/Qinch/k8s-manifests/tree/master">https://github.com/Qinch/k8s-manifests/tree/master</a> 的README。</li>
+</ul>
+<h4 id="10-参考资料">10 参考资料</h4>
+<ul>
+<li>Kubernetes in Action》</li>
+<li><a href="https://kubernetes.io/zh-cn/docs/concepts/overview/">https://kubernetes.io/zh-cn/docs/concepts/overview/</a></li>
+</ul>
+    </article>
+
+    
+<ul class="article-share">
+</ul>
+
+
+
+    <ul class="pager article-pager">
+      <li class="pager-newer pager-noitem">&lt; Newer</li>
+      <li class="pager-older">
+        <a href="/posts/kss/" data-toggle="tooltip" data-placement="top" title="kubernetes快速入门（上）">Older &gt;</a>
+      </li>
+    </ul>
+  </div>
+
+
+<div class="site-footer">
+  <div class="copyright"></div>
+  <ul class="site-footer-items">
+    <li class="site-footer-item-"><a href="" title=""></a></li>
+  </ul>
+  <div class="powerdby">
+    <a href="https://github.com/qinch" rel="me" target="_blank"><i class="fa-brands fa-github" style="font-size: 16px;"></i></a>&nbsp&nbsp
+    <a href="mailto:qinchaowhut@qq.com" target="_blank"><i class="fa-solid fa-envelope" style="font-size: 16px;"></i></a></li><br>
+    ©2015-2026 qinch | Powered by <a href="https://gohugo.io/">Hugo</a> and <a href="https://github.com/taikii/whiteplain">Whiteplain</a>
+  </div>
+</div>
+
+      <script async src="https://www.googletagmanager.com/gtag/js?id=Toracking%20ID"></script>
+      <script>
+        var doNotTrack = false;
+        if ( true ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'Toracking ID');
+        }
+      </script>
+
+</body>
+</html>
